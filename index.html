@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPhone Portfolio</title>
+    <!-- Base and Layout Styles -->
+    <link rel="stylesheet" href="styles/base.css">
+    <link rel="stylesheet" href="styles/iphone.css">
+    <link rel="stylesheet" href="styles/home.css">
+    <!-- App Specific Styles -->
+    <link rel="stylesheet" href="styles/safari.css">
+    <link rel="stylesheet" href="styles/mail.css">
+    <link rel="stylesheet" href="styles/messages.css">
+    <link rel="stylesheet" href="styles/about.css">
+    <link rel="stylesheet" href="styles/skills.css">
+    <link rel="stylesheet" href="styles/projects.css">
+    <link rel="stylesheet" href="styles/experience.css">
+    <link rel="stylesheet" href="styles/education.css">
+    <link rel="stylesheet" href="styles/contact.css">
+    <!-- Responsive Styles -->
+    <link rel="stylesheet" href="styles/responsive.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function() {
+            // To make this work:
+            // 1. Create a free account at emailjs.com
+            // 2. Set up an email service (e.g., Gmail)
+            // 3. Create an email template with parameters: to_email, from_email, subject, message
+            // 4. Replace 'YOUR_USER_ID' with your EmailJS user ID
+            // 5. Replace 'default_service' and 'template_id' in script.js with your service and template IDs
+            emailjs.init("cGEJxQ5ttlJBEJcte");
+        })();
+    </script>
+    
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
+    
+    <!-- Mammoth.js for Word document preview -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    
+    <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDiptAEF_Y6ptGYkiAf1jeEkyy5J72w22g",
+            authDomain: "trushresume.firebaseapp.com",
+            projectId: "trushresume",
+            storageBucket: "trushresume.firebasestorage.app",
+            messagingSenderId: "504357252195",
+            appId: "1:504357252195:web:9519b10c4efc88185cdc56",
+            measurementId: "G-9VL9JPE4KW"
+        };
+        
+        // Initialize Firebase - make sure this executes correctly
+        try {
+            firebase.initializeApp(firebaseConfig);
+            console.log("Firebase initialized successfully");
+            
+            // Verify Firestore is accessible
+            const db = firebase.firestore();
+            console.log("Firestore accessed successfully");
+        } catch (error) {
+            console.error("Firebase initialization error:", error);
+        }
+    </script>
+    
+    <!-- Removed background dependencies -->
+</head>
+<body>
+    <!-- Vanta.js background div -->
+    <div id="vanta-background"></div>
+    
+    <!-- Background shapes -->
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+    
+    <div class="container">
+        <div class="iphone-container">
+            <div class="iphone">
+                <div class="camera-ring"></div>
+                <div class="iphone-screen" style="background-image: url('styles/wallpaper.png'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+                    <div class="status-bar">
+                        <div class="time">12:00</div>
+                        <div class="status-icons">
+                            <i class="fas fa-signal"></i>
+                            <i class="fas fa-wifi"></i>
+                            <i class="fas fa-battery-full"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="home-screen" id="home-screen">
+                        <div class="app-grid">
+                            <div class="app" data-app="about">
+                                <div class="app-icon" style="background-color: #5D9CEC;">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="app-name">About Me</div>
+                            </div>
+                            
+                            <div class="app" data-app="skills">
+                                <div class="app-icon" style="background-color: #48CFAD;">
+                                    <i class="fas fa-code"></i>
+                                </div>
+                                <div class="app-name">Skills</div>
+                            </div>
+                            
+                            <div class="app" data-app="projects">
+                                <div class="app-icon" style="background-color: #EC87C0;">
+                                    <i class="fas fa-folder"></i>
+                                </div>
+                                <div class="app-name">Projects</div>
+                            </div>
+                            
+                            <div class="app" data-app="experience">
+                                <div class="app-icon" style="background-color: #FFCE54;">
+                                    <i class="fas fa-briefcase"></i>
+                                </div>
+                                <div class="app-name">Experience</div>
+                            </div>
+                            
+                            <div class="app" data-app="education">
+                                <div class="app-icon" style="background-color: #FC6E51;">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                                <div class="app-name">Education</div>
+                            </div>
+                            
+                            <div class="app" data-app="contact">
+                                <div class="app-icon" style="background-color: #A0D468;">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div class="app-name">Contact</div>
+                            </div>
+                        </div>
+                        
+                        <div class="dock">
+                            <div class="app" data-app="phone">
+                                <div class="app-icon">
+                                    <i class="fas fa-phone"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="app" data-app="messages">
+                                <div class="app-icon" style="background-color: #5BC236;">
+                                    <i class="fas fa-comment-dots" style="color: white; font-size: 22px;"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="app" data-app="mail">
+                                <div class="app-icon" style="background-color: #D44638;">
+                                    <i class="fas fa-envelope" style="color: white; font-size: 22px;"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="app" data-app="safari">
+                                <div class="app-icon" style="background-color: #1C92F4;">
+                                    <i class="fas fa-compass" style="color: white; font-size: 22px;"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- App Screens -->
+                    <div class="app-screen" id="about-app">
+                        <div class="app-header">
+                            <div class="back-button" id="back-button"><i class="fas fa-chevron-left"></i></div>
+                            <div class="app-title">About Me</div>
+                        </div>
+                        <div class="app-content">
+                            <div class="profile-picture"></div>
+                            <h2>John Doe</h2>
+                            <p class="job-title">Full Stack Developer</p>
+                            <div class="about-text">
+                                <p>I'm a passionate developer with 5+ years of experience creating beautiful, responsive web applications. I love solving complex problems with elegant solutions.</p>
+                                <p>When I'm not coding, you can find me hiking, reading sci-fi novels, or experimenting with new recipes in the kitchen.</p>
+                            </div>
+                        </div>
+                        <!-- Home indicator bar -->
+                        <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
+                        onmouseover="this.style.opacity='0.8'; bounce(this);" 
+                        onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
+                        onclick="goToHomeScreen()"></div>
+                    </div>
+                    
+                    <div class="app-screen" id="skills-app">
+                        <div class="app-header">
+                            <div class="back-button" id="back-button"><i class="fas fa-chevron-left"></i></div>
+                            <div class="app-title">Skills</div>
+                        </div>
+                        <div class="app-content">
+                            <h3>Technical Skills</h3>
+                            <div class="skill-group">
+                                <div class="skill">
+                                    <div class="skill-name">JavaScript</div>
+                                    <div class="skill-bar"><div class="skill-level" style="width: 90%"></div></div>
+                                </div>
+                                <div class="skill">
+                                    <div class="skill-name">React</div>
+                                    <div class="skill-bar"><div class="skill-level" style="width: 85%"></div></div>
+                                </div>
+                                <div class="skill">
+                                    <div class="skill-name">Node.js</div>
+                                    <div class="skill-bar"><div class="skill-level" style="width: 80%"></div></div>
+                                </div>
+                                <div class="skill">
+                                    <div class="skill-name">HTML/CSS</div>
+                                    <div class="skill-bar"><div class="skill-level" style="width: 95%"></div></div>
+                                </div>
+                                <div class="skill">
+                                    <div class="skill-name">Python</div>
+                                    <div class="skill-bar"><div class="skill-level" style="width: 75%"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Home indicator bar -->
+                        <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
+                        onmouseover="this.style.opacity='0.8'; bounce(this);" 
+                        onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
+                        onclick="goToHomeScreen()"></div>
+                    </div>
+                    
+                    <div class="app-screen" id="projects-app">
+                        <div class="app-header">
+                            <div class="back-button" id="back-button"><i class="fas fa-chevron-left"></i></div>
+                            <div class="app-title">Projects</div>
+                        </div>
+                        <div class="app-content">
+                            <div class="project-list">
+                                <div class="project-item">
+                                    <h3>E-commerce Platform</h3>
+                                    <p>A full-featured online store built with React, Node.js, and MongoDB.</p>
+                                    <div class="tech-stack">
+                                        <span>React</span>
+                                        <span>Node.js</span>
+                                        <span>MongoDB</span>
+                                    </div>
+                                </div>
+                                <div class="project-item">
+                                    <h3>Social Media Dashboard</h3>
+                                    <p>Analytics dashboard for social media accounts with real-time data visualization.</p>
+                                    <div class="tech-stack">
+                                        <span>Vue.js</span>
+                                        <span>Express</span>
+                                        <span>D3.js</span>
+                                    </div>
+                                </div>
+                                <div class="project-item">
+                                    <h3>Task Management App</h3>
+                                    <p>A collaborative task manager with real-time updates and team features.</p>
+                                    <div class="tech-stack">
+                                        <span>React</span>
+                                        <span>Firebase</span>
+                                        <span>Redux</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Home indicator bar -->
+                        <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
+                        onmouseover="this.style.opacity='0.8'; bounce(this);" 
+                        onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
+                        onclick="goToHomeScreen()"></div>
+                    </div>
+                    
+                    <div class="app-screen" id="experience-app">
+                        <div class="app-header">
+                            <div class="back-button" id="back-button"><i class="fas fa-chevron-left"></i></div>
+                            <div class="app-title">Experience</div>
+                        </div>
+                        <div class="app-content">
+                            <div class="experience-list">
+                                <div class="experience-item">
+                                    <div class="experience-date">2021 - Present</div>
+                                    <h3>Senior Frontend Developer</h3>
+                                    <h4>Tech Solutions Inc.</h4>
+                                    <p>Leading frontend development for enterprise applications, mentoring junior developers, and implementing best practices.</p>
+                                </div>
+                                <div class="experience-item">
+                                    <div class="experience-date">2019 - 2021</div>
+                                    <h3>Full Stack Developer</h3>
+                                    <h4>Digital Innovations Co.</h4>
+                                    <p>Developed multiple web applications using React, Node.js, and MongoDB with a focus on responsive design and performance.</p>
+                                </div>
+                                <div class="experience-item">
+                                    <div class="experience-date">2017 - 2019</div>
+                                    <h3>Junior Web Developer</h3>
+                                    <h4>Webcraft Studios</h4>
+                                    <p>Built responsive websites for clients using HTML, CSS, JavaScript, and WordPress.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Home indicator bar -->
+                        <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
+                        onmouseover="this.style.opacity='0.8'; bounce(this);" 
+                        onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
+                        onclick="goToHomeScreen()"></div>
+                    </div>
+                    
+                    <div class="app-screen" id="education-app">
+                        <div class="app-header">
+                            <div class="back-button" id="back-button"><i class="fas fa-chevron-left"></i></div>
+                            <div class="app-title">Education</div>
+                        </div>
+                        <div class="app-content">
+                            <div class="education-list">
+                                <div class="education-item">
+                                    <div class="education-date">2013 - 2017</div>
+                                    <h3>Bachelor of Science in Computer Science</h3>
+                                    <h4>University of Technology</h4>
+                                    <p>Focus on software engineering and web development. Graduated with honors.</p>
+                                </div>
+                                <div class="education-item">
+                                    <div class="education-date">2018</div>
+                                    <h3>Web Development Bootcamp</h3>
+                                    <h4>Code Academy</h4>
+                                    <p>Intensive 12-week program focused on full-stack web development using modern technologies.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Home indicator bar -->
+                        <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
+                        onmouseover="this.style.opacity='0.8'; bounce(this);" 
+                        onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
+                        onclick="goToHomeScreen()"></div>
+                    </div>
+                    
+                    <div class="app-screen" id="contact-app">
+                        <div class="app-header">
+                            <div class="back-button" id="back-button"><i class="fas fa-chevron-left"></i></div>
+                            <div class="app-title">Contact</div>
+                        </div>
+                        <div class="app-content">
+                            <div class="contact-info">
+                                <div class="contact-item">
+                                    <i class="fas fa-phone"></i>
+                                    <span>+1 (555) 123-4567</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="fas fa-envelope"></i>
+                                    <span>johndoe@example.com</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>123 Main St, Anytown, USA</span>
+                                </div>
+                            </div>
+                            <div class="social-links">
+                                <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                                <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                                <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                            </div>
+                            <div class="contact-form">
+                                <div class="form-group">
+                                    <div class="mail-field">
+                                        <div class="mail-label">To</div>
+                                        <input type="text" class="mail-input" id="contact-mail-to" value="trushp097@gmail.com" readonly style="padding-left: 60px; border: none; outline: none;">
+                                    </div>
+                                    <hr style="height: 1px; background-color: rgba(0, 0, 0, 0.15); width: 100%; position: relative; border: none; margin: 15px 0;">
+                                    <div class="mail-field">
+                                        <div class="mail-label" style="min-width: 30px;"><span style="font-size: 12px; color: #0000007d;">From</span></div>
+                                        <input type="text" class="mail-input" id="contact-mail-from" placeholder="Enter your email" style="border: none; outline: none; font-size: 12px; flex: 1; padding-left: 0px;">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" class="mail-input" id="contact-mail-subject" placeholder="Subject" style="border: none; outline: none;">
+                                </div>
+                                <div class="form-group compose-field">
+                                    <textarea id="contact-mail-body" placeholder="Compose email" style="border: none; outline: none; font-size: 13px; resize: none; height: 200px; width: 100%; box-sizing: border-box;"></textarea>
+                                </div>
+                                <div class="mail-actions">
+                                    <button id="contact-test-emailjs-btn" onclick="testEmailJS()" style="background-color: #007aff; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;">Send</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Home indicator bar -->
+                        <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
+                        onmouseover="this.style.opacity='0.8'; bounce(this);" 
+                        onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
+                        onclick="goToHomeScreen()"></div>
+                    </div>
+                    
+                    <div class="app-screen" id="safari-app">
+                        <div class="app-header safari-header">
+                            <div class="app-title"></div>
+                        </div>
+                        <div class="app-content safari-content">
+                            <!-- Google Search Home View -->
+                            <div class="google-search-container" id="google-home-view">
+                                <div class="google-logo">
+                                    <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google">
+                                </div>
+                                <div class="safari-search google-search-bar">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" placeholder="Search Google" id="safari-search-input">
+                                </div>
+                                <div class="google-search-buttons">
+                                    <button id="google-search-btn" style="visibility: hidden; pointer-events: none;">Google Search</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Search Results View (hidden by default) -->
+                            <div class="search-results-container" id="search-results-view" style="display:none;">
+                                <div class="search-results-header">
+                                    <div class="safari-search google-search-bar results-search-bar">
+                                        <i class="fas fa-search"></i>
+                                        <input type="text" id="results-search-input">
+                                    </div>
+                                </div>
+                                <div class="search-results-content" id="search-results-content">
+                                    <!-- Results will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Direct inline bar with bounce effect -->
+                        <div style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
+                        onmouseover="this.style.opacity='0.8'; bounce(this);" 
+                        onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
+                        onclick="goToHomeScreen()"></div>
+                        
+                        <div id="safari-bottom-bar" onclick="goToHomeScreen()"></div>
+                        <div class="safari-home-back-bar" onclick="goToHomeScreen()" style="display: none;"></div>
+                    </div>
+                    
+                    <!-- Mail App -->
+                    <div class="app-screen" id="mail-app">
+                        <div class="app-header">
+                            <div class="back-button" id="back-button"><i class="fas fa-chevron-left"></i></div>
+                            <div class="app-title">New Message</div>
+                        </div>
+                        <div class="app-content mail-content">
+                            <div class="mail-compose">
+                                <div class="mail-field">
+                                    <div class="mail-label"><span style="font-size: 12px; color: #0000007d;">To</span><span style="color: #000000; font-size: 12px; padding-left: 10px;">trushpatel097@gmail.com</span></div>
+                                </div>
+                                <hr style="height: 1px; background-color: rgba(0, 0, 0, 0.15); width: 100%; position: relative; border: none; margin: 15px 0;">
+                                <div class="mail-field">
+                                    <div class="mail-label" style="min-width: 30px;"><span style="font-size: 12px; color: #0000007d;">From</span></div>
+                                    <input type="text" class="mail-input" id="mail-from" placeholder="Enter your email" style="border: none; outline: none; font-size: 12px; flex: 1; padding-left: 8px;">
+                                </div>
+                                <hr style="height: 1px; background-color: rgba(0, 0, 0, 0.15); width: 100%; position: relative; border: none; margin: 15px 0;">
+                                <div class="mail-field">
+                                    <input type="text" class="mail-input" id="mail-subject" placeholder="Subject" style="border: none; outline: none;font-size: 12px;">
+                                </div>
+                                <hr style="height: 1px; background-color: rgba(0, 0, 0, 0.15); width: 100%; position: relative; border: none; margin: 15px 0;">
+                                <div class="mail-field compose-field">
+                                    <textarea id="mail-body" placeholder="Compose email" style="border: none; outline: none; font-size: 13px; resize: none; height: 200px; width: 100%; box-sizing: border-box;"></textarea>
+                                </div>
+                                <hr style="height: 1px; background-color: rgba(0, 0, 0, 0.15); width: 100%; position: relative; border: none; margin: 15px 0;">
+                                <div class="mail-actions">
+                                    <button id="test-emailjs-btn" onclick="testEmailJS()" style="background-color: #007aff; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;">Send</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Home indicator bar -->
+                        <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
+                        onmouseover="this.style.opacity='0.8'; bounce(this);" 
+                        onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
+                        onclick="goToHomeScreen()"></div>
+                    </div>
+                    
+                    <!-- Messages App -->
+                    <div class="app-screen" id="messages-app">
+                        <div class="messages-app">
+                            <div class="messages-header">
+                                <div class="messages-header-left">
+                                    <div class="contact-avatar">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div class="contact-name">Trush Patel</div>
+                                    <div class="admin-status">
+                                        <div class="status-text">Last seen: Just now</div>
+                                    </div>
+                                </div>
+                                <div class="messages-header-right">
+                                    <div class="video-call-icon" style="width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; margin-top: -5px; cursor: pointer;">
+                                        <i class="fas fa-video" style="color: #007AFF; font-size: 20px;"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="messages-content">
+                                <div class="time-stamp" id="messages-timestamp"></div>
+                                <div class="welcome-message message message-received">
+                                    Welcome! This is a private chat. You can expect a response within 24 hours. The chat will be saved.
+                                </div>
+                                <!-- Chat messages will appear here -->
+                            </div>
+                            
+                            <div class="messages-input-area">
+                                <div class="messages-input-attachments">
+                                    <div class="attachment-btn">
+                                        <i class="fas fa-paperclip"></i>
+                                    </div>
+                                </div>
+                                <div class="messages-input-field">
+                                    <input type="text" class="messages-input" placeholder="Message">
+                                    <div class="messages-send-btn">
+                                        <i class="fas fa-arrow-up"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Home indicator bar -->
+                        <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
+                        onmouseover="this.style.opacity='0.8'; bounce(this);" 
+                        onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
+                        onclick="goToHomeScreen()"></div>
+                    </div>
+                    
+                    <div class="home-button"></div>
+                </div>
+                <div class="home-indicator"></div>
+            </div>
+        </div>
+        
+        <div class="content-container">
+            <h1 class="name">John Doe</h1>
+            <h2 class="title">Full Stack Developer</h2>
+            <p class="tagline">Building beautiful, responsive web applications.</p>
+            
+            <div class="content-description">
+                <p>Welcome to my interactive portfolio! Click on any app in the iPhone to explore more about me and my work.</p>
+                <div class="arrow-animation">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Tap the apps</span>
+                </div>
+            </div>
+            
+            <div class="cta-buttons">
+                <a href="#" class="cta-button primary">Download CV</a>
+                <a href="#" class="cta-button secondary">Let's Talk</a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="script.js"></script>
+    <script>
+    function testEmailJS() {
+        console.log('Sending email...');
+        try {
+            // Determine which app is active (mail app or contact app)
+            const isMailApp = document.querySelector('#mail-app.active') !== null;
+            console.log('Is mail app active:', isMailApp);
+
+            // Get email send count from localStorage
+            let emailSendCount = parseInt(localStorage.getItem('emailSendCount') || '0');
+            
+            // Check if user has reached the send limit (2 emails)
+            if (emailSendCount >= 2) {
+                alert('You have reached the limit of 2 emails. Please try again later.');
+                return;
+            }
+            
+            // Get input values based on which app is active
+            let fromInput, subjectInput, bodyInput, mailContent, mailCompose, button;
+            
+            if (isMailApp) {
+                // Use mail app elements
+                fromInput = document.getElementById('mail-from');
+                subjectInput = document.getElementById('mail-subject');
+                bodyInput = document.getElementById('mail-body');
+                mailContent = document.querySelector('#mail-app .mail-content');
+                mailCompose = document.querySelector('#mail-app .mail-compose');
+                button = document.getElementById('test-emailjs-btn');
+            } else {
+                // Use contact app elements
+                fromInput = document.getElementById('contact-mail-from');
+                subjectInput = document.getElementById('contact-mail-subject');
+                bodyInput = document.getElementById('contact-mail-body');
+                mailContent = document.querySelector('#contact-app .app-content');
+                mailCompose = document.querySelector('#contact-app .contact-form');
+                button = document.getElementById('contact-test-emailjs-btn');
+            }
+            
+            const from = fromInput.value.trim();
+            const subject = subjectInput.value.trim();
+            const body = bodyInput.value.trim();
+            
+            console.log('Form values:', { from, subject, body });
+            
+            // Validate from field is not empty
+            if (!from) {
+                alert('Please enter your email address.');
+                return;
+            }
+            
+            // Email validation with regex
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailRegex.test(from)) {
+                alert('Please enter a valid email address.');
+                return;
+            }
+            
+            // Send the actual email
+            const testParams = {
+                to_name: 'Trush Patel',
+                to_email: 'trushp097@gmail.com',
+                from_name: from,
+                from_email: from,
+                subject: subject,
+                message: body
+            };
+            
+            // Show loading state
+            const originalText = button.textContent;
+            button.textContent = 'Sending...';
+            button.disabled = true;
+            
+            emailjs.send('service_xtwz8cj', 'template_ufl6l47', testParams)
+                .then(function(response) {
+                    console.log('SUCCESS!', response.status, response.text);
+                    
+                    // Increment and save the email count
+                    emailSendCount++;
+                    localStorage.setItem('emailSendCount', emailSendCount.toString());
+                    
+                    // Clear draft
+                    localStorage.removeItem('mailAppDraft');
+                    
+                    // Show success feedback
+                    const successFeedback = document.createElement('div');
+                    successFeedback.className = 'mail-success-feedback';
+                    successFeedback.innerHTML = `
+                        <div class="mail-close-button">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <div class="mail-success-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h3>Email Sent</h3>
+                        <p>Your message has been sent successfully</p>
+                        <div class="mail-success-details">
+                            <p><strong>From:</strong> ${from}</p>
+                            <p><strong>To:</strong> trushp097@gmail.com</p>
+                            <p><strong>Subject:</strong> ${subject || '(No subject)'}</p>
+                        </div>
+                        <p class="mail-limit-info">You have sent ${emailSendCount} of 2 allowed emails.</p>
+                    `;
+                    
+                    // Replace mail compose with success message
+                    mailCompose.style.display = 'none';
+                    mailContent.appendChild(successFeedback);
+                    
+                    // Add click event listener to close button
+                    const closeButton = successFeedback.querySelector('.mail-close-button');
+                    closeButton.addEventListener('click', () => {
+                        // Reset form fields
+                        fromInput.value = '';
+                        subjectInput.value = '';
+                        bodyInput.value = '';
+                        
+                        // Remove success message and restore compose form
+                        mailContent.removeChild(successFeedback);
+                        mailCompose.style.display = 'flex';
+                        
+                        // Reset button
+                        button.textContent = originalText;
+                        button.disabled = false;
+                    });
+                    
+                    // Reset button state (but don't remove popup)
+                    button.textContent = originalText;
+                    button.disabled = false;
+                })
+                .catch(function(error) {
+                    console.error('FAILED!', error);
+                    
+                    // Show error message
+                    const errorFeedback = document.createElement('div');
+                    errorFeedback.className = 'mail-error-feedback';
+                    errorFeedback.innerHTML = `
+                        <div class="mail-close-button">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <div class="mail-error-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <h3>Sending Failed</h3>
+                        <p>There was a problem sending your message</p>
+                        <div class="mail-error-details">
+                            <p><strong>From:</strong> ${from}</p>
+                            <p><strong>To:</strong> trushp097@gmail.com</p>
+                            <p class="mail-error-note">Please check your internet connection and try again.</p>
+                        </div>
+                        <button class="mail-try-again-btn">Try Again</button>
+                    `;
+                    
+                    // Replace mail compose with error message
+                    mailCompose.style.display = 'none';
+                    mailContent.appendChild(errorFeedback);
+                    
+                    // Add click event listeners
+                    const tryAgainBtn = errorFeedback.querySelector('.mail-try-again-btn');
+                    tryAgainBtn.addEventListener('click', () => {
+                        mailContent.removeChild(errorFeedback);
+                        mailCompose.style.display = 'flex';
+                        button.textContent = originalText;
+                        button.disabled = false;
+                    });
+                    
+                    const closeButton = errorFeedback.querySelector('.mail-close-button');
+                    closeButton.addEventListener('click', () => {
+                        mailContent.removeChild(errorFeedback);
+                        mailCompose.style.display = 'flex';
+                        button.textContent = originalText;
+                        button.disabled = false;
+                    });
+                });
+        } catch (e) {
+            console.error('Error in send function:', e);
+            alert('Error sending email: ' + e.message);
+        }
+    }
+    </script>
+</body>
+</html> 

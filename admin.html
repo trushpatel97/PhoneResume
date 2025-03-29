@@ -1,0 +1,2427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Admin Panel</title>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Mammoth.js for Word document preview -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #e9ecef;
+            --text-color: #343a40;
+            --background-color: #f8f9fa;
+            --border-color: #dee2e6;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            color: var(--text-color);
+            background-color: var(--background-color);
+        }
+        
+        .container {
+            display: flex;
+            height: 100%;
+            width: 100%;
+        }
+        
+        .sidebar {
+            width: 300px;
+            background-color: #fff;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 18px;
+            color: var(--primary-color);
+        }
+        
+        .logout-button {
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px;
+            font-size: 14px;
+        }
+        
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .admin-status-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #28a745;
+            font-size: 14px;
+            padding: 5px;
+        }
+        
+        .admin-status-toggle.offline {
+            color: #6c757d;
+        }
+        
+        .admin-status-toggle i {
+            font-size: 12px;
+        }
+        
+        .user-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .user-item {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background-color: #fff;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+        
+        .user-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .user-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .user-item.online {
+            border-left: 4px solid #28a745;
+            background-color: rgba(40, 167, 69, 0.05);
+        }
+        
+        .user-status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+            display: inline-block;
+        }
+        
+        .user-status-indicator.online {
+            background-color: #28a745;
+            box-shadow: 0 0 5px #28a745;
+            animation: pulse 2s infinite;
+        }
+        
+        .user-status-indicator.offline {
+            background-color: #6c757d;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 5px rgba(40, 167, 69, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+            }
+        }
+        
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            flex: 1;
+        }
+        
+        .user-id {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .last-message {
+            font-size: 12px;
+            color: #6c757d;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 220px;
+        }
+        
+        .message-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 2px;
+        }
+        
+        .user-item.active .last-message {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .user-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #6c757d;
+        }
+        
+        .user-status.online {
+            background-color: #28a745;
+        }
+        
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--background-color);
+        }
+        
+        .no-chat-selected {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+        }
+        
+        .no-chat-selected i {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+        }
+        
+        .current-user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .current-user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+        
+        .chat-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .chat-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--primary-color);
+            font-size: 16px;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: var(--background-color);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .message {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+            position: relative;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
+        }
+        
+        .message.image-message {
+            padding: 5px;
+            max-width: 200px;
+        }
+        
+        .message.image-message img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 12px;
+            object-fit: contain;
+        }
+        
+        .message-admin {
+            background-color: var(--primary-color);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .message-user {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .message-timestamp {
+            font-size: 10px;
+            color: #8e8e93;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .message-time-hidden {
+            position: absolute;
+            font-size: 10px;
+            color: #8e8e93;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            bottom: -16px;
+        }
+        
+        .message-admin .message-time-hidden {
+            right: 5px;
+        }
+        
+        .message-user .message-time-hidden {
+            left: 5px;
+        }
+        
+        .message:hover {
+            transform: translateY(-10px);
+        }
+        
+        .message:hover .message-time-hidden {
+            opacity: 1;
+        }
+        
+        .chat-input-area {
+            padding: 15px;
+            background-color: #fff;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .attachment-btn {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #e8e8e8;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+            border: none;
+        }
+        
+        .attachment-btn i {
+            font-size: 14px;
+            color: #8e8e93;
+        }
+        
+        .attachment-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .chat-input:focus {
+            border-color: var(--primary-color);
+        }
+        
+        .send-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+        
+        .send-button:hover {
+            background-color: #0069d9;
+        }
+        
+        .login-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: var(--background-color);
+        }
+        
+        .login-container {
+            width: 400px;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .login-container h1 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            text-align: center;
+        }
+        
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .login-form input {
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .login-form input:focus {
+            border-color: var(--primary-color);
+        }
+        
+        .login-form button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .login-form button:hover {
+            background-color: #0069d9;
+        }
+        
+        #login-error {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        
+        .loading-messages, .no-messages, .messages-error {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+        
+        /* Add styles for the admin message actions */
+        .admin-message-actions {
+            position: absolute;
+            right: -35px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .message:hover .admin-message-actions {
+            opacity: 1;
+        }
+        
+        .admin-action-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            transition: transform 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .admin-action-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .download-message-btn {
+            background-color: #34c759;
+            color: white;
+        }
+        
+        .download-message-btn:hover {
+            background-color: #2a9e48;
+        }
+        
+        .user-online-badge {
+            background-color: #28a745;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 5px;
+            display: inline-block;
+        }
+        
+        .refresh-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--primary-color);
+            font-size: 14px;
+            padding: 5px;
+            margin-right: 5px;
+            transition: transform 0.3s ease;
+        }
+        
+        .refresh-button:hover {
+            transform: rotate(180deg);
+        }
+        
+        /* Add CSS style for the preview button */
+        .preview-message-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .preview-message-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Section -->
+    <div id="login-section" class="login-container">
+        <div class="login-form">
+            <div class="login-header">
+                <h2>Admin Login</h2>
+                <p>Enter your credentials to access the chat admin panel</p>
+            </div>
+            <div id="login-error" class="error-message"></div>
+            <form id="login-form">
+                <input type="email" id="email" placeholder="Email" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Panel Section (hidden by default) -->
+    <div id="admin-panel" class="container" style="display: none;">
+        <!-- Sidebar with list of users -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Active Chats</h2>
+                <div class="nav-actions">
+                    <button id="refresh-users-btn" class="refresh-button" title="Refresh Users">
+                        <i class="fas fa-sync"></i>
+                    </button>
+                    <button id="admin-status-toggle" class="admin-status-toggle">
+                        <i class="fas fa-circle"></i> Online
+                    </button>
+                    <button id="logout-button" class="logout-button">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+            <div class="user-list" id="user-list">
+                <!-- User list will be populated here -->
+                <div class="user-item">
+                    <div class="user-info">
+                        <div class="user-id">Loading chats...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Chat area -->
+        <div class="chat-area" id="chat-area">
+            <div class="no-chat-selected" id="no-chat-selected">
+                <i class="fas fa-comments"></i>
+                <p>Select a conversation to start chatting</p>
+            </div>
+            
+            <div class="chat-container" id="chat-container" style="display: none; flex: 1; display: flex; flex-direction: column;">
+                <div class="chat-header" id="chat-header">
+                    <div class="current-user-info">
+                        <div class="current-user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="current-user-id">Select a user</div>
+                    </div>
+                    <div class="chat-actions">
+                        <button class="chat-button" id="delete-chat-btn">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button class="chat-button" id="export-chat-btn">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Messages will be displayed here -->
+                </div>
+                
+                <div class="chat-input-area">
+                    <button class="attachment-btn" id="attachment-btn">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                    <input type="text" class="chat-input" id="chat-input" placeholder="Type a message...">
+                    <button class="send-button" id="send-button">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDiptAEF_Y6ptGYkiAf1jeEkyy5J72w22g",
+            authDomain: "trushresume.firebaseapp.com",
+            projectId: "trushresume",
+            storageBucket: "trushresume.firebasestorage.app",
+            messagingSenderId: "504357252195",
+            appId: "1:504357252195:web:9519b10c4efc88185cdc56",
+            measurementId: "G-9VL9JPE4KW"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements for login
+            const loginSection = document.getElementById('login-section');
+            const loginForm = document.getElementById('login-form');
+            const loginError = document.getElementById('login-error');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            
+            // DOM elements for admin panel
+            const adminPanel = document.getElementById('admin-panel');
+            const logoutButton = document.getElementById('logout-button');
+            const userList = document.getElementById('user-list');
+            const chatContainer = document.getElementById('chat-container');
+            const noChatSelected = document.getElementById('no-chat-selected');
+            const chatMessages = document.getElementById('chat-messages');
+            const chatInput = document.getElementById('chat-input');
+            const sendButton = document.getElementById('send-button');
+            const currentUserId = document.querySelector('.current-user-id');
+            const adminStatusToggle = document.getElementById('admin-status-toggle');
+            const deleteChatBtn = document.getElementById('delete-chat-btn');
+            const exportChatBtn = document.getElementById('export-chat-btn');
+            
+            let selectedUserId = null;
+            let currentUnsubscribe = null;
+            let adminOnline = true;
+            
+            // Implement login functionality
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const email = emailInput.value.trim();
+                const password = passwordInput.value;
+                
+                // Sign in with Firebase
+                firebase.auth().signInWithEmailAndPassword(email, password)
+                    .catch(error => {
+                        // Display error message
+                        loginError.textContent = error.message;
+                    });
+            });
+            
+            // Handle logout
+            logoutButton.addEventListener('click', function() {
+                firebase.auth().signOut()
+                    .catch(error => {
+                        console.error('Error signing out:', error);
+                    });
+            });
+            
+            // Auth state change listener
+            firebase.auth().onAuthStateChanged(user => {
+                if (user) {
+                    // User is signed in
+                    console.log('User is signed in:', user.email);
+                    
+                    // Hide login, show admin panel
+                    loginSection.style.display = 'none';
+                    adminPanel.style.display = 'flex';
+                    
+                    // Clear login form
+                    loginForm.reset();
+                    loginError.textContent = '';
+                    
+                    // Initialize admin panel
+                    initAdminPanel();
+                } else {
+                    // User is signed out
+                    console.log('User is signed out');
+                    
+                    // Show login, hide admin panel
+                    loginSection.style.display = 'flex';
+                    adminPanel.style.display = 'none';
+                    
+                    // Clear any existing listeners or intervals
+                    if (currentUnsubscribe) {
+                        currentUnsubscribe();
+                    }
+                }
+            });
+            
+            // Initialize admin panel functionality
+            function initAdminPanel() {
+                // Set admin online status
+                firebase.firestore().collection('admin').doc('status').set({
+                    online: true,
+                    lastActive: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                // Update admin status when leaving
+                window.addEventListener('beforeunload', () => {
+                    firebase.firestore().collection('admin').doc('status').update({
+                        online: false,
+                        lastActive: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+                
+                // Set up periodic heartbeat for admin online status
+                const adminHeartbeat = setInterval(() => {
+                    if (document.visibilityState === 'visible') {
+                        firebase.firestore().collection('admin').doc('status').update({
+                            lastActive: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                }, 60000); // Update every minute
+                
+                // Toggle admin online status
+                adminStatusToggle.addEventListener('click', () => {
+                    adminOnline = !adminOnline;
+                    if (adminOnline) {
+                        adminStatusToggle.classList.remove('offline');
+                        adminStatusToggle.innerHTML = '<i class="fas fa-circle"></i> Online';
+                    } else {
+                        adminStatusToggle.classList.add('offline');
+                        adminStatusToggle.innerHTML = '<i class="fas fa-circle"></i> Offline';
+                    }
+                    
+                    firebase.firestore().collection('admin').doc('status').update({
+                        online: adminOnline,
+                        lastActive: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+                
+                // Listen for active users
+                loadActiveUsers();
+                
+                // Listen for new messages from any user to update the preview
+                setupGlobalMessageListener();
+                
+                // Setup delete chat and export chat functionality
+                setupChatActions();
+                
+                // Check for inactive users (offline but not marked as such)
+                checkUserActivity();
+                // Set up periodic check for user activity
+                setInterval(checkUserActivity, 120000); // Check every 2 minutes
+                
+                // Refresh users button
+                document.getElementById('refresh-users-btn').addEventListener('click', () => {
+                    // Add rotate animation
+                    const refreshBtn = document.getElementById('refresh-users-btn');
+                    refreshBtn.style.transition = 'transform 1s ease';
+                    refreshBtn.style.transform = 'rotate(360deg)';
+                    
+                    // Force reload the active users
+                    loadActiveUsers();
+                    
+                    // Reset the rotation after animation completes
+                    setTimeout(() => {
+                        refreshBtn.style.transition = 'none';
+                        refreshBtn.style.transform = 'rotate(0deg)';
+                        setTimeout(() => {
+                            refreshBtn.style.transition = 'transform 0.3s ease';
+                        }, 50);
+                    }, 1000);
+                });
+            }
+            
+            // Global listener for new messages to update the user list previews
+            let globalMessageUnsubscribe = null;
+            function setupGlobalMessageListener() {
+                // If there's an active listener, unsubscribe
+                if (globalMessageUnsubscribe) {
+                    globalMessageUnsubscribe();
+                }
+                
+                // Listen for all chat collection changes
+                globalMessageUnsubscribe = firebase.firestore().collectionGroup('messages')
+                    .orderBy('timestamp', 'desc')
+                    .limit(20) // Increased limit to capture more messages
+                    .onSnapshot(snapshot => {
+                        console.log("Global message listener snapshot:", snapshot.size, "messages");
+                        
+                        // Process all messages in the initial snapshot
+                        if (snapshot.docChanges().length === snapshot.size) {
+                            console.log("Initial load of global messages");
+                            // Force refresh the user list to get latest messages
+                            loadActiveUsers();
+                        }
+                        
+                        snapshot.docChanges().forEach(change => {
+                            const messageData = change.doc.data();
+                            // Skip invalid messages
+                            if (!messageData || !messageData.sender) {
+                                console.warn("Invalid message data received:", messageData);
+                                return;
+                            }
+                            
+                            // Skip if no timestamp (invalid message)
+                            if (!messageData.timestamp) {
+                                console.warn("Message without timestamp received");
+                                return;
+                            }
+                            
+                            const path = change.doc.ref.path.split('/');
+                            if (path.length >= 2) {
+                                const userId = path[1]; // 'chats/{userId}/messages/{messageId}'
+                                
+                                const messagePreview = 
+                                    messageData.text || 
+                                    (messageData.imageUrl ? 'Image' : 
+                                    (messageData.fileUrl ? 'File' : 'Message'));
+                                    
+                                console.log(`Message detected for user ${userId}:`, 
+                                    change.type, 
+                                    messagePreview);
+                                
+                                // Find and update the user item in the list
+                                updateUserItemPreview(userId, messageData);
+                            }
+                        });
+                    }, error => {
+                        console.error("Error in global message listener:", error);
+                        // Try to reestablish listener after a delay
+                        setTimeout(() => {
+                            setupGlobalMessageListener();
+                        }, 10000);
+                    });
+            }
+            
+            // Function to update a specific user's preview message
+            function updateUserItemPreview(userId, messageData) {
+                console.log(`Updating preview for user ${userId}:`, messageData.text || (messageData.imageUrl ? 'Image' : 'File attachment'));
+                
+                // Find the user item in the list
+                const userItem = document.querySelector(`.user-item[data-user-id="${userId}"]`);
+                if (!userItem) {
+                    console.log(`User ${userId} not found in list, refreshing user list`);
+                    // If user not in list, refresh the entire list
+                    loadActiveUsers();
+                    return;
+                }
+                
+                // Extract the preview text
+                let previewText = messageData.text || '';
+                if (messageData.imageUrl) {
+                    previewText = 'Image attachment';
+                } else if (messageData.fileUrl) {
+                    previewText = `File attachment: ${messageData.fileName || 'document'}`;
+                } else if (messageData.fileData) {
+                    previewText = 'File attachment';
+                }
+                
+                // Limit preview text
+                if (previewText.length > 30) {
+                    previewText = previewText.substring(0, 30) + '...';
+                }
+                
+                // Add 'You: ' prefix for admin messages
+                if (messageData.sender === 'admin') {
+                    previewText = 'You: ' + previewText;
+                }
+                
+                // Update the preview text
+                const lastMessageElem = userItem.querySelector('.last-message');
+                if (lastMessageElem) {
+                    lastMessageElem.textContent = previewText;
+                }
+                
+                // Format timestamp nicely
+                let timeDisplay = 'Just now';
+                if (messageData.timestamp) {
+                    const msgTime = messageData.timestamp.toDate ? 
+                        messageData.timestamp.toDate() : 
+                        new Date(messageData.timestamp);
+                    
+                    const now = new Date();
+                    const diffMs = now - msgTime;
+                    
+                    if (diffMs < 60000) { // Less than a minute
+                        timeDisplay = 'Just now';
+                    } else {
+                        timeDisplay = formatTimeRelative(msgTime);
+                    }
+                }
+                
+                // Update timestamp
+                const timestampElem = userItem.querySelector('.message-time');
+                if (timestampElem) {
+                    timestampElem.textContent = timeDisplay;
+                }
+                
+                // Move the user to the top of the list if not already selected
+                if (!userItem.classList.contains('active')) {
+                    const userList = document.getElementById('user-list');
+                    userList.insertBefore(userItem, userList.firstChild);
+                }
+            }
+            
+            // Function to check and update user activity status
+            function checkUserActivity() {
+                console.log("Checking user activity status...");
+                
+                // Get all users
+                firebase.firestore().collection('users').get()
+                    .then(snapshot => {
+                        const batch = firebase.firestore().batch();
+                        let updates = 0;
+                        
+                        const now = new Date();
+                        
+                        snapshot.forEach(doc => {
+                            const userData = doc.data();
+                            
+                            // If user is marked as online but hasn't been active for 5 minutes, set to offline
+                            if (userData.online === true && userData.lastActive) {
+                                const lastActive = userData.lastActive.toDate();
+                                const diffMs = now - lastActive;
+                                const diffMin = Math.floor(diffMs / (1000 * 60));
+                                
+                                if (diffMin > 5) {
+                                    console.log(`User ${userData.userId || doc.id} inactive for ${diffMin} minutes, marking as offline`);
+                                    batch.update(doc.ref, { 
+                                        online: false 
+                                    });
+                                    updates++;
+                                }
+                            }
+                        });
+                        
+                        if (updates > 0) {
+                            console.log(`Updating ${updates} inactive users to offline status`);
+                            return batch.commit();
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error checking user activity:", error);
+                    });
+            }
+            
+            // Load active users with chats
+            function loadActiveUsers() {
+                firebase.firestore().collection('users')
+                    .onSnapshot(snapshot => {
+                        console.log('Active users snapshot received:', snapshot.size, 'users');
+                        
+                        // Track changes for debugging
+                        snapshot.docChanges().forEach(change => {
+                            const userData = change.doc.data();
+                            const userId = userData.userId || change.doc.id;
+                            console.log(`User ${userId} ${change.type}:`, userData.online ? 'online' : 'offline');
+                        });
+                        
+                        // Clear existing list
+                        userList.innerHTML = '';
+                        
+                        if (snapshot.empty) {
+                            userList.innerHTML = `
+                                <div class="user-item">
+                                <div class="user-info">
+                                    <div class="user-id">No active users</div>
+                                        <div class="last-message">Wait for users to start chatting</div>
+                                    </div>
+                                </div>
+                            `;
+                            return;
+                        }
+                        
+                        // Track processed users to avoid duplicates
+                        const processedUsers = new Set();
+                        
+                        // Create a loading placeholder
+                        const loadingItem = document.createElement('div');
+                        loadingItem.className = 'user-item';
+                        loadingItem.innerHTML = `
+                                <div class="user-info">
+                                <div class="user-id">Loading users...</div>
+                                </div>
+                            `;
+                        userList.appendChild(loadingItem);
+                        
+                        // Process each user
+                        const userPromises = [];
+                        
+                        snapshot.forEach(doc => {
+                            const userData = doc.data();
+                            const userId = userData.userId || doc.id;
+                            
+                            // Skip if already processed
+                            if (processedUsers.has(userId)) return;
+                            processedUsers.add(userId);
+                            
+                            // Create a promise to fetch the last message
+                            const userPromise = firebase.firestore()
+                                .collection('chats')
+                                .doc(userId)
+                                .collection('messages')
+                                .orderBy('timestamp', 'desc')
+                                .limit(1)
+                                .get({ source: 'server' }) // Force fetch from server instead of cache
+                                .then(msgSnapshot => {
+                                    // Get online status
+                                    const online = userData.online === true; // explicitly check for true
+                                    const lastActive = userData.lastActive ? new Date(userData.lastActive.toDate()) : null;
+                                    
+                                    // Format the online status for display
+                                    let onlineStatus = online ? 'Online' : 'Offline';
+                                    if (!online && lastActive) {
+                                        onlineStatus = `Last seen: ${formatTimeRelative(lastActive)}`;
+                                    }
+                                    
+                                    // Get last message text if available
+                                    let lastMessageText = 'No messages yet';
+                                    let lastMessageTime = null;
+                                    
+                                    if (!msgSnapshot.empty) {
+                                        const lastMessage = msgSnapshot.docs[0].data();
+                                        
+                                        // Format the preview text based on message type
+                                        if (lastMessage.imageUrl) {
+                                            lastMessageText = 'Image attachment';
+                                        } else if (lastMessage.fileUrl) {
+                                            lastMessageText = `File attachment: ${lastMessage.fileName || 'document'}`;
+                                        } else if (lastMessage.fileData) {
+                                            lastMessageText = 'File attachment';
+                                        } else {
+                                            lastMessageText = lastMessage.text || '';
+                                        }
+                                        
+                                        if (lastMessageText.length > 30) {
+                                            lastMessageText = lastMessageText.substring(0, 30) + '...';
+                                        }
+                                        
+                                        if (lastMessage.sender === 'admin') {
+                                            lastMessageText = 'You: ' + lastMessageText;
+                                        }
+                                        
+                                        if (lastMessage.timestamp) {
+                                            lastMessageTime = new Date(lastMessage.timestamp.toDate ? lastMessage.timestamp.toDate() : lastMessage.timestamp);
+                                        }
+                                    }
+                                    
+                                    // Format last active time
+                                    let lastActiveDisplay = lastMessageTime ? formatTimeRelative(lastMessageTime) : 'Unknown';
+                                    if (!lastMessageTime && lastActive) {
+                                        lastActiveDisplay = formatTimeRelative(lastActive);
+                                    }
+                                    
+                                    return {
+                                        userId,
+                                        online,
+                                        lastActive,
+                                        lastMessageText,
+                                        lastMessageTime,
+                                        lastActiveDisplay,
+                                        onlineStatus
+                                    };
+                                })
+                                .catch(error => {
+                                    console.error(`Error loading last message for ${userId}:`, error);
+                                    
+                                    // Attempt to get at least the user data correctly
+                                    let lastActiveDisplay = 'Unknown';
+                                    const lastActive = userData.lastActive ? 
+                                        new Date(userData.lastActive.toDate ? userData.lastActive.toDate() : userData.lastActive) : 
+                                        null;
+                                    
+                                    if (lastActive) {
+                                        lastActiveDisplay = formatTimeRelative(lastActive);
+                                    }
+                                    
+                                    return {
+                                        userId,
+                                        online: userData.online,
+                                        lastActive: lastActive,
+                                        lastMessageText: 'Unable to load last message',
+                                        lastActiveDisplay: lastActiveDisplay,
+                                        onlineStatus: userData.online ? 'Online' : 'Offline'
+                                    };
+                                });
+                            
+                            userPromises.push(userPromise);
+                        });
+                        
+                        // Wait for all user data to be loaded
+                        Promise.all(userPromises)
+                            .then(users => {
+                                // Remove loading placeholder
+                                userList.innerHTML = '';
+                                
+                                // Sort users: online first, then by last message time
+                                users.sort((a, b) => {
+                                    // Online users first
+                                    if (a.online && !b.online) return -1;
+                                    if (!a.online && b.online) return 1;
+                                    
+                                    // Then by last message time (most recent first)
+                                    const timeA = a.lastMessageTime || a.lastActive || new Date(0);
+                                    const timeB = b.lastMessageTime || b.lastActive || new Date(0);
+                                    return timeB - timeA;
+                                });
+                                
+                                // Add each user to the list
+                                users.forEach(user => {
+                            const userItem = document.createElement('div');
+                            userItem.className = 'user-item';
+                            userItem.dataset.userId = user.userId;
+                                    if (user.online) {
+                                        userItem.classList.add('online');
+                            }
+                            
+                            userItem.innerHTML = `
+                                <div class="user-info">
+                                            <div class="user-status-indicator ${user.online ? 'online' : 'offline'}" style="display: none;"></div>
+                                            <div class="user-id">${user.userId} ${user.online ? '<span class="user-online-badge">Online</span>' : ''}</div>
+                                            <div class="last-message">${user.lastMessageText}</div>
+                                            <div class="message-time">
+                                                ${user.online ? 'Active now' : `Last seen: ${user.lastActiveDisplay}`}
+                                            </div>
+                                </div>
+                            `;
+                            
+                            userItem.addEventListener('click', () => {
+                                // Remove active class from all items
+                                document.querySelectorAll('.user-item').forEach(item => {
+                                    item.classList.remove('active');
+                                });
+                                
+                                // Add active class to selected item
+                                userItem.classList.add('active');
+                                
+                                // Show chat container
+                                chatContainer.style.display = 'flex';
+                                noChatSelected.style.display = 'none';
+                                
+                                // Set selected user
+                                        selectedUserId = user.userId;
+                                        currentUserId.textContent = `User: ${user.userId.substring(0, 15)}...`;
+                                
+                                // Load chat messages
+                                        loadChatMessages(user.userId);
+                            });
+                            
+                            userList.appendChild(userItem);
+                                });
+                            })
+                            .catch(error => {
+                                console.error("Error processing user data:", error);
+                                userList.innerHTML = `
+                                    <div class="user-item error-item">
+                                        <div class="user-info">
+                                            <div class="user-id">Error loading users</div>
+                                            <div class="last-message">${error.message}</div>
+                                        </div>
+                                    </div>
+                                `;
+                        });
+                    }, error => {
+                        console.error("Error getting active users:", error);
+                        
+                        // Show error in the UI
+                        userList.innerHTML = `
+                            <div class="user-item error-item">
+                                <div class="user-info">
+                                    <div class="user-id">Error loading users</div>
+                                    <div class="last-message">${error.message}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+            }
+            
+            // Helper function to format time in a relative way (just now, 5m ago, etc.)
+            function formatTimeRelative(date) {
+                const now = new Date();
+                const diffMs = now - date;
+                const diffSec = Math.floor(diffMs / 1000);
+                const diffMin = Math.floor(diffSec / 60);
+                const diffHours = Math.floor(diffMin / 60);
+                const diffDays = Math.floor(diffHours / 24);
+                
+                if (diffSec < 60) {
+                    return 'just now';
+                } else if (diffMin < 60) {
+                    return `${diffMin}m ago`;
+                } else if (diffHours < 24) {
+                    return `${diffHours}h ago`;
+                } else if (diffDays < 7) {
+                    return `${diffDays}d ago`;
+                } else {
+                    return date.toLocaleDateString();
+                }
+            }
+                
+                function loadChatMessages(userId) {
+                    console.log(`Loading messages for user: ${userId}`);
+                    
+                    // Clear previous messages
+                    chatMessages.innerHTML = '';
+                    
+                    // Add loading indicator
+                    const loadingIndicator = document.createElement('div');
+                    loadingIndicator.className = 'loading-messages';
+                    loadingIndicator.textContent = 'Loading messages...';
+                    chatMessages.appendChild(loadingIndicator);
+                    
+                    // If there's an active listener, unsubscribe
+                    if (currentUnsubscribe) {
+                        currentUnsubscribe();
+                    }
+                    
+                // Set up real-time listener for messages
+                            currentUnsubscribe = firebase.firestore()
+                                .collection('chats')
+                                .doc(userId)
+                                .collection('messages')
+                                .orderBy('timestamp', 'asc')
+                                .onSnapshot(snapshot => {
+                                    console.log(`Message snapshot for ${userId}:`, snapshot.size, 'messages');
+                                    
+                                    // Remove loading indicator
+                                    const loadingElem = chatMessages.querySelector('.loading-messages');
+                                    if (loadingElem) {
+                                        chatMessages.removeChild(loadingElem);
+                                    }
+                                    
+                                    if (snapshot.empty) {
+                                        console.log(`No messages found for user ${userId}`);
+                                        const noMessagesElem = document.createElement('div');
+                                        noMessagesElem.className = 'no-messages';
+                                        noMessagesElem.innerHTML = `
+                                <p>No messages in this conversation</p>
+                                <p>Send a message to start chatting</p>
+                                        `;
+                                        chatMessages.appendChild(noMessagesElem);
+                                        return;
+                                    }
+                                    
+                        // Process messages in chronological order
+                        processMessages(snapshot);
+                        
+                                }, error => {
+                                    console.error(`Error loading messages for ${userId}:`, error);
+                                    
+                                    // Remove loading indicator
+                                    const loadingElem = chatMessages.querySelector('.loading-messages');
+                                    if (loadingElem) {
+                                        chatMessages.removeChild(loadingElem);
+                                    }
+                                    
+                                    // Show error
+                                    const errorElem = document.createElement('div');
+                                    errorElem.className = 'messages-error';
+                                    errorElem.innerHTML = `
+                                        <p>Error loading messages: ${error.message}</p>
+                                        <button id="retry-load-messages">Retry</button>
+                                    `;
+                                    chatMessages.appendChild(errorElem);
+                                    
+                                    // Add retry handler
+                                    document.getElementById('retry-load-messages').addEventListener('click', () => {
+                                        loadChatMessages(userId);
+                                    });
+                                });
+            }
+            
+            // Process chat messages from Firestore snapshot
+            function processMessages(snapshot) {
+                console.log("Processing messages:", snapshot.size);
+                
+                // Track message dates to group by day
+                let lastDate = null;
+                
+                // Clear messages container
+                chatMessages.innerHTML = '';
+                
+                // Batch to mark messages as seen
+                const batch = firebase.firestore().batch();
+                let hasPendingUpdates = false;
+                
+                // Get newest message for preview update
+                let newestMessage = null;
+                let newestTimestamp = 0;
+                
+                // Process each message
+                snapshot.forEach(doc => {
+                    const messageData = doc.data();
+                    const messageId = doc.id;
+                    
+                    // Check if this is the newest message for preview
+                    if (messageData.timestamp) {
+                        const msgTimestamp = messageData.timestamp.toMillis ? 
+                            messageData.timestamp.toMillis() : 
+                            new Date(messageData.timestamp).getTime();
+                            
+                        if (msgTimestamp > newestTimestamp) {
+                            newestTimestamp = msgTimestamp;
+                            newestMessage = messageData;
+                        }
+                    }
+                    
+                    // Debug message data
+                    console.log(`Message ${messageId}:`, {
+                        hasText: !!messageData.text,
+                        hasImageUrl: !!messageData.imageUrl,
+                        hasFileUrl: !!messageData.fileUrl, 
+                        hasFileData: !!messageData.fileData,
+                        fileType: messageData.fileType || 'none',
+                        sender: messageData.sender
+                    });
+                    
+                    // Skip if invalid message
+                    if (!messageData || (!messageData.text && !messageData.imageUrl && !messageData.fileUrl && !messageData.fileData)) {
+                        console.warn("Invalid message data:", messageId);
+                        return;
+                    }
+                    
+                    // Mark user messages as seen
+                    if (messageData.sender === 'user' && (!messageData.seen || !messageData.delivered)) {
+                        batch.update(doc.ref, { 
+                            seen: true,
+                            delivered: true,
+                            seenAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        hasPendingUpdates = true;
+                    }
+                    
+                    // Get formatted timestamp
+                    const timestamp = messageData.timestamp ? new Date(messageData.timestamp.toDate()) : new Date();
+                    
+                    // Check if we need to add a date separator
+                    const messageDate = timestamp.toLocaleDateString();
+                    if (lastDate !== messageDate) {
+                        const dateSeparator = document.createElement('div');
+                        dateSeparator.className = 'message-timestamp';
+                        dateSeparator.textContent = messageDate;
+                        chatMessages.appendChild(dateSeparator);
+                        lastDate = messageDate;
+                    }
+                    
+                    // Create message element
+                    const messageElement = document.createElement('div');
+                    messageElement.className = `message message-${messageData.sender === 'admin' ? 'admin' : 'user'}`;
+                    messageElement.dataset.messageId = messageId;
+                    
+                    // Handle attachments
+                    if (messageData.imageUrl) {
+                        messageElement.className += ' image-message';
+                        const image = document.createElement('img');
+                        image.src = messageData.imageUrl;
+                        image.alt = 'Attached Image';
+                        image.style.maxWidth = '100%';
+                        image.style.borderRadius = '12px';
+                        messageElement.appendChild(image);
+                    } else if (messageData.fileUrl) {
+                        messageElement.className += ' document-message';
+                        
+                        // Create document container
+                        const docContainer = document.createElement('div');
+                        docContainer.style.backgroundColor = '#f1f1f1';
+                        docContainer.style.padding = '15px';
+                        docContainer.style.borderRadius = '12px';
+                        docContainer.style.display = 'flex';
+                        docContainer.style.flexDirection = 'column';
+                        docContainer.style.gap = '10px';
+                        docContainer.style.cursor = 'pointer'; // Add pointer cursor
+                        
+                        // Add document icon and name
+                        const docInfo = document.createElement('div');
+                        docInfo.style.display = 'flex';
+                        docInfo.style.alignItems = 'center';
+                        docInfo.style.gap = '8px';
+                        
+                        const icon = document.createElement('i');
+                        if (messageData.fileType === 'application/pdf') {
+                            icon.className = 'fas fa-file-pdf';
+                        } else if (messageData.fileType && messageData.fileType.includes('word')) {
+                            icon.className = 'fas fa-file-word';
+                        } else if (messageData.fileType && messageData.fileType.includes('excel')) {
+                            icon.className = 'fas fa-file-excel';
+                        } else {
+                            icon.className = 'fas fa-file';
+                        }
+                        icon.style.fontSize = '24px';
+                        icon.style.color = '#007AFF';
+                        
+                        const fileName = document.createElement('span');
+                        fileName.textContent = messageData.fileName || 'Document';
+                        fileName.style.wordBreak = 'break-word';
+                        fileName.style.maxWidth = '150px';
+                        
+                        docInfo.appendChild(icon);
+                        docInfo.appendChild(fileName);
+                        
+                        // Add preview button for viewable files
+                        const actionButtons = document.createElement('div');
+                        actionButtons.style.display = 'flex';
+                        actionButtons.style.gap = '10px';
+                        actionButtons.style.marginTop = '8px';
+                        
+                        if ((messageData.fileUrl || messageData.fileData) && 
+                            messageData.fileType && 
+                            (messageData.fileType === 'application/pdf' || 
+                             messageData.fileType.includes('word') || 
+                             messageData.fileType.includes('text/') ||
+                             messageData.fileType.includes('application/vnd.openxmlformats-officedocument'))) {
+                            
+                            // Create a function to show the preview
+                            const showPreview = (e) => {
+                                if (e) e.stopPropagation(); // Prevent message hover effect from disappearing
+                                
+                                // Create modal popup for document preview
+                                const previewModal = document.createElement('div');
+                                previewModal.className = 'document-preview-modal';
+                                previewModal.style.position = 'fixed';
+                                previewModal.style.top = '0';
+                                previewModal.style.left = '0';
+                                previewModal.style.width = '100%';
+                                previewModal.style.height = '100%';
+                                previewModal.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+                                previewModal.style.zIndex = '10000';
+                                previewModal.style.display = 'flex';
+                                previewModal.style.justifyContent = 'center';
+                                previewModal.style.alignItems = 'center';
+                                
+                                const modalContent = document.createElement('div');
+                                modalContent.className = 'modal-content';
+                                modalContent.style.backgroundColor = '#fff';
+                                modalContent.style.width = '90%';
+                                modalContent.style.maxWidth = '800px';
+                                modalContent.style.maxHeight = '90%';
+                                modalContent.style.borderRadius = '12px';
+                                modalContent.style.overflow = 'hidden';
+                                modalContent.style.display = 'flex';
+                                modalContent.style.flexDirection = 'column';
+                                
+                                const modalHeader = document.createElement('div');
+                                modalHeader.className = 'modal-header';
+                                modalHeader.style.display = 'flex';
+                                modalHeader.style.justifyContent = 'space-between';
+                                modalHeader.style.alignItems = 'center';
+                                modalHeader.style.padding = '15px';
+                                modalHeader.style.borderBottom = '1px solid #eee';
+                                
+                                const modalTitle = document.createElement('h3');
+                                modalTitle.textContent = messageData.fileName || 'Document Preview';
+                                modalTitle.style.margin = '0';
+                                modalTitle.style.fontSize = '16px';
+                                modalTitle.style.fontWeight = '600';
+                                
+                                const closeButton = document.createElement('button');
+                                closeButton.innerHTML = '<i class="fas fa-times"></i>';
+                                closeButton.style.background = 'none';
+                                closeButton.style.border = 'none';
+                                closeButton.style.fontSize = '18px';
+                                closeButton.style.cursor = 'pointer';
+                                closeButton.style.padding = '5px';
+                                closeButton.setAttribute('aria-label', 'Close preview');
+                                
+                                modalHeader.appendChild(modalTitle);
+                                modalHeader.appendChild(closeButton);
+                                
+                                const modalBody = document.createElement('div');
+                                modalBody.className = 'modal-body';
+                                modalBody.style.padding = '0';
+                                modalBody.style.overflow = 'auto';
+                                modalBody.style.flex = '1';
+                                modalBody.style.minHeight = '500px'; // Add minimum height
+                                
+                                // Add loading indicator
+                                modalBody.innerHTML = `
+                                    <div style="display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column; gap: 10px;">
+                                        <div style="font-size: 24px; color: #888;">
+                                            <i class="fas fa-spinner fa-spin"></i>
+                                        </div>
+                                        <div style="color: #888;">Loading document preview...</div>
+                                    </div>
+                                `;
+                                
+                                modalContent.appendChild(modalHeader);
+                                modalContent.appendChild(modalBody);
+                                previewModal.appendChild(modalContent);
+                                
+                                // Add the modal to the page
+                                document.body.appendChild(previewModal);
+                                
+                                // Process document based on file type
+                                    if (messageData.fileType && 
+                                        (messageData.fileType.includes('word') || 
+                                         messageData.fileType.includes('application/vnd.openxmlformats-officedocument'))) {
+                                    
+                                    // Handle Word documents differently based on whether we have fileUrl or fileData
+                                    if (messageData.fileData) {
+                                        // Process Word document using mammoth.js
+                                        try {
+                                            // Convert base64 data to array buffer
+                                            const base64Data = messageData.fileData.split(',')[1];
+                                            const binaryString = window.atob(base64Data);
+                                            const bytes = new Uint8Array(binaryString.length);
+                                            for (let i = 0; i < binaryString.length; i++) {
+                                                bytes[i] = binaryString.charCodeAt(i);
+                                            }
+                                            const arrayBuffer = bytes.buffer;
+                                            
+                                            // Use mammoth.js to convert Word to HTML
+                                            mammoth.convertToHtml({ arrayBuffer })
+                                                .then(function(result) {
+                                                    // Replace loading indicator with content
+                                                    modalBody.innerHTML = '';
+                                                    
+                                                    // Add styles
+                                                    const styleElement = document.createElement('style');
+                                                    styleElement.textContent = `
+                                                        .document-content { color: #000000; font-weight: 500; padding: 20px; }
+                                                        .document-content p { margin: 0 0 8px 0; color: #000000; }
+                                                        .document-content h1 { font-size: 22px; margin: 20px 0 10px 0; color: #000000; }
+                                                        .document-content h2 { font-size: 18px; margin: 15px 0 8px 0; color: #000000; }
+                                                        .document-content ul, .document-content ol { margin: 8px 0; padding-left: 25px; color: #000000; }
+                                                        .document-content table { border-collapse: collapse; margin: 10px 0; }
+                                                        .document-content td, .document-content th { border: 1px solid #ddd; padding: 6px; color: #000000; }
+                                                    `;
+                                                    modalBody.appendChild(styleElement);
+                                                    
+                                                    // Add content
+                                                    const contentElement = document.createElement('div');
+                                                    contentElement.className = 'document-content';
+                                                    contentElement.innerHTML = result.value;
+                                                    modalBody.appendChild(contentElement);
+                                                    
+                                                    // Warning about formatting
+                                                    if (result.messages.length > 0) {
+                                                        const warningElement = document.createElement('div');
+                                                        warningElement.style.marginTop = '10px';
+                                                        warningElement.style.padding = '8px';
+                                                        warningElement.style.backgroundColor = '#fff9e6';
+                                                        warningElement.style.borderRadius = '4px';
+                                                        warningElement.style.fontSize = '11px';
+                                                        warningElement.style.color = '#856404';
+                                                        warningElement.style.margin = '0 20px 20px 20px';
+                                                        warningElement.textContent = 'Note: Some document formatting may not be displayed correctly.';
+                                                        modalBody.appendChild(warningElement);
+                                                    }
+                                                })
+                                                .catch(function(error) {
+                                                    console.error('Error converting Word document:', error);
+                                                    modalBody.innerHTML = `
+                                                        <div style="color: #721c24; background-color: #f8d7da; padding: 10px; border-radius: 4px; margin: 20px;">
+                                                            <p>Unable to preview document. The file may be password-protected or in an unsupported format.</p>
+                                                            <p>Please download the file to view its contents.</p>
+                                                        </div>
+                                                    `;
+                                                });
+                                        } catch (error) {
+                                            console.error('Error processing Word document:', error);
+                                            modalBody.innerHTML = `
+                                                <div style="color: #721c24; background-color: #f8d7da; padding: 10px; border-radius: 4px; margin: 20px;">
+                                                    <p>Unable to preview document. The file may be password-protected or in an unsupported format.</p>
+                                                    <p>Please download the file to view its contents.</p>
+                                                </div>
+                                            `;
+                                        }
+                                    } else if (messageData.fileUrl) {
+                                        // Use Google Docs Viewer for Word documents with URL
+                                        let previewUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(messageData.fileUrl)}&embedded=true`;
+                                        
+                                        const iframe = document.createElement('iframe');
+                                        iframe.src = previewUrl;
+                                        iframe.style.width = '100%';
+                                        iframe.style.height = '100%';
+                                        iframe.style.minHeight = '500px';
+                                        iframe.style.border = 'none';
+                                        iframe.style.backgroundColor = '#fff';
+                                        modalBody.innerHTML = '';
+                                        modalBody.appendChild(iframe);
+                                    }
+                                } else {
+                                    // For other file types, use iframe
+                                    let previewUrl;
+                                    if (messageData.fileUrl) {
+                                        previewUrl = messageData.fileUrl;
+                                } else if (messageData.fileData) {
+                                    previewUrl = messageData.fileData;
+                                }
+                                
+                                const iframe = document.createElement('iframe');
+                                iframe.src = previewUrl;
+                                iframe.style.width = '100%';
+                                iframe.style.height = '100%';
+                                    iframe.style.minHeight = '500px';
+                                iframe.style.border = 'none';
+                                    iframe.style.backgroundColor = '#fff';
+                                    modalBody.innerHTML = '';
+                                modalBody.appendChild(iframe);
+                                }
+                                
+                                // Close modal when clicking the close button
+                                closeButton.addEventListener('click', () => {
+                                    document.body.removeChild(previewModal);
+                                });
+                                
+                                // Close modal when clicking outside the content
+                                previewModal.addEventListener('click', (event) => {
+                                    if (event.target === previewModal) {
+                                        document.body.removeChild(previewModal);
+                                    }
+                                });
+                            };
+                            
+                            // Add click event to the whole docContainer
+                            docContainer.addEventListener('click', showPreview);
+                            
+                            // Add preview button (optional - can be kept for explicit preview)
+                            //const previewButton = document.createElement('button');
+                            previewButton.className = 'admin-action-btn preview-message-btn';
+                            previewButton.innerHTML = '<i class="fas fa-eye"></i>';
+                            previewButton.title = 'Preview document';
+                            previewButton.addEventListener('click', showPreview);
+                            
+                            actionButtons.appendChild(previewButton);
+                        }
+                        
+                        docContainer.appendChild(docInfo);
+                        docContainer.appendChild(actionButtons);
+                        messageElement.appendChild(docContainer);
+                    } else if (messageData.fileData) {
+                        if (messageData.fileType && messageData.fileType.startsWith('image/')) {
+                            messageElement.className += ' image-message';
+                            const image = document.createElement('img');
+                            image.src = messageData.fileData;
+                            image.alt = 'Attached Image';
+                            image.style.maxWidth = '100%';
+                            image.style.borderRadius = '12px';
+                            messageElement.appendChild(image);
+                        } else {
+                            messageElement.className += ' document-message';
+                            
+                            // Create document container
+                            const docContainer = document.createElement('div');
+                            docContainer.style.backgroundColor = '#f1f1f1';
+                            docContainer.style.padding = '15px';
+                            docContainer.style.borderRadius = '12px';
+                            docContainer.style.display = 'flex';
+                            docContainer.style.flexDirection = 'column';
+                            docContainer.style.gap = '10px';
+                            docContainer.style.cursor = 'pointer'; // Add pointer cursor
+                            
+                            // Add document icon and name
+                            const docInfo = document.createElement('div');
+                            docInfo.style.display = 'flex';
+                            docInfo.style.alignItems = 'center';
+                            docInfo.style.gap = '8px';
+                            
+                            const icon = document.createElement('i');
+                            icon.className = 'fas fa-file';
+                            icon.style.fontSize = '24px';
+                            icon.style.color = '#007AFF';
+                            
+                            const fileName = document.createElement('span');
+                            fileName.textContent = messageData.fileName || 'Document';
+                            fileName.style.wordBreak = 'break-word';
+                            fileName.style.maxWidth = '150px';
+                            
+                            docInfo.appendChild(icon);
+                            docInfo.appendChild(fileName);
+                            docContainer.appendChild(docInfo);
+                            
+                            // Add click event for preview if it's a previewable document
+                            if (messageData.fileType && 
+                                (messageData.fileType === 'application/pdf' || 
+                                 messageData.fileType.includes('word') || 
+                                 messageData.fileType.includes('text/') ||
+                                 messageData.fileType.includes('application/vnd.openxmlformats-officedocument'))) {
+                                
+                                docContainer.addEventListener('click', (e) => {
+                                    e.stopPropagation();
+                                    
+                                    // Create preview modal (similar code as above)
+                                    const previewModal = document.createElement('div');
+                                    previewModal.className = 'document-preview-modal';
+                                    previewModal.style.position = 'fixed';
+                                    previewModal.style.top = '0';
+                                    previewModal.style.left = '0';
+                                    previewModal.style.width = '100%';
+                                    previewModal.style.height = '100%';
+                                    previewModal.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+                                    previewModal.style.zIndex = '10000';
+                                    previewModal.style.display = 'flex';
+                                    previewModal.style.justifyContent = 'center';
+                                    previewModal.style.alignItems = 'center';
+                                    
+                                    const modalContent = document.createElement('div');
+                                    modalContent.className = 'modal-content';
+                                    modalContent.style.backgroundColor = '#fff';
+                                    modalContent.style.width = '90%';
+                                    modalContent.style.maxWidth = '800px';
+                                    modalContent.style.maxHeight = '90%';
+                                    modalContent.style.borderRadius = '12px';
+                                    modalContent.style.overflow = 'hidden';
+                                    modalContent.style.display = 'flex';
+                                    modalContent.style.flexDirection = 'column';
+                                    
+                                    const modalHeader = document.createElement('div');
+                                    modalHeader.className = 'modal-header';
+                                    modalHeader.style.display = 'flex';
+                                    modalHeader.style.justifyContent = 'space-between';
+                                    modalHeader.style.alignItems = 'center';
+                                    modalHeader.style.padding = '15px';
+                                    modalHeader.style.borderBottom = '1px solid #eee';
+                                    
+                                    const modalTitle = document.createElement('h3');
+                                    modalTitle.textContent = messageData.fileName || 'Document Preview';
+                                    modalTitle.style.margin = '0';
+                                    modalTitle.style.fontSize = '16px';
+                                    modalTitle.style.fontWeight = '600';
+                                    
+                                    const closeButton = document.createElement('button');
+                                    closeButton.innerHTML = '<i class="fas fa-times"></i>';
+                                    closeButton.style.background = 'none';
+                                    closeButton.style.border = 'none';
+                                    closeButton.style.fontSize = '18px';
+                                    closeButton.style.cursor = 'pointer';
+                                    closeButton.style.padding = '5px';
+                                    closeButton.setAttribute('aria-label', 'Close preview');
+                                    
+                                    modalHeader.appendChild(modalTitle);
+                                    modalHeader.appendChild(closeButton);
+                                    
+                                    const modalBody = document.createElement('div');
+                                    modalBody.className = 'modal-body';
+                                    modalBody.style.padding = '0';
+                                    modalBody.style.overflow = 'auto';
+                                    modalBody.style.flex = '1';
+                                    modalBody.style.minHeight = '500px';
+                                    
+                                    // Add loading indicator
+                                    modalBody.innerHTML = `
+                                        <div style="display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column; gap: 10px;">
+                                            <div style="font-size: 24px; color: #888;">
+                                                <i class="fas fa-spinner fa-spin"></i>
+                                            </div>
+                                            <div style="color: #888;">Loading document preview...</div>
+                                        </div>
+                                    `;
+                                    
+                                    modalContent.appendChild(modalHeader);
+                                    modalContent.appendChild(modalBody);
+                                    previewModal.appendChild(modalContent);
+                                    document.body.appendChild(previewModal);
+                                    
+                                    // Process Word documents
+                                    if (messageData.fileType.includes('word') || 
+                                        messageData.fileType.includes('application/vnd.openxmlformats-officedocument')) {
+                                        try {
+                                            // Convert base64 data to array buffer
+                                            const base64Data = messageData.fileData.split(',')[1];
+                                            const binaryString = window.atob(base64Data);
+                                            const bytes = new Uint8Array(binaryString.length);
+                                            for (let i = 0; i < binaryString.length; i++) {
+                                                bytes[i] = binaryString.charCodeAt(i);
+                                            }
+                                            const arrayBuffer = bytes.buffer;
+                                            
+                                            // Use mammoth.js to convert Word to HTML
+                                            mammoth.convertToHtml({ arrayBuffer })
+                                                .then(function(result) {
+                                                    // Replace loading indicator with content
+                                                    modalBody.innerHTML = '';
+                                                    
+                                                    // Add styles
+                                                    const styleElement = document.createElement('style');
+                                                    styleElement.textContent = `
+                                                        .document-content { color: #000000; font-weight: 500; padding: 20px; }
+                                                        .document-content p { margin: 0 0 8px 0; color: #000000; }
+                                                        .document-content h1 { font-size: 22px; margin: 20px 0 10px 0; color: #000000; }
+                                                        .document-content h2 { font-size: 18px; margin: 15px 0 8px 0; color: #000000; }
+                                                        .document-content ul, .document-content ol { margin: 8px 0; padding-left: 25px; color: #000000; }
+                                                        .document-content table { border-collapse: collapse; margin: 10px 0; }
+                                                        .document-content td, .document-content th { border: 1px solid #ddd; padding: 6px; color: #000000; }
+                                                    `;
+                                                    modalBody.appendChild(styleElement);
+                                                    
+                                                    // Add content
+                                                    const contentElement = document.createElement('div');
+                                                    contentElement.className = 'document-content';
+                                                    contentElement.innerHTML = result.value;
+                                                    modalBody.appendChild(contentElement);
+                                                    
+                                                    // Warning about formatting
+                                                    if (result.messages.length > 0) {
+                                                        const warningElement = document.createElement('div');
+                                                        warningElement.style.marginTop = '10px';
+                                                        warningElement.style.padding = '8px';
+                                                        warningElement.style.backgroundColor = '#fff9e6';
+                                                        warningElement.style.borderRadius = '4px';
+                                                        warningElement.style.fontSize = '11px';
+                                                        warningElement.style.color = '#856404';
+                                                        warningElement.style.margin = '0 20px 20px 20px';
+                                                        warningElement.textContent = 'Note: Some document formatting may not be displayed correctly.';
+                                                        modalBody.appendChild(warningElement);
+                                                    }
+                                                })
+                                                .catch(function(error) {
+                                                    console.error('Error converting Word document:', error);
+                                                    modalBody.innerHTML = `
+                                                        <div style="color: #721c24; background-color: #f8d7da; padding: 10px; border-radius: 4px; margin: 20px;">
+                                                            <p>Unable to preview document. The file may be password-protected or in an unsupported format.</p>
+                                                            <p>Please download the file to view its contents.</p>
+                                                        </div>
+                                                    `;
+                                                });
+                                        } catch (error) {
+                                            console.error('Error processing Word document:', error);
+                                            modalBody.innerHTML = `
+                                                <div style="color: #721c24; background-color: #f8d7da; padding: 10px; border-radius: 4px; margin: 20px;">
+                                                    <p>Unable to preview document. The file may be password-protected or in an unsupported format.</p>
+                                                    <p>Please download the file to view its contents.</p>
+                                                </div>
+                                            `;
+                                        }
+                                    } else {
+                                        // For other file types, use iframe
+                                        const iframe = document.createElement('iframe');
+                                        iframe.src = messageData.fileData;
+                                        iframe.style.width = '100%';
+                                        iframe.style.height = '100%';
+                                        iframe.style.minHeight = '500px';
+                                        iframe.style.border = 'none';
+                                        iframe.style.backgroundColor = '#fff';
+                                        modalBody.innerHTML = '';
+                                        modalBody.appendChild(iframe);
+                                    }
+                                    
+                                    // Close modal when clicking the close button
+                                    closeButton.addEventListener('click', () => {
+                                        document.body.removeChild(previewModal);
+                                    });
+                                    
+                                    // Close modal when clicking outside the content
+                                    previewModal.addEventListener('click', (event) => {
+                                        if (event.target === previewModal) {
+                                            document.body.removeChild(previewModal);
+                                        }
+                                    });
+                                });
+                            }
+                            
+                            messageElement.appendChild(docContainer);
+                        }
+                    } else {
+                        messageElement.textContent = messageData.text;
+                    }
+                    
+                    // Add timestamp tooltip
+                    messageElement.title = timestamp.toLocaleTimeString();
+                    
+                    // Add hidden timestamp that appears on hover
+                    const timeElement = document.createElement('div');
+                    timeElement.className = 'message-time-hidden';
+                    timeElement.textContent = timestamp.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+                    messageElement.appendChild(timeElement);
+                    
+                    // Add download button for attachments that appears on hover (for user messages with attachments)
+                    if ((messageData.imageUrl || messageData.fileUrl || messageData.fileData) && messageData.sender === 'user') {
+                        const downloadAction = document.createElement('div');
+                        downloadAction.className = 'admin-message-actions';
+                        
+                        // Add preview button first - ONLY for documents (PDF, Word, etc.), not for images
+                        if ((messageData.fileUrl || messageData.fileData) && 
+                            messageData.fileType && 
+                            (messageData.fileType === 'application/pdf' || 
+                             messageData.fileType.includes('word') || 
+                             messageData.fileType.includes('text/') ||
+                             messageData.fileType.includes('application/vnd.openxmlformats-officedocument'))) {
+                            
+                            const previewButton = document.createElement('button');
+                            previewButton.className = 'admin-action-btn preview-message-btn';
+                            previewButton.innerHTML = '<i class="fas fa-eye"></i>';
+                            previewButton.title = 'Preview document';
+                            previewButton.addEventListener('click', (e) => {
+                                e.stopPropagation(); // Prevent message hover effect from disappearing
+                                
+                                // Create modal popup for document preview
+                                const previewModal = document.createElement('div');
+                                previewModal.className = 'document-preview-modal';
+                                previewModal.style.position = 'fixed';
+                                previewModal.style.top = '0';
+                                previewModal.style.left = '0';
+                                previewModal.style.width = '100%';
+                                previewModal.style.height = '100%';
+                                previewModal.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+                                previewModal.style.zIndex = '10000';
+                                previewModal.style.display = 'flex';
+                                previewModal.style.justifyContent = 'center';
+                                previewModal.style.alignItems = 'center';
+                                
+                                const modalContent = document.createElement('div');
+                                modalContent.className = 'modal-content';
+                                modalContent.style.backgroundColor = '#fff';
+                                modalContent.style.width = '90%';
+                                modalContent.style.maxWidth = '800px';
+                                modalContent.style.maxHeight = '90%';
+                                modalContent.style.borderRadius = '12px';
+                                modalContent.style.overflow = 'hidden';
+                                modalContent.style.display = 'flex';
+                                modalContent.style.flexDirection = 'column';
+                                
+                                const modalHeader = document.createElement('div');
+                                modalHeader.className = 'modal-header';
+                                modalHeader.style.display = 'flex';
+                                modalHeader.style.justifyContent = 'space-between';
+                                modalHeader.style.alignItems = 'center';
+                                modalHeader.style.padding = '15px';
+                                modalHeader.style.borderBottom = '1px solid #eee';
+                                
+                                const modalTitle = document.createElement('h3');
+                                modalTitle.textContent = messageData.fileName || 'Document Preview';
+                                modalTitle.style.margin = '0';
+                                modalTitle.style.fontSize = '16px';
+                                modalTitle.style.fontWeight = '600';
+                                
+                                const closeButton = document.createElement('button');
+                                closeButton.innerHTML = '<i class="fas fa-times"></i>';
+                                closeButton.style.background = 'none';
+                                closeButton.style.border = 'none';
+                                closeButton.style.fontSize = '18px';
+                                closeButton.style.cursor = 'pointer';
+                                closeButton.style.padding = '5px';
+                                closeButton.setAttribute('aria-label', 'Close preview');
+                                
+                                modalHeader.appendChild(modalTitle);
+                                modalHeader.appendChild(closeButton);
+                                
+                                const modalBody = document.createElement('div');
+                                modalBody.className = 'modal-body';
+                                modalBody.style.padding = '0';
+                                modalBody.style.overflow = 'auto';
+                                modalBody.style.flex = '1';
+                                modalBody.style.minHeight = '500px'; // Add minimum height
+                                
+                                // Add loading indicator
+                                modalBody.innerHTML = `
+                                    <div style="display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column; gap: 10px;">
+                                        <div style="font-size: 24px; color: #888;">
+                                            <i class="fas fa-spinner fa-spin"></i>
+                                        </div>
+                                        <div style="color: #888;">Loading document preview...</div>
+                                    </div>
+                                `;
+                                
+                                modalContent.appendChild(modalHeader);
+                                modalContent.appendChild(modalBody);
+                                previewModal.appendChild(modalContent);
+                                
+                                // Add the modal to the page
+                                document.body.appendChild(previewModal);
+                                
+                                // Process document based on file type
+                                    if (messageData.fileType && 
+                                        (messageData.fileType.includes('word') || 
+                                         messageData.fileType.includes('application/vnd.openxmlformats-officedocument'))) {
+                                    
+                                    // Handle Word documents differently based on whether we have fileUrl or fileData
+                                    if (messageData.fileData) {
+                                        // Process Word document using mammoth.js
+                                        try {
+                                            // Convert base64 data to array buffer
+                                            const base64Data = messageData.fileData.split(',')[1];
+                                            const binaryString = window.atob(base64Data);
+                                            const bytes = new Uint8Array(binaryString.length);
+                                            for (let i = 0; i < binaryString.length; i++) {
+                                                bytes[i] = binaryString.charCodeAt(i);
+                                            }
+                                            const arrayBuffer = bytes.buffer;
+                                            
+                                            // Use mammoth.js to convert Word to HTML
+                                            mammoth.convertToHtml({ arrayBuffer })
+                                                .then(function(result) {
+                                                    // Replace loading indicator with content
+                                                    modalBody.innerHTML = '';
+                                                    
+                                                    // Add styles
+                                                    const styleElement = document.createElement('style');
+                                                    styleElement.textContent = `
+                                                        .document-content { color: #000000; font-weight: 500; padding: 20px; }
+                                                        .document-content p { margin: 0 0 8px 0; color: #000000; }
+                                                        .document-content h1 { font-size: 22px; margin: 20px 0 10px 0; color: #000000; }
+                                                        .document-content h2 { font-size: 18px; margin: 15px 0 8px 0; color: #000000; }
+                                                        .document-content ul, .document-content ol { margin: 8px 0; padding-left: 25px; color: #000000; }
+                                                        .document-content table { border-collapse: collapse; margin: 10px 0; }
+                                                        .document-content td, .document-content th { border: 1px solid #ddd; padding: 6px; color: #000000; }
+                                                    `;
+                                                    modalBody.appendChild(styleElement);
+                                                    
+                                                    // Add content
+                                                    const contentElement = document.createElement('div');
+                                                    contentElement.className = 'document-content';
+                                                    contentElement.innerHTML = result.value;
+                                                    modalBody.appendChild(contentElement);
+                                                    
+                                                    // Warning about formatting
+                                                    if (result.messages.length > 0) {
+                                                        const warningElement = document.createElement('div');
+                                                        warningElement.style.marginTop = '10px';
+                                                        warningElement.style.padding = '8px';
+                                                        warningElement.style.backgroundColor = '#fff9e6';
+                                                        warningElement.style.borderRadius = '4px';
+                                                        warningElement.style.fontSize = '11px';
+                                                        warningElement.style.color = '#856404';
+                                                        warningElement.style.margin = '0 20px 20px 20px';
+                                                        warningElement.textContent = 'Note: Some document formatting may not be displayed correctly.';
+                                                        modalBody.appendChild(warningElement);
+                                                    }
+                                                })
+                                                .catch(function(error) {
+                                                    console.error('Error converting Word document:', error);
+                                                    modalBody.innerHTML = `
+                                                        <div style="color: #721c24; background-color: #f8d7da; padding: 10px; border-radius: 4px; margin: 20px;">
+                                                            <p>Unable to preview document. The file may be password-protected or in an unsupported format.</p>
+                                                            <p>Please download the file to view its contents.</p>
+                                                        </div>
+                                                    `;
+                                                });
+                                        } catch (error) {
+                                            console.error('Error processing Word document:', error);
+                                            modalBody.innerHTML = `
+                                                <div style="color: #721c24; background-color: #f8d7da; padding: 10px; border-radius: 4px; margin: 20px;">
+                                                    <p>Unable to preview document. The file may be password-protected or in an unsupported format.</p>
+                                                    <p>Please download the file to view its contents.</p>
+                                                </div>
+                                            `;
+                                        }
+                                    } else if (messageData.fileUrl) {
+                                        // Use Google Docs Viewer for Word documents with URL
+                                        let previewUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(messageData.fileUrl)}&embedded=true`;
+                                        
+                                        const iframe = document.createElement('iframe');
+                                        iframe.src = previewUrl;
+                                        iframe.style.width = '100%';
+                                        iframe.style.height = '100%';
+                                        iframe.style.minHeight = '500px';
+                                        iframe.style.border = 'none';
+                                        iframe.style.backgroundColor = '#fff';
+                                        modalBody.innerHTML = '';
+                                        modalBody.appendChild(iframe);
+                                    }
+                                } else {
+                                    // For other file types, use iframe
+                                    let previewUrl;
+                                    if (messageData.fileUrl) {
+                                        previewUrl = messageData.fileUrl;
+                                } else if (messageData.fileData) {
+                                    previewUrl = messageData.fileData;
+                                }
+                                
+                                const iframe = document.createElement('iframe');
+                                iframe.src = previewUrl;
+                                iframe.style.width = '100%';
+                                iframe.style.height = '100%';
+                                    iframe.style.minHeight = '500px';
+                                iframe.style.border = 'none';
+                                    iframe.style.backgroundColor = '#fff';
+                                    modalBody.innerHTML = '';
+                                modalBody.appendChild(iframe);
+                                }
+                                
+                                // Close modal when clicking the close button
+                                closeButton.addEventListener('click', () => {
+                                    document.body.removeChild(previewModal);
+                                });
+                                
+                                // Close modal when clicking outside the content
+                                previewModal.addEventListener('click', (event) => {
+                                    if (event.target === previewModal) {
+                                        document.body.removeChild(previewModal);
+                                    }
+                                });
+                            });
+                            
+                            downloadAction.appendChild(previewButton);
+                        }
+                        
+                        // Add download button
+                        const downloadButton = document.createElement('button');
+                        downloadButton.className = 'admin-action-btn download-message-btn';
+                        downloadButton.innerHTML = '<i class="fas fa-download"></i>';
+                        downloadButton.title = 'Download attachment';
+                        downloadButton.addEventListener('click', (e) => {
+                            e.stopPropagation(); // Prevent message hover effect from disappearing
+                            
+                            // Determine the download URL and filename
+                            let downloadUrl;
+                            let fileName = 'attachment';
+                            
+                            if (messageData.fileUrl) {
+                                downloadUrl = messageData.fileUrl;
+                                fileName = messageData.fileName || 'document';
+                            } else if (messageData.imageUrl) {
+                                downloadUrl = messageData.imageUrl;
+                                fileName = 'image.jpg';
+                            } else if (messageData.fileData) {
+                                downloadUrl = messageData.fileData;
+                                fileName = messageData.fileName || 'attachment';
+                            }
+                            
+                            // Create a temporary anchor element to trigger download
+                            const downloadLink = document.createElement('a');
+                            downloadLink.href = downloadUrl;
+                            downloadLink.download = fileName;
+                            document.body.appendChild(downloadLink);
+                            downloadLink.click();
+                            document.body.removeChild(downloadLink);
+                        });
+                        
+                        downloadAction.appendChild(downloadButton);
+                        messageElement.appendChild(downloadAction);
+                    }
+                    
+                    // Add to chat
+                    chatMessages.appendChild(messageElement);
+                });
+                
+                // Commit the batch update if there are any pending updates
+                if (hasPendingUpdates) {
+                    batch.commit().catch(error => {
+                        console.error('Error marking messages as seen:', error);
+                    });
+                }
+                
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                // Update the preview in the user list if we have a newest message
+                if (newestMessage && selectedUserId) {
+                    updateUserItemPreview(selectedUserId, newestMessage);
+                }
+            }
+            
+            // Send message on admin side
+                function sendMessage() {
+                    const messageText = chatInput.value.trim();
+                    
+                    if (!messageText || !selectedUserId) return;
+                    
+                // Clear input immediately for better UX
+                chatInput.value = '';
+                
+                // Message object
+                const message = {
+                    text: messageText,
+                    sender: 'admin',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                // Add to Firestore
+                    firebase.firestore()
+                        .collection('chats')
+                        .doc(selectedUserId)
+                        .collection('messages')
+                    .add(message)
+                        .catch(error => {
+                            console.error('Error sending message:', error);
+                            alert('Error sending message: ' + error.message);
+                        });
+                }
+                
+            // Function to handle attachment button click
+            function handleAttachmentClick() {
+                // Create a hidden file input element
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = '*/*'; // Accept all file types
+                fileInput.style.display = 'none';
+                
+                // Add the file input to the document
+                document.body.appendChild(fileInput);
+                
+                // Trigger the file input click
+                fileInput.click();
+                
+                // Handle file selection
+                fileInput.addEventListener('change', async function(e) {
+                    const file = e.target.files[0];
+                    if (file && selectedUserId) {
+                        try {
+                            // Generate a unique filename
+                            const timestamp = Date.now();
+                            const fileExtension = file.name.split('.').pop();
+                            const uniqueFilename = `chat_files/${selectedUserId}/${timestamp}_${file.name}`;
+                            
+                            // Upload file to Firebase Storage
+                            const storageRef = firebase.storage().ref(uniqueFilename);
+                            const uploadTask = await storageRef.put(file);
+                            
+                            // Get the download URL
+                            const downloadURL = await uploadTask.ref.getDownloadURL();
+                            
+                            // Create message object based on file type
+                            let message = {
+                                sender: 'admin',
+                                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                                fileName: file.name,
+                                fileType: file.type  // Always include fileType regardless of file type
+                            };
+                            
+                            // Handle different file types
+                            if (file.type.startsWith('image/')) {
+                                message.text = 'Image attachment';
+                                message.imageUrl = downloadURL;
+                            } else {
+                                message.text = `File attachment: ${file.name}`;
+                                message.fileUrl = downloadURL;
+                            }
+                            
+                            // Add message to Firestore
+                            await firebase.firestore()
+                                .collection('chats')
+                                .doc(selectedUserId)
+                                .collection('messages')
+                                .add(message);
+                                
+                        } catch (error) {
+                            console.error("Error uploading file:", error);
+                            alert('Error uploading file: ' + error.message);
+                        }
+                    }
+                    
+                    // Remove the file input from the document
+                    document.body.removeChild(fileInput);
+                });
+            }
+            
+            // Setup chat actions (delete/export)
+            function setupChatActions() {
+                // Send message on button click
+                sendButton.addEventListener('click', sendMessage);
+                
+                // Send message on Enter key
+                chatInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                });
+                
+                // Handle attachment button click
+                const attachmentBtn = document.getElementById('attachment-btn');
+                if (attachmentBtn) {
+                    attachmentBtn.addEventListener('click', handleAttachmentClick);
+                }
+                
+                // Delete chat
+                deleteChatBtn.addEventListener('click', () => {
+                    if (!selectedUserId) return;
+                    
+                    if (confirm(`Are you sure you want to delete the chat with user ${selectedUserId}?`)) {
+                        deleteChat(selectedUserId);
+                    }
+                });
+                
+                
+            }
+            
+            // Delete a chat
+            function deleteChat(userId) {
+                const db = firebase.firestore();
+                const chatRef = db.collection('chats').doc(userId);
+                const userRef = db.collection('users').doc(userId);
+                
+                // Show a loading alert
+                const loadingAlert = alert('Deleting chat... Please wait.');
+                
+                // Create a batch to handle all delete operations atomically
+                const batch = db.batch();
+                
+                // First get all messages in the chat
+                chatRef.collection('messages').get()
+                    .then(snapshot => {
+                        // Add each message to batch for deletion
+                        snapshot.forEach(doc => {
+                            batch.delete(doc.ref);
+                        });
+                        
+                        // Mark the chat document for deletion
+                        batch.delete(chatRef);
+                        
+                        // Set a flag in user document to indicate chat was deleted by admin
+                        // This will signal the user's app to clear local storage
+                        batch.set(userRef, {
+                            chatDeleted: true,
+                            chatDeletedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            lastActive: firebase.firestore.FieldValue.serverTimestamp()
+                        }, { merge: true });
+                        
+                        // Commit all the batch operations
+                        return batch.commit();
+                    })
+                            .then(() => {
+                        // Show success message
+                                alert('Chat deleted successfully');
+                        
+                        // Reset UI
+                                chatMessages.innerHTML = '';
+                                selectedUserId = null;
+                                chatContainer.style.display = 'none';
+                                noChatSelected.style.display = 'flex';
+                        
+                        // Force refresh of user list
+                        loadActiveUsers();
+                            })
+                            .catch(error => {
+                                console.error('Error deleting chat:', error);
+                                alert('Error deleting chat: ' + error.message);
+                            });
+                    }
+            
+            // Export chat to text file
+            function exportChat(userId) {
+                    firebase.firestore()
+                        .collection('chats')
+                    .doc(userId)
+                        .collection('messages')
+                        .orderBy('timestamp', 'asc')
+                        .get()
+                        .then(snapshot => {
+                        let chatText = `Chat with ${userId}\n\n`;
+                        
+                        // Format date/time
+                        const formatDate = (timestamp) => {
+                            if (!timestamp) return 'Unknown time';
+                            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+                            return date.toLocaleString();
+                        };
+                        
+                        // Add each message to the text
+                            snapshot.forEach(doc => {
+                            const message = doc.data();
+                            const sender = message.sender === 'admin' ? 'Admin' : 'User';
+                            const time = formatDate(message.timestamp);
+                            
+                            let messageContent = message.text;
+                            
+                            // Add attachment information if present
+                            if (message.imageUrl) {
+                                messageContent = `[Image attachment] ${message.imageUrl}`;
+                            } else if (message.fileUrl) {
+                                messageContent = `[File attachment: ${message.fileName || 'document'}] ${message.fileUrl}`;
+                            } else if (message.fileData) {
+                                messageContent = `[Inline attachment: ${message.fileName || 'file'}]`;
+                            }
+                            
+                            chatText += `[${time}] ${sender}: ${messageContent}\n`;
+                        });
+                        
+                        // Create downloadable blob
+                            const blob = new Blob([chatText], { type: 'text/plain' });
+                            const url = URL.createObjectURL(blob);
+                        
+                        // Create download link
+                            const a = document.createElement('a');
+                            a.href = url;
+                        a.download = `chat_with_${userId}_${new Date().toISOString().slice(0,10)}.txt`;
+                            a.click();
+                        
+                        // Clean up
+                            URL.revokeObjectURL(url);
+                        })
+                        .catch(error => {
+                            console.error('Error exporting chat:', error);
+                            alert('Error exporting chat: ' + error.message);
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

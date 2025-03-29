@@ -1,0 +1,34 @@
+/* Skills App Styles */
+.skill-group {
+    margin-top: 15px;
+}
+
+.skill {
+    margin-bottom: 15px;
+}
+
+.skill-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.skill-bar {
+    height: 8px;
+    background-color: #eee;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.skill-level {
+    height: 100%;
+    background-color: var(--primary-color);
+    animation: fillBar 1.5s ease-out;
+}
+
+@keyframes fillBar {
+    from {
+        width: 0;
+    }
+} 

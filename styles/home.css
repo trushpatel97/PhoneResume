@@ -1,0 +1,124 @@
+/* Home Screen Styles */
+.home-screen {
+    height: calc(100% - 30px);
+    padding: 15px 8px 0 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.app-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 20px;
+    padding: 0 15px;
+}
+
+.app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.app:hover {
+    transform: scale(1.1);
+}
+
+.app:active {
+    transform: scale(0.95);
+}
+
+.app-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    color: white;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.app-name {
+    font-size: 10px;
+    color: white;
+    margin-top: 3px;
+    text-align: center;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Dock Styles */
+.dock {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: space-evenly;
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 25px;
+    padding: 10px;
+    width: 280px;
+    max-width: 340px;
+}
+
+.dock .app-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Dock App Icons */
+.dock .app[data-app="phone"] .app-icon {
+    background: linear-gradient(to bottom, #4CD964, #2AC845);
+}
+
+.dock .app[data-app="safari"] .app-icon {
+    background-color: #1C92F4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dock .app[data-app="messages"] .app-icon {
+    background-color: #5BC236;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dock .app[data-app="mail"] .app-icon {
+    background-color: #D44638;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Home Button */
+.home-button {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 5px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 5px;
+    cursor: pointer;
+    display: none;
+}
+
+.app-screen.active ~ .home-button {
+    display: block;
+    width: 100px;
+} 
