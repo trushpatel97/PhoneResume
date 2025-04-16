@@ -1,32 +1,382 @@
 /* Education App Styles */
 .education-item {
     position: relative;
-    padding-left: 20px;
+    padding: 0 20px;
     margin-bottom: 20px;
-    border-left: 2px solid var(--primary-color);
+    border-left: none;
 }
 
-.education-date {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--primary-color);
-    margin-bottom: 5px;
-}
-
-.education-item h3 {
-    font-size: 16px;
+.education-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 2px;
-    color: var(--secondary-color);
 }
 
-.education-item h4 {
-    font-size: 14px;
+.university-name {
+    font-size: 20px !important;
+    font-weight: bold !important;
+    color: rgba(158, 27, 52, 0.85) !important; /* Softened Temple University Red */
+}
+
+.graduation-date {
+    font-size: 16px;
     font-weight: normal;
-    margin-bottom: 5px;
-    color: #666;
+    color: #333;
 }
 
-.education-item p {
-    font-size: 13px;
+.degree {
+    font-style: italic;
+    font-size: 16px;
     color: #333;
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.section-title {
+    font-size: 20px;
+    color: rgba(158, 27, 52, 0.85); /* Softened Temple University Red */
+    margin: 30px 0 15px 0;
+    text-align: left;
+    padding: 0 20px;
+    font-weight: bold;
+}
+
+.achievements-section, .courses-section {
+    margin-top: 10px;
+    padding: 0 20px;
+}
+
+.achievement-item {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.achievement-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.achievement-item p {
+    font-size: 14px;
+    line-height: 1.4;
+    color: #666;
+    margin: 0;
+}
+
+.achievements-section p, .courses-section p {
+    margin-bottom: 8px;
+    text-align: left;
+    color: #333;
+}
+
+/* PDF Popup Styles */
+.pdf-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 999999;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.pdf-popup-content {
+    position: relative;
+    background-color: #fff;
+    width: 90%;
+    max-width: 1000px;
+    height: 85vh;
+    margin: auto;
+    border-radius: 12px;
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(0); /* Reset any transforms */
+}
+
+.pdf-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.pdf-popup-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.pdf-popup-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 8px;
+    color: #666;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    position: relative;
+    z-index: 10;
+}
+
+.pdf-popup-close:hover {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.pdf-popup-close:active {
+    background-color: #e9ecef;
+}
+
+.pdf-popup-close i {
+    pointer-events: none;
+}
+
+.pdf-viewer {
+    flex: 1;
+    background-color: #f5f5f5;
+    overflow: hidden;
+    min-height: 0;
+    height: calc(100% - 65px); /* Subtract header height */
+}
+
+.pdf-viewer embed {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+
+/* Course Styles */
+.courses-section {
+    margin-top: 10px;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    overflow-y: visible;
+    height: auto;
+    padding-bottom: 60px; /* Add padding at the bottom for the home indicator */
+}
+
+/* Course items styling */
+.course-item {
+    padding: 12px 15px;
+    margin-bottom: 0;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.course-item:hover {
+    background-color: #e9ecef;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.course-title {
+    font-size: 14px;
+    color: #333;
+    margin: 0;
+    line-height: 1.3;
+}
+
+/* Section headers for course categories */
+.course-category {
+    grid-column: 1 / -1;
+    font-size: 16px;
+    color: rgba(158, 27, 52, 0.85);
+    margin: 15px 0 5px 0;
+    font-weight: 600;
+}
+
+/* Scrollbar styling for education list */
+.education-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.education-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.education-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.education-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .courses-section {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+}
+
+/* Topics Popup Styles */
+.topics-popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999999;
+    justify-content: center;
+    align-items: center;
+}
+
+/* When the popup should be visible */
+.topics-popup.show {
+    display: flex;
+}
+
+.topics-content {
+    background-color: white;
+    border-radius: 15px;
+    padding: 20px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.topics-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.topics-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+}
+
+.topics-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #666;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.topics-close:hover {
+    color: #333;
+}
+
+.topics-list {
+    overflow-y: auto;
+    max-height: calc(80vh - 80px);
+    padding-right: 10px;
+}
+
+.topic-item {
+    padding: 10px;
+    margin: 5px 0;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    transition: background-color 0.2s ease;
+}
+
+.topic-item:hover {
+    background-color: #e9ecef;
+}
+
+/* Scrollbar styling */
+.topics-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.topics-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.topics-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.topics-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Custom scrollbar styles */
+.courses-section::-webkit-scrollbar {
+    width: 6px;
+}
+
+.courses-section::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.courses-section::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.courses-section::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.app-content {
+    height: calc(100% - 44px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 20px;
+}
+
+.education-list {
+    height: 100%;
+    overflow-y: auto;
+    padding: 15px 0;
+}
+
+
+
+
+.certification-title {
+    color: #007AFF;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+    margin-left: 0;
+    padding-left: 0;
 } 

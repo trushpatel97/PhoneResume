@@ -31,4 +31,131 @@
     font-size: 11px;
     padding: 3px 8px;
     border-radius: 12px;
+}
+
+/* Projects Folder Styles */
+.folder-app .app-icon {
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.folder-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 1px;
+    padding: 2px;
+    width: 100%;
+    height: 100%;
+}
+
+.mini-app {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    aspect-ratio: 1;
+    font-size: 6px;
+    color: white;
+}
+
+/* Projects Folder View */
+.projects-folder {
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    width: 75%;
+    margin: 175px auto;
+    padding: 1px;
+    border-radius: 20px;
+}
+
+.folder-title {
+    display: none;
+}
+
+.folder-grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 15px;
+    padding: 5px;
+}
+
+.folder-app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.folder-app:active {
+    transform: scale(0.95);
+}
+
+.folder-app-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.folder-app-name {
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.9);
+    text-align: center;
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Animation for folder opening */
+.app-screen[id="projects-app"] {
+    animation: folderOpen 0.2s ease-out;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+@keyframes folderOpen {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Mobile Responsive Adjustments */
+@media (max-width: 480px) {
+    .projects-folder {
+        width: 200px;
+        padding: 12px;
+    }
+
+    .folder-grid-container {
+        gap: 12px;
+    }
+
+    .folder-app-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+
+    .folder-app-name {
+        font-size: 8px;
+        max-width: 55px;
+    }
 } 

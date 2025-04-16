@@ -31,4 +31,110 @@
     from {
         width: 0;
     }
+}
+
+.app-content {
+    height: calc(100% - 44px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 60px;
+    position: relative;
+    background-color: #fff;
+}
+
+.skills-container {
+    padding: 20px;
+    padding-bottom: 80px;
+    height: auto;
+    min-height: 100%;
+    overflow-y: visible;
+}
+
+.skill-category {
+    margin-bottom: 25px;
+    opacity: 1;
+    transform: translateZ(0);
+}
+
+.skill-category h3 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 15px;
+    font-weight: 600;
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    padding-left: 5px;
+}
+
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+.skill-item {
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 12px 15px;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #333;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.skill-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1));
+}
+
+/* Ensure the home indicator doesn't block content */
+.app-home-indicator {
+    position: fixed !important;
+    bottom: 8px;
+    z-index: 1000;
+}
+
+/* Custom scrollbar styles */
+.app-content::-webkit-scrollbar {
+    width: 6px;
+    position: absolute;
+    right: 0;
+}
+
+.app-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.app-content::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.app-content::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Ensure content is properly spaced */
+@media (max-width: 480px) {
+    .skills-container {
+        padding: 15px;
+        padding-bottom: 70px;
+    }
+    
+    .skills-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .skill-item {
+        padding: 10px;
+        font-size: 13px;
+    }
 } 

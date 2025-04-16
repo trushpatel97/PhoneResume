@@ -131,6 +131,24 @@
     const homeButton = document.querySelector('.home-button');
     const backButtons = document.querySelectorAll('.back-button');
     
+    // Add click outside handler for projects folder
+    document.addEventListener('click', (event) => {
+        const projectsApp = document.getElementById('projects-app');
+        const projectsFolder = document.querySelector('.projects-folder');
+        
+        if (projectsApp && projectsApp.classList.contains('active')) {
+            // Check if click is outside the projects folder
+            if (!projectsFolder.contains(event.target) && !event.target.closest('.app[data-app="projects"]')) {
+                // Close the projects folder
+                projectsApp.classList.remove('active');
+                // Reset status bar
+                const statusBar = document.querySelector('.status-bar');
+                statusBar.classList.remove('in-app');
+                statusBar.classList.remove('light-mode');
+            }
+        }
+    });
+    
     // Open an app when clicked
     apps.forEach(app => {
         app.addEventListener('click', () => {
@@ -888,27 +906,32 @@
             }
         }
         
-        // Add event listener for Enter key on search input
+        // Add Enter key event listener for main search input
         if (safariSearchInput) {
-            safariSearchInput.addEventListener('keydown', function(event) {
+            safariSearchInput.addEventListener('keypress', function(event) {
                 if (event.key === 'Enter') {
-                    performSearch(safariSearchInput.value);
                     event.preventDefault();
+                    const query = this.value.trim();
+                    if (query) {
+                        performSearch(query);
+                    }
                 }
             });
         }
 
-        // Results search input - add event listener for Enter key
+        // Add Enter key event listener for results search input
         if (resultsSearchInput) {
-            resultsSearchInput.addEventListener('keydown', function(event) {
+            resultsSearchInput.addEventListener('keypress', function(event) {
                 if (event.key === 'Enter') {
-                    performSearch(resultsSearchInput.value);
                     event.preventDefault();
+                    const query = this.value.trim();
+                    if (query) {
+                        performSearch(query);
+                    }
                 }
             });
         }
 
-        // If search buttons exist, add event listeners
         if (googleSearchBtn) {
             googleSearchBtn.addEventListener('click', function() {
                 performSearch(safariSearchInput.value);
@@ -1258,82 +1281,201 @@
     // Handle messages input and send button
     function setupMessagesInput() {
         const messagesInput = document.querySelector('.messages-input');
-        const messagesInputField = document.querySelector('.messages-input-field');
+        const messagesContent = document.querySelector('.messages-content');
         const sendButton = document.querySelector('.messages-send-btn');
+        const messagesInputField = document.querySelector('.messages-input-field');
         const attachmentBtn = document.querySelector('.attachment-btn');
-        let selectedImage = null;
 
-        if (messagesInput && sendButton) {
-            // Show send button when typing
-            messagesInput.addEventListener('input', () => {
-                if (messagesInput.value.trim() !== '') {
-                    messagesInputField.classList.add('has-content');
-                } else {
-                    messagesInputField.classList.remove('has-content');
+        if (!messagesInput || !messagesContent || !sendButton) {
+            console.error('Missing required message elements');
+            return;
+        }
+
+        // Constants for file upload limits
+        const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+        const MAX_UPLOADS_PER_DAY = 3;
+        const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+
+        // Get user's daily upload count from localStorage
+        function getUserUploads() {
+            const today = new Date().toDateString();
+            const uploads = JSON.parse(localStorage.getItem('userUploads') || '{}');
+            
+            // Clear old dates
+            for (let date in uploads) {
+                if (date !== today) {
+                    delete uploads[date];
                 }
-            });
+            }
+            
+            uploads[today] = uploads[today] || 0;
+            localStorage.setItem('userUploads', JSON.stringify(uploads));
+            return uploads[today];
+        }
 
-            // Handle attachment button click
-            attachmentBtn.addEventListener('click', () => {
-                const fileInput = document.createElement('input');
-                fileInput.type = 'file';
-                fileInput.accept = 'image/*';
-                fileInput.style.display = 'none';
-                document.body.appendChild(fileInput);
-                fileInput.click();
+        // Increment user's upload count
+        function incrementUserUploads() {
+            const today = new Date().toDateString();
+            const uploads = JSON.parse(localStorage.getItem('userUploads') || '{}');
+            uploads[today] = (uploads[today] || 0) + 1;
+            localStorage.setItem('userUploads', JSON.stringify(uploads));
+        }
 
-                fileInput.addEventListener('change', (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                        selectedImage = file;
-                        // Create image preview
+        function handleAttachment() {
+            const currentUploads = getUserUploads();
+            
+            if (currentUploads >= MAX_UPLOADS_PER_DAY) {
+                alert(`You've reached your daily upload limit of ${MAX_UPLOADS_PER_DAY} files. Please try again tomorrow.`);
+                return;
+            }
+
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = ALLOWED_FILE_TYPES.join(',');
+            fileInput.style.display = 'none';
+            document.body.appendChild(fileInput);
+
+            fileInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                // Validate file type
+                if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+                    alert('Invalid file type. Please upload an image (JPG, PNG, GIF) or PDF file.');
+                    return;
+                }
+
+                // Validate file size
+                if (file.size > MAX_FILE_SIZE) {
+                    alert('File is too large. Maximum size is 2MB.');
+                    return;
+                }
+
+                try {
+                    // Create preview container
+                    const previewContainer = document.createElement('div');
+                    previewContainer.className = 'attachment-preview';
+
+                    if (file.type.startsWith('image/')) {
+                        // Image preview
                         const reader = new FileReader();
                         reader.onload = (e) => {
-                            const preview = document.createElement('div');
-                            preview.className = 'image-preview';
-                            preview.innerHTML = `
-                                <img src="${e.target.result}" alt="Preview">
-                                <button class="remove-image"><i class="fas fa-times"></i></button>
+                            previewContainer.innerHTML = `
+                                <div class="preview-content">
+                                    <img src="${e.target.result}" alt="Preview">
+                                    <button class="remove-attachment"><i class="fas fa-times"></i></button>
+                                </div>
+                                <div class="file-info">${file.name} (${(file.size / 1024).toFixed(1)} KB)</div>
                             `;
-                            
-                            // Remove existing preview if any
-                            const existingPreview = messagesInputField.querySelector('.image-preview');
-                            if (existingPreview) {
-                                existingPreview.remove();
-                            }
-                            
-                            messagesInputField.insertBefore(preview, messagesInput);
-                            messagesInputField.classList.add('has-content');
-                            
-                            // Handle remove button
-                            preview.querySelector('.remove-image').addEventListener('click', () => {
-                                preview.remove();
-                                selectedImage = null;
-                                if (!messagesInput.value.trim()) {
-                                    messagesInputField.classList.remove('has-content');
-                                }
-                            });
                         };
                         reader.readAsDataURL(file);
+                    } else {
+                        // PDF preview
+                        previewContainer.innerHTML = `
+                            <div class="preview-content">
+                                <i class="fas fa-file-pdf"></i>
+                                <button class="remove-attachment"><i class="fas fa-times"></i></button>
+                            </div>
+                            <div class="file-info">${file.name} (${(file.size / 1024).toFixed(1)} KB)</div>
+                        `;
                     }
-                });
-            });
 
-            // Handle send button click
-            sendButton.addEventListener('click', () => {
-                const text = messagesInput.value.trim();
-                if (text || selectedImage) {
-                    // Here you would typically send the message
-                    // For now, we'll just clear the input and image
-                    messagesInput.value = '';
-                    const preview = messagesInputField.querySelector('.image-preview');
-                    if (preview) {
-                        preview.remove();
+                    // Remove existing preview if any
+                    const existingPreview = messagesInputField.querySelector('.attachment-preview');
+                    if (existingPreview) {
+                        existingPreview.remove();
                     }
-                    selectedImage = null;
-                    messagesInputField.classList.remove('has-content');
+
+                    messagesInputField.insertBefore(previewContainer, messagesInput);
+
+                    // Handle remove button
+                    const removeBtn = previewContainer.querySelector('.remove-attachment');
+                    removeBtn.addEventListener('click', () => {
+                        previewContainer.remove();
+                    });
+
+                    incrementUserUploads();
+                } catch (error) {
+                    console.error('Error handling attachment:', error);
+                    alert('Failed to process attachment. Please try again.');
+                } finally {
+                    document.body.removeChild(fileInput);
                 }
             });
+
+            fileInput.click();
+        }
+
+        function sendMessage() {
+            const text = messagesInput.value.trim();
+            const attachmentPreview = messagesInputField.querySelector('.attachment-preview');
+            
+            if (!text && !attachmentPreview) return;
+
+            const messageContainer = document.createElement('div');
+            messageContainer.className = 'message-container';
+            
+            const message = document.createElement('div');
+            message.className = 'message message-sent';
+
+            if (attachmentPreview) {
+                const previewContent = attachmentPreview.querySelector('.preview-content');
+                if (previewContent) {
+                    const clone = previewContent.cloneNode(true);
+                    const removeBtn = clone.querySelector('.remove-attachment');
+                    if (removeBtn) removeBtn.remove();
+                    message.appendChild(clone);
+                }
+            }
+            
+            if (text) {
+                const textDiv = document.createElement('div');
+                textDiv.className = 'message-text';
+                textDiv.textContent = text;
+                message.appendChild(textDiv);
+            }
+            
+            const timestamp = document.createElement('div');
+            timestamp.className = 'time-stamp';
+            const now = new Date();
+            timestamp.textContent = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            
+            messageContainer.appendChild(message);
+            messagesContent.appendChild(messageContainer);
+            messagesContent.appendChild(timestamp);
+            
+            // Clear input and attachment preview
+            messagesInput.value = '';
+            if (attachmentPreview) {
+                attachmentPreview.remove();
+            }
+            messagesInputField.classList.remove('has-content');
+            messagesContent.scrollTop = messagesContent.scrollHeight;
+        }
+
+        // Show/hide send button based on input
+        messagesInput.addEventListener('input', () => {
+            if (messagesInput.value.trim() || messagesInputField.querySelector('.attachment-preview')) {
+                messagesInputField.classList.add('has-content');
+            } else {
+                messagesInputField.classList.remove('has-content');
+            }
+        });
+
+        // Handle Enter key press
+        messagesInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Handle send button click
+        sendButton.addEventListener('click', sendMessage);
+
+        // Handle attachment button click
+        if (attachmentBtn) {
+            attachmentBtn.addEventListener('click', handleAttachment);
         }
     }
 
@@ -2228,17 +2370,17 @@ function displayMessage(messagesContent, messageData, messageId, showStatus = fa
             docInfo.appendChild(icon);
             docInfo.appendChild(fileName);
             
-            // Add download link
-            const downloadLink = document.createElement('a');
-            downloadLink.href = messageData.fileUrl;
-            downloadLink.className = 'document-download';
-            downloadLink.download = messageData.fileName || 'document';
-            downloadLink.innerHTML = '<i class="fas fa-download"></i> Download';
-            downloadLink.style.color = '#007AFF';
-            downloadLink.style.textDecoration = 'none';
-            downloadLink.style.display = 'flex';
-            downloadLink.style.alignItems = 'center';
-            downloadLink.style.gap = '5px';
+                // Add download link
+                const downloadLink = document.createElement('a');
+                downloadLink.href = messageData.fileUrl;
+                downloadLink.className = 'document-download';
+                downloadLink.download = messageData.fileName || 'document';
+                downloadLink.innerHTML = '<i class="fas fa-download"></i> Download';
+                downloadLink.style.color = '#007AFF';
+                downloadLink.style.textDecoration = 'none';
+                downloadLink.style.display = 'flex';
+                downloadLink.style.alignItems = 'center';
+                downloadLink.style.gap = '5px';
             
             docContainer.appendChild(docInfo);
             docContainer.appendChild(downloadLink);
@@ -2250,39 +2392,6 @@ function displayMessage(messagesContent, messageData, messageId, showStatus = fa
         // Create message actions container
         const messageActions = document.createElement('div');
         messageActions.className = 'message-actions';
-        
-        // Add download button for attachments (files and images)
-        if (messageData.imageUrl || messageData.fileUrl || messageData.fileData) {
-            const downloadButton = document.createElement('button');
-            downloadButton.className = 'message-action-btn download-message-btn';
-            downloadButton.innerHTML = '<i class="fas fa-download"></i>';
-            downloadButton.title = 'Download attachment';
-            downloadButton.addEventListener('click', () => {
-                // Determine the download URL
-                let downloadUrl;
-                let fileName = 'attachment';
-                
-                if (messageData.fileUrl) {
-                    downloadUrl = messageData.fileUrl;
-                    fileName = messageData.fileName || 'document';
-                } else if (messageData.imageUrl) {
-                    downloadUrl = messageData.imageUrl;
-                    fileName = 'image.jpg';
-                } else if (messageData.fileData) {
-                    downloadUrl = messageData.fileData;
-                    fileName = messageData.fileName || 'attachment';
-                }
-                
-                // Create a temporary anchor element to trigger download
-                const downloadLink = document.createElement('a');
-                downloadLink.href = downloadUrl;
-                downloadLink.download = fileName;
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-            });
-            messageActions.appendChild(downloadButton);
-        }
         
         // Add edit button for text messages only
         if (!messageData.imageUrl && !messageData.fileUrl && !messageData.fileData) {
@@ -2494,6 +2603,7 @@ function displayMessage(messagesContent, messageData, messageId, showStatus = fa
                 docContainer.style.flexDirection = 'column';
                 docContainer.style.gap = '10px';
                 docContainer.style.alignItems = 'center';
+                docContainer.style.cursor = 'pointer'; // Add pointer cursor to indicate it's clickable
                 
                 // Add document info
                 const docInfo = document.createElement('div');
@@ -2519,240 +2629,72 @@ function displayMessage(messagesContent, messageData, messageId, showStatus = fa
                 
                 docInfo.appendChild(icon);
                 docInfo.appendChild(fileName);
-                
-                // Add preview button with blue styling for admin messages
-                const previewButton = document.createElement('button');
-                previewButton.className = 'document-preview-btn';
-                previewButton.innerHTML = '<i class="fas fa-eye"></i> Preview';
-                previewButton.style.color = '#007AFF';
-                previewButton.style.background = 'rgba(0, 122, 255, 0.1)';
-                previewButton.style.border = 'none';
-                previewButton.style.borderRadius = '4px';
-                previewButton.style.padding = '5px 10px';
-                previewButton.style.cursor = 'pointer';
-                previewButton.style.fontSize = '12px';
-                previewButton.style.marginTop = '5px';
-                previewButton.style.display = 'flex';
-                previewButton.style.alignItems = 'center';
-                previewButton.style.gap = '5px';
-                
-                // Create preview container
-                const previewContainer = document.createElement('div');
-                previewContainer.className = 'document-preview-container';
-                previewContainer.style.display = 'none';
-                previewContainer.style.maxHeight = '300px';
-                previewContainer.style.width = '100%';
-                previewContainer.style.overflow = 'auto';
-                previewContainer.style.backgroundColor = 'white';
-                previewContainer.style.color = 'black';
-                previewContainer.style.borderRadius = '8px';
-                previewContainer.style.marginTop = '10px';
-                previewContainer.style.padding = '15px';
-                previewContainer.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
-                previewContainer.style.fontFamily = 'Arial, sans-serif';
-                previewContainer.style.fontSize = '14px';
-                previewContainer.style.lineHeight = '1.5';
-                
-                // Loading indicator
-                const loadingElement = document.createElement('div');
-                loadingElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading preview...';
-                loadingElement.style.textAlign = 'center';
-                loadingElement.style.padding = '20px';
-                previewContainer.appendChild(loadingElement);
-                
-                // Toggle preview
-                previewButton.addEventListener('click', async () => {
-                    // Create modal popup for document preview
-                    const previewModal = document.createElement('div');
-                    previewModal.className = 'document-preview-modal';
-                    previewModal.style.position = 'fixed';
-                    previewModal.style.top = '0';
-                    previewModal.style.left = '0';
-                    previewModal.style.width = '100%';
-                    previewModal.style.height = '100%';
-                    previewModal.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
-                    previewModal.style.zIndex = '10000';
-                    previewModal.style.display = 'flex';
-                    previewModal.style.justifyContent = 'center';
-                    previewModal.style.alignItems = 'center';
+
+                // Make the container clickable for preview
+                docContainer.style.cursor = 'pointer';
+                docContainer.addEventListener('click', () => {
+                    // Create preview modal
+                    const modal = document.createElement('div');
+                    modal.style.position = 'fixed';
+                    modal.style.top = '0';
+                    modal.style.left = '0';
+                    modal.style.width = '100%';
+                    modal.style.height = '100%';
+                    modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
+                    modal.style.display = 'flex';
+                    modal.style.justifyContent = 'center';
+                    modal.style.alignItems = 'center';
+                    modal.style.zIndex = '10000';
                     
                     const modalContent = document.createElement('div');
-                    modalContent.className = 'modal-content';
                     modalContent.style.backgroundColor = '#fff';
                     modalContent.style.width = '90%';
                     modalContent.style.maxWidth = '800px';
-                    modalContent.style.maxHeight = '80%';
+                    modalContent.style.maxHeight = '90vh';
                     modalContent.style.borderRadius = '12px';
                     modalContent.style.overflow = 'hidden';
-                    modalContent.style.display = 'flex';
-                    modalContent.style.flexDirection = 'column';
+                    modalContent.style.position = 'relative';
                     
-                    const modalHeader = document.createElement('div');
-                    modalHeader.className = 'modal-header';
-                    modalHeader.style.display = 'flex';
-                    modalHeader.style.justifyContent = 'space-between';
-                    modalHeader.style.alignItems = 'center';
-                    modalHeader.style.padding = '15px';
-                    modalHeader.style.borderBottom = '1px solid #eee';
+                    const closeBtn = document.createElement('button');
+                    closeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                    closeBtn.style.position = 'absolute';
+                    closeBtn.style.top = '15px';
+                    closeBtn.style.right = '15px';
+                    closeBtn.style.background = 'none';
+                    closeBtn.style.border = 'none';
+                    closeBtn.style.fontSize = '24px';
+                    closeBtn.style.cursor = 'pointer';
+                    closeBtn.style.zIndex = '1';
+                    closeBtn.style.color = '#000';
                     
-                    const modalTitle = document.createElement('h3');
-                    modalTitle.textContent = messageData.fileName || 'Document Preview';
-                    modalTitle.style.margin = '0';
-                    modalTitle.style.fontSize = '16px';
-                    modalTitle.style.fontWeight = '600';
+                    const iframe = document.createElement('iframe');
+                    iframe.style.width = '100%';
+                    iframe.style.height = '90vh';
+                    iframe.style.border = 'none';
                     
-                    const closeButton = document.createElement('button');
-                    closeButton.innerHTML = '<i class="fas fa-times"></i>';
-                    closeButton.style.background = 'none';
-                    closeButton.style.border = 'none';
-                    closeButton.style.fontSize = '18px';
-                    closeButton.style.cursor = 'pointer';
-                    closeButton.style.padding = '5px';
-                    closeButton.setAttribute('aria-label', 'Close preview');
-                    
-                    modalHeader.appendChild(modalTitle);
-                    modalHeader.appendChild(closeButton);
-                    
-                    const modalBody = document.createElement('div');
-                    modalBody.className = 'modal-body';
-                    modalBody.style.padding = '20px';
-                    modalBody.style.overflow = 'auto';
-                    modalBody.style.flex = '1';
-                    modalBody.style.maxHeight = 'calc(80vh - 70px)';
-                    
-                    // Loading indicator
-                    const loadingElement = document.createElement('div');
-                    loadingElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading document...';
-                    loadingElement.style.textAlign = 'center';
-                    loadingElement.style.padding = '20px';
-                    modalBody.appendChild(loadingElement);
-                    
-                    modalContent.appendChild(modalHeader);
-                    modalContent.appendChild(modalBody);
-                    previewModal.appendChild(modalContent);
-                    document.body.appendChild(previewModal);
-                    
-                    // Close modal when clicking the close button
-                    closeButton.addEventListener('click', () => {
-                        document.body.removeChild(previewModal);
-                    });
-                    
-                    // Close modal when clicking outside the content
-                    previewModal.addEventListener('click', (event) => {
-                        if (event.target === previewModal) {
-                            document.body.removeChild(previewModal);
-                        }
-                    });
-                    
-                    // Only process Word documents
-                    if (messageData.fileType === 'application/msword' || 
-                        messageData.fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-                        
-                        try {
-                            // Convert base64 data to array buffer
-                            const base64Data = messageData.fileData.split(',')[1];
-                            const binaryString = window.atob(base64Data);
-                            const bytes = new Uint8Array(binaryString.length);
-                            for (let i = 0; i < binaryString.length; i++) {
-                                bytes[i] = binaryString.charCodeAt(i);
-                            }
-                            const arrayBuffer = bytes.buffer;
-                            
-                            // Use mammoth.js to convert Word to HTML
-                            const result = await mammoth.convertToHtml({ arrayBuffer });
-                            
-                            // Replace loading indicator with content
-                            modalBody.innerHTML = '';
-                            
-                            // Add styles
-                            const styleElement = document.createElement('style');
-                            styleElement.textContent = `
-                                .document-content { color: #000000; font-weight: 500; }
-                                .document-content p { margin: 0 0 8px 0; color: #000000; }
-                                .document-content h1 { font-size: 22px; margin: 20px 0 10px 0; color: #000000; }
-                                .document-content h2 { font-size: 18px; margin: 15px 0 8px 0; color: #000000; }
-                                .document-content ul, .document-content ol { margin: 8px 0; padding-left: 25px; color: #000000; }
-                                .document-content table { border-collapse: collapse; margin: 10px 0; }
-                                .document-content td, .document-content th { border: 1px solid #ddd; padding: 6px; color: #000000; }
-                            `;
-                            modalBody.appendChild(styleElement);
-                            
-                            // Add content
-                            const contentElement = document.createElement('div');
-                            contentElement.className = 'document-content';
-                            contentElement.innerHTML = result.value;
-                            modalBody.appendChild(contentElement);
-                            
-                            // Warning about formatting
-                            if (result.messages.length > 0) {
-                                const warningElement = document.createElement('div');
-                                warningElement.style.marginTop = '10px';
-                                warningElement.style.padding = '8px';
-                                warningElement.style.backgroundColor = '#fff9e6';
-                                warningElement.style.borderRadius = '4px';
-                                warningElement.style.fontSize = '11px';
-                                warningElement.style.color = '#856404';
-                                warningElement.textContent = 'Note: Some document formatting may not be displayed correctly.';
-                                modalBody.appendChild(warningElement);
-                            }
-                        } catch (error) {
-                            console.error('Error previewing document:', error);
-                            modalBody.innerHTML = `
-                                <div style="color: #721c24; background-color: #f8d7da; padding: 10px; border-radius: 4px;">
-                                    <p>Unable to preview document. The file may be password-protected or in an unsupported format.</p>
-                                    <p>Please download the file to view its contents.</p>
-                                </div>
-                            `;
-                        }
-                    } else if (messageData.fileType === 'application/pdf') {
-                        // For PDF files (if supported)
-                        try {
-                            const base64Data = messageData.fileData;
-                            const pdfEmbed = document.createElement('embed');
-                            pdfEmbed.src = base64Data;
-                            pdfEmbed.type = 'application/pdf';
-                            pdfEmbed.style.width = '100%';
-                            pdfEmbed.style.height = '70vh';
-                            
-                            modalBody.innerHTML = '';
-                            modalBody.appendChild(pdfEmbed);
-                        } catch (error) {
-                            modalBody.innerHTML = `
-                                <div style="color: #721c24; background-color: #f8d7da; padding: 10px; border-radius: 4px;">
-                                    <p>Error previewing PDF document.</p>
-                                </div>
-                            `;
-                            console.error('Error previewing PDF:', error);
-                        }
+                    // Use Google Docs Viewer for documents
+                    if (messageData.fileType?.includes('word') || 
+                        messageData.fileName?.toLowerCase().endsWith('.doc') || 
+                        messageData.fileName?.toLowerCase().endsWith('.docx')) {
+                        iframe.src = `https://docs.google.com/viewer?url=${encodeURIComponent(messageData.fileUrl)}&embedded=true`;
+                    } else {
+                        iframe.src = messageData.fileUrl;
                     }
+                    
+                    modalContent.appendChild(closeBtn);
+                    modalContent.appendChild(iframe);
+                    modal.appendChild(modalContent);
+                    document.body.appendChild(modal);
+                    
+                    // Close modal when clicking close button or outside
+                    const closeModal = () => document.body.removeChild(modal);
+                    closeBtn.onclick = closeModal;
+                    modal.onclick = (e) => {
+                        if (e.target === modal) closeModal();
+                    };
                 });
                 
-                // Add download link
-                const downloadLink = document.createElement('a');
-                downloadLink.href = messageData.fileData;
-                downloadLink.className = 'document-download';
-                downloadLink.download = messageData.fileName || 'document';
-                downloadLink.innerHTML = '<i class="fas fa-download"></i> Download';
-                downloadLink.style.color = '#007AFF';
-                downloadLink.style.textDecoration = 'none';
-                downloadLink.style.display = 'flex';
-                downloadLink.style.alignItems = 'center';
-                downloadLink.style.gap = '5px';
-                
-                // Add elements to the container
                 docContainer.appendChild(docInfo);
-                
-                // Action buttons container
-                const actionsContainer = document.createElement('div');
-                actionsContainer.style.display = 'flex';
-                actionsContainer.style.gap = '10px';
-                actionsContainer.style.marginTop = '5px';
-                
-                actionsContainer.appendChild(previewButton);
-                actionsContainer.appendChild(downloadLink);
-                
-                docContainer.appendChild(actionsContainer);
-                // docContainer.appendChild(previewContainer);
                 messageElement.appendChild(docContainer);
             }
         } else if (messageData.fileUrl) {

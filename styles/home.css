@@ -40,7 +40,91 @@
     align-items: center;
     font-size: 18px;
     color: white;
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    background-size: 150% 150%;
+    animation: gradientShift 5s ease infinite;
+    z-index: 0;
+}
+
+.app-icon::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(120deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%);
+    z-index: 1;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50% }
+    50% { background-position: 100% 50% }
+    100% { background-position: 0% 50% }
+}
+
+/* App-specific gradients */
+.app[data-app="education"] .app-icon {
+    background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+}
+
+.app[data-app="projects"] .app-icon {
+    background-color: rgba(128, 128, 128, 0.25);
+    background-image: none;
+    animation: none;
+}
+
+.app[data-app="experience"] .app-icon {
+    background: linear-gradient(135deg, #FFD93D, #FF6B6B);
+}
+
+.app[data-app="skills"] .app-icon {
+    background: linear-gradient(135deg, #6C63FF, #FF6584);
+    background-size: 100% 100%;
+    position: relative;
+    z-index: 0;
+}
+
+.app[data-app="skills"] .app-icon::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: inherit;
+    border-radius: 12px;
+    z-index: -1;
+}
+
+/* Dock App Icons with enhanced gradients */
+.dock .app[data-app="phone"] .app-icon {
+    background: linear-gradient(135deg, #4CD964, #2AC845, #34D399);
+}
+
+.dock .app[data-app="safari"] .app-icon {
+    background: linear-gradient(135deg, #60A5FA, #3B82F6, #2563EB);
+}
+
+.dock .app[data-app="messages"] .app-icon {
+    background: linear-gradient(135deg, #34D399, #059669, #10B981);
+}
+
+.dock .app[data-app="mail"] .app-icon {
+    background: linear-gradient(135deg, #F87171, #DC2626, #EF4444);
+}
+
+.app:hover .app-icon {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.app:active .app-icon {
+    transform: scale(0.95) translateY(0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .app-name {
@@ -76,32 +160,6 @@
     height: 46px;
     border-radius: 12px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-}
-
-/* Dock App Icons */
-.dock .app[data-app="phone"] .app-icon {
-    background: linear-gradient(to bottom, #4CD964, #2AC845);
-}
-
-.dock .app[data-app="safari"] .app-icon {
-    background-color: #1C92F4;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.dock .app[data-app="messages"] .app-icon {
-    background-color: #5BC236;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.dock .app[data-app="mail"] .app-icon {
-    background-color: #D44638;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 /* Home Button */

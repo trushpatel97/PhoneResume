@@ -17,13 +17,17 @@
     <link rel="stylesheet" href="styles/projects.css">
     <link rel="stylesheet" href="styles/experience.css">
     <link rel="stylesheet" href="styles/education.css">
-    <link rel="stylesheet" href="styles/contact.css">
+    <!-- 2048 Game Styles -->
+    <link rel="stylesheet" href="styles/2048.css">
     <!-- Responsive Styles -->
     <link rel="stylesheet" href="styles/responsive.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- EmailJS SDK -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <!-- 2048 Game Script -->
+    <script src="scripts/leaderboard.js"></script>
+    <script src="scripts/2048.js"></script>
     <script type="text/javascript">
         (function() {
             // To make this work:
@@ -112,9 +116,19 @@
                                 <div class="app-name">Skills</div>
                             </div>
                             
-                            <div class="app" data-app="projects">
-                                <div class="app-icon" style="background-color: #EC87C0;">
-                                    <i class="fas fa-folder"></i>
+                            <div class="app folder-app" data-app="projects">
+                                <div class="app-icon folder-icon">
+                                    <div class="folder-grid">
+                                        <div class="mini-app" style="background-image: url('images/VetDatabase.jpg'); background-size: cover; background-position: center;"></div>
+                                        <div class="mini-app" style="background-image: url('images/ChalkboardLogo.png'); background-size: cover; background-position: center;"></div>
+                                        <div class="mini-app" style="background-image: url('images/StorySpinner.jpg'); background-size: cover; background-position: center;"></div>
+                                        <div class="mini-app" style="background-image: url('images/Mousetrap.JPEG'); background-size: cover; background-position: center;"></div>
+                                        <div class="mini-app" style="background-image: url('images/Celebrity.jpg'); background-size: cover; background-position: center;"></div>
+                                        <div class="mini-app" style="background-image: url('images/Eyes.jpg'); background-size: cover; background-position: center;"></div>
+                                        <div class="mini-app" style="background-image: url('images/UPS.jpg'); background-size: cover; background-position: center;"></div>
+                                        <div class="mini-app" style="background-image: url('images/GCP.jpg'); background-size: cover; background-position: center;"></div>
+                                        <div class="mini-app" style="background-color: transparent;"></div>
+                                    </div>
                                 </div>
                                 <div class="app-name">Projects</div>
                             </div>
@@ -132,19 +146,12 @@
                                 </div>
                                 <div class="app-name">Education</div>
                             </div>
-                            
-                            <div class="app" data-app="contact">
-                                <div class="app-icon" style="background-color: #A0D468;">
-                                    <i class="fas fa-envelope"></i>
-                                </div>
-                                <div class="app-name">Contact</div>
-                            </div>
                         </div>
                         
                         <div class="dock">
-                            <div class="app" data-app="phone">
-                                <div class="app-icon">
-                                    <i class="fas fa-phone"></i>
+                            <div class="app" data-app="game2048">
+                                <div class="app-icon" style="background-color: #FF9500;">
+                                    <i class="fas fa-gamepad"></i>
                                 </div>
                             </div>
                             
@@ -174,13 +181,80 @@
                             <div class="back-button" id="back-button"><i class="fas fa-chevron-left"></i></div>
                             <div class="app-title">About Me</div>
                         </div>
-                        <div class="app-content">
-                            <div class="profile-picture"></div>
-                            <h2>John Doe</h2>
-                            <p class="job-title">Full Stack Developer</p>
-                            <div class="about-text">
-                                <p>I'm a passionate developer with 5+ years of experience creating beautiful, responsive web applications. I love solving complex problems with elegant solutions.</p>
-                                <p>When I'm not coding, you can find me hiking, reading sci-fi novels, or experimenting with new recipes in the kitchen.</p>
+                        <div class="app-content" style="overflow-y: auto; padding: 0; height: calc(100% - 44px);">
+                            <div class="about-container" style="padding: 16px 16px;">
+                                <!-- Profile Header -->
+                                <div class="profile-header" style="width: 100%; text-align: center; margin-bottom: 16px;">
+                                    <h1 class="about-name" style="font-size: 32px; font-weight: 600; margin-bottom: 8px; color: #000;">Trush Patel</h1>
+                                    <div class="about-title" style="font-size: 20px; color: #007AFF; margin-bottom: 8px;">Software Engineer</div>
+                                    <div class="about-location" style="color: #666; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                                        <i class="fas fa-map-marker-alt" style="font-size: 15px;"></i>
+                                        <span style="font-size: 15px;">Hatfield, PA</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Quick Stats -->
+                                <div class="stats-container" style="width: 100%; display: flex; justify-content: center; margin-bottom: 16px; background: #F2F2F7; padding: 12px; border-radius: 16px;">
+                                    <div class="stat-item" style="flex: 1; text-align: center;">
+                                        <div class="stat-value" style="font-size: 17px; font-weight: 600; color: #007AFF;">3+ Years</div>
+                                        <div class="stat-label" style="font-size: 13px; color: #666; margin-top: 2px;">Experience</div>
+                                    </div>
+                                    <div class="stat-item" style="flex: 1; text-align: center; border-left: 1px solid #E5E5EA; border-right: 1px solid #E5E5EA;">
+                                        <div class="stat-value" style="font-size: 17px; font-weight: 600; color: #007AFF;">GCP</div>
+                                        <div class="stat-label" style="font-size: 13px; color: #666; margin-top: 2px;">Certified</div>
+                                    </div>
+                                    <div class="stat-item" style="flex: 1; text-align: center;">
+                                        <div class="stat-value" style="font-size: 17px; font-weight: 600; color: #007AFF;">8+</div>
+                                        <div class="stat-label" style="font-size: 13px; color: #666; margin-top: 2px;">Projects</div>
+                                    </div>
+                                </div>
+
+                                <!-- About Section -->
+                                <div class="about-section" style="background: #F2F2F7; padding: 16px; border-radius: 16px; margin-bottom: 16px;">
+                                    <h2 style="font-size: 20px; font-weight: 600; color: #000; margin-bottom: 16px; text-align: center;">About Me</h2>
+                                    <p style="font-size: 13.5px; line-height: 1.2; color: #333; margin: 0 0 4px 0;text-indent: 25px;">
+                                        Passionate about AI since 2019, I have built projects in machine learning, deep learning, and natural language processing. While working as a consultant for UPS through TCS, I developed an AI-based system to automate email responses, streamlining communication and increasing efficiency. 
+                                    </p>
+                                    <p style="font-size: 13.5px; line-height: 1.2; color: #333; margin: 0;text-indent: 25px;">
+                                        I also have experience working with large-scale business data on cloud platforms, and validated billions of data through automation. My work combines technical expertise with real-world applications to drive meaningful results across industries.
+                                    </p> 
+                                </div>
+
+                                <!-- Additional Content (scrollable) -->
+                                <div class="additional-content" style="margin-top: 16px;">
+                                    <!-- Expertise Section -->
+                                    <div class="about-section" style="background: #F2F2F7; padding: 16px; border-radius: 16px; margin-bottom: 16px;">
+                                        <h2 style="font-size: 20px; font-weight: 600; color: #000; margin-bottom: 16px; text-align: center;">Core Expertise</h2>
+                                        <ul style="list-style: none; padding: 0; margin: 0;">
+                                            <li style="display: flex; align-items: flex-start; margin-bottom: 12px;">
+                                                <i class="fas fa-brain" style="color: #007AFF; width: 20px; font-size: 15px; margin-top: 4px;"></i>
+                                                <div style="margin-left: 8px;">
+                                                    <span style="font-size: 15px; color: #000;"><strong>AI & ML:</strong> Deep Learning, NLP, Email Automation</span>
+                                                </div>
+                                            </li>
+                                            <li style="display: flex; align-items: flex-start; margin-bottom: 12px;">
+                                                <i class="fas fa-cloud" style="color: #007AFF; width: 20px; font-size: 15px; margin-top: 4px;"></i>
+                                                <div style="margin-left: 8px;">
+                                                    <span style="font-size: 15px; color: #000;"><strong>Cloud & Data:</strong> GCP Certified, Large-scale Data Validation</span>
+                                                </div>
+                                            </li>
+                                            <li style="display: flex; align-items: flex-start;">
+                                                <i class="fas fa-code" style="color: #007AFF; width: 20px; font-size: 15px; margin-top: 4px;"></i>
+                                                <div style="margin-left: 8px;">
+                                                    <span style="font-size: 15px; color: #000;"><strong>Development:</strong> Python, JavaScript, Java, C, C++</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Current Focus -->
+                                    <div class="about-section" style="background: #F2F2F7; padding: 16px; border-radius: 16px;">
+                                        <h2 style="font-size: 20px; font-weight: 600; color: #000; margin-bottom: 16px; text-align: center;">Current Focus</h2>
+                                        <p style="font-size: 13px; line-height: 1.6; color: #333; margin: 0; text-indent: 25px;">
+                                            I'm seeking opportunities to leverage my AI and automation expertise in enterprise solutions. I'm particularly interested in roles that allow me to apply machine learning and deep learning to solve complex business challenges. In the meantime, I'm working on a mobile app to help supply homeless people with items they need.
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <!-- Home indicator bar -->
@@ -196,27 +270,47 @@
                             <div class="app-title">Skills</div>
                         </div>
                         <div class="app-content">
-                            <h3>Technical Skills</h3>
-                            <div class="skill-group">
-                                <div class="skill">
-                                    <div class="skill-name">JavaScript</div>
-                                    <div class="skill-bar"><div class="skill-level" style="width: 90%"></div></div>
+                            <div class="skills-container">
+                                <div class="skill-category">
+                                    <h3>Programming Languages</h3>
+                                    <div class="skills-grid">
+                                        <div class="skill-item">Python</div>
+                                        <div class="skill-item">JavaScript</div>
+                                        <div class="skill-item">Java</div>
+                                        <div class="skill-item">C/C++</div>
+                                        <div class="skill-item">MATLAB</div>
+                                        <div class="skill-item">HTML</div>
+                                        <div class="skill-item">CSS</div>
+                                    </div>
                                 </div>
-                                <div class="skill">
-                                    <div class="skill-name">React</div>
-                                    <div class="skill-bar"><div class="skill-level" style="width: 85%"></div></div>
+
+                                <div class="skill-category">
+                                    <h3>Databases</h3>
+                                    <div class="skills-grid">
+                                        <div class="skill-item">PostgreSQL</div>
+                                    </div>
                                 </div>
-                                <div class="skill">
-                                    <div class="skill-name">Node.js</div>
-                                    <div class="skill-bar"><div class="skill-level" style="width: 80%"></div></div>
+
+                                <div class="skill-category">
+                                    <h3>Frameworks</h3>
+                                    <div class="skills-grid">
+                                        <div class="skill-item">React</div>
+                                        <div class="skill-item">Knex.js</div>
+                                        <div class="skill-item">Flask</div>
+                                        <div class="skill-item">Django</div>
+                                    </div>
                                 </div>
-                                <div class="skill">
-                                    <div class="skill-name">HTML/CSS</div>
-                                    <div class="skill-bar"><div class="skill-level" style="width: 95%"></div></div>
-                                </div>
-                                <div class="skill">
-                                    <div class="skill-name">Python</div>
-                                    <div class="skill-bar"><div class="skill-level" style="width: 75%"></div></div>
+
+                                <div class="skill-category">
+                                    <h3>Machine Learning</h3>
+                                    <div class="skills-grid">
+                                        <div class="skill-item">TensorFlow</div>
+                                        <div class="skill-item">NumPy</div>
+                                        <div class="skill-item">Matplotlib</div>
+                                        <div class="skill-item">Pandas</div>
+                                        <div class="skill-item">Scikit-learn</div>
+                                        <div class="skill-item">OpenAI</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -232,34 +326,49 @@
                             <div class="back-button" id="back-button"><i class="fas fa-chevron-left"></i></div>
                             <div class="app-title">Projects</div>
                         </div>
-                        <div class="app-content">
-                            <div class="project-list">
-                                <div class="project-item">
-                                    <h3>E-commerce Platform</h3>
-                                    <p>A full-featured online store built with React, Node.js, and MongoDB.</p>
-                                    <div class="tech-stack">
-                                        <span>React</span>
-                                        <span>Node.js</span>
-                                        <span>MongoDB</span>
+                        <div class="app-content projects-folder">
+                            <div class="folder-title">Projects</div>
+                            <div class="folder-grid-container">
+                                <div class="folder-app" data-project="vet">
+                                    <div class="folder-app-icon" style="background-image: url('images/VetDatabase.jpg'); background-size: cover; background-position: center;">
                                     </div>
+                                    <div class="folder-app-name">Vet Database</div>
                                 </div>
-                                <div class="project-item">
-                                    <h3>Social Media Dashboard</h3>
-                                    <p>Analytics dashboard for social media accounts with real-time data visualization.</p>
-                                    <div class="tech-stack">
-                                        <span>Vue.js</span>
-                                        <span>Express</span>
-                                        <span>D3.js</span>
+                                <div class="folder-app" data-project="chalkboard">
+                                    <div class="folder-app-icon" style="background-image: url('images/ChalkboardLogo.png'); background-size: cover; background-position: center;">
                                     </div>
+                                    <div class="folder-app-name">Chalkboard</div>
                                 </div>
-                                <div class="project-item">
-                                    <h3>Task Management App</h3>
-                                    <p>A collaborative task manager with real-time updates and team features.</p>
-                                    <div class="tech-stack">
-                                        <span>React</span>
-                                        <span>Firebase</span>
-                                        <span>Redux</span>
+                                <div class="folder-app" data-project="story">
+                                    <div class="folder-app-icon" style="background-image: url('images/StorySpinner.jpg'); background-size: cover; background-position: center;">
                                     </div>
+                                    <div class="folder-app-name">Story Spinner</div>
+                                </div>
+                                <div class="folder-app" data-project="mousetrap">
+                                    <div class="folder-app-icon" style="background-image: url('images/Mousetrap.JPEG'); background-size: cover; background-position: center;">
+                                    </div>
+                                    <div class="folder-app-name">Moustrap</div>
+                                </div>
+                                <div class="folder-app" data-project="celebrity">
+                                    <div class="folder-app-icon" style="background-image: url('images/Celebrity.jpg'); background-size: cover; background-position: center;">
+                                    </div>
+                                    <div class="folder-app-name">Celebrity Look-alike</div>
+                                </div>
+                                <div class="folder-app" data-project="eye">
+                                    <div class="folder-app-icon" style="background-image: url('images/Eyes.jpg'); background-size: cover; background-position: center;">
+                                    </div>
+                                    <div class="folder-app-name">Eye Disease</div>
+                                    <a href="https://github.com/trushpatel97/Eye-Disease-Detection" target="_blank" class="project-link" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 1;"></a>
+                                </div>
+                                <div class="folder-app" data-project="tracking">
+                                    <div class="folder-app-icon" style="background-image: url('images/UPS.jpg'); background-size: cover; background-position: center;">
+                                    </div>
+                                    <div class="folder-app-name">Package Tracking</div>
+                                </div>
+                                <div class="folder-app" data-project="bigdata">
+                                    <div class="folder-app-icon" style="background-image: url('images/GCP.jpg'); background-size: cover; background-position: center;">
+                                    </div>
+                                    <div class="folder-app-name">BigData</div>
                                 </div>
                             </div>
                         </div>
@@ -278,8 +387,10 @@
                         <div class="app-content">
                             <div class="experience-list">
                                 <div class="experience-item">
-                                    <div class="experience-date">2021 - Present</div>
-                                    <h3>Senior Frontend Developer</h3>
+                                    <div class="experience-header">
+                                        <span class="date">2020 - Present</span>
+                                    </div>
+                                    <h3>Full Stack Developer</h3>
                                     <h4>Tech Solutions Inc.</h4>
                                     <p>Leading frontend development for enterprise applications, mentoring junior developers, and implementing best practices.</p>
                                 </div>
@@ -312,71 +423,97 @@
                         <div class="app-content">
                             <div class="education-list">
                                 <div class="education-item">
-                                    <div class="education-date">2013 - 2017</div>
-                                    <h3>Bachelor of Science in Computer Science</h3>
-                                    <h4>University of Technology</h4>
-                                    <p>Focus on software engineering and web development. Graduated with honors.</p>
-                                </div>
-                                <div class="education-item">
-                                    <div class="education-date">2018</div>
-                                    <h3>Web Development Bootcamp</h3>
-                                    <h4>Code Academy</h4>
-                                    <p>Intensive 12-week program focused on full-stack web development using modern technologies.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Home indicator bar -->
-                        <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
-                        onmouseover="this.style.opacity='0.8'; bounce(this);" 
-                        onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
-                        onclick="goToHomeScreen()"></div>
-                    </div>
-                    
-                    <div class="app-screen" id="contact-app">
-                        <div class="app-header">
-                            <div class="back-button" id="back-button"><i class="fas fa-chevron-left"></i></div>
-                            <div class="app-title">Contact</div>
-                        </div>
-                        <div class="app-content">
-                            <div class="contact-info">
-                                <div class="contact-item">
-                                    <i class="fas fa-phone"></i>
-                                    <span>+1 (555) 123-4567</span>
-                                </div>
-                                <div class="contact-item">
-                                    <i class="fas fa-envelope"></i>
-                                    <span>johndoe@example.com</span>
-                                </div>
-                                <div class="contact-item">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    <span>123 Main St, Anytown, USA</span>
-                                </div>
-                            </div>
-                            <div class="social-links">
-                                <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
-                                <a href="#" class="social-link"><i class="fab fa-github"></i></a>
-                                <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
-                            </div>
-                            <div class="contact-form">
-                                <div class="form-group">
-                                    <div class="mail-field">
-                                        <div class="mail-label">To</div>
-                                        <input type="text" class="mail-input" id="contact-mail-to" value="trushp097@gmail.com" readonly style="padding-left: 60px; border: none; outline: none;">
+                                    <div class="education-header">
+                                        <span class="university-name">Temple University</span>
+                                        <span class="graduation-date">2020</span>
                                     </div>
-                                    <hr style="height: 1px; background-color: rgba(0, 0, 0, 0.15); width: 100%; position: relative; border: none; margin: 15px 0;">
-                                    <div class="mail-field">
-                                        <div class="mail-label" style="min-width: 30px;"><span style="font-size: 12px; color: #0000007d;">From</span></div>
-                                        <input type="text" class="mail-input" id="contact-mail-from" placeholder="Enter your email" style="border: none; outline: none; font-size: 12px; flex: 1; padding-left: 0px;">
+                                    <div class="degree">Bachelor of Computer Science</div>
+                                    
+                                    <div class="education-header" style="margin-top: 10px;padding-top: 10px ;">
+                                        <span class="university-name">Certifications</span>
+                                    </div>
+                                    <div class="degree">Google Cloud Associate Cloud Engineer</div>
+                                </div>
+                                
+                                <div class="section-title">Achievements</div>
+                                <div class="education-item achievements-section">
+                                    <div class="achievement-item">
+                                        <div class="achievement-title symposium-link" style="cursor: pointer; color: #007AFF; text-decoration: underline;" onclick="openPDFPopup()">Temple University's Symposium</div>
+                                        <p>Selected and presented <i>Chalkboard</i> at the 2021 Temple University Symposium</p>
+                                    </div>
+                                    <div class="achievement-item">
+                                        <div class="achievement-title" style="cursor: pointer; color: #007AFF; text-decoration: underline;">
+                                            <a href="https://github.com/trushpatel97/Eye-Disease-Detection" target="_blank" style="color: inherit; text-decoration: inherit;">Eye Disease Detection Research</a>
+                                        </div>
+                                        <p>Built a neural network model with 97.9% accuracy to classify retinal diseases, improving early diagnosis</p>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <input type="text" class="mail-input" id="contact-mail-subject" placeholder="Subject" style="border: none; outline: none;">
+
+                                <div class="section-title">Courses</div>
+                                <div class="education-item courses-section">
+                                    <!-- Computer Science Category -->
+                                    <div class="course-category">Computer Science</div>
+                                    <div class="course-item" onclick="showTopics('os')">
+                                        <div class="course-title">Operating Systems</div>
+                                    </div>
+                                    <div class="course-item" onclick="showTopics('datastructures')">
+                                        <div class="course-title">Data Structures</div>
+                                    </div>
+                                    <div class="course-item" onclick="showTopics('softwaredesign')">
+                                        <div class="course-title">Software Design</div>
+                                    </div>
+                                    <div class="course-item" onclick="showTopics('mobile')">
+                                        <div class="course-title">Mobile Development</div>
+                                    </div>
+                                    <div class="course-item" onclick="showTopics('mobilesecurity')">
+                                        <div class="course-title">Security in Mobile and Embedded Systems</div>
+                                    </div>
+                                    <div class="course-item" onclick="showTopics('wireless')">
+                                        <div class="course-title">Wireless Networks and Security</div>
+                                    </div>
+                                    <div class="course-item" onclick="showTopics('projects')">
+                                        <div class="course-title">Projects in Computer Science</div>
+                                    </div>
+                                    <div class="course-item" onclick="showTopics('lowlevel')">
+                                        <div class="course-title">Comp Sys & Low-Level Program</div>
+                                    </div>
+
+                                    <!-- Mathematics Category -->
+                                    <div class="course-category">Mathematics</div>
+                                    <div class="course-item" onclick="showTopics('calculus')">
+                                        <div class="course-title">Calculus I,II,III</div>
+                                    </div>
+                                    <div class="course-item" onclick="showTopics('probstat')">
+                                        <div class="course-title">Computational Prob & Stat</div>
+                                    </div>
+                                    <div class="course-item" onclick="showTopics('mathcomp1')">
+                                        <div class="course-title">Math Concepts in Computing I</div>
+                                    </div>
+                                    <div class="course-item" onclick="showTopics('mathcomp2')">
+                                        <div class="course-title">Math Concepts in Computing II</div>
+                                    </div>
+
+                                    <!-- Physics Category -->
+                                    <div class="course-category">Physics</div>
+                                    <div class="course-item" onclick="showTopics('physics1')">
+                                        <div class="course-title">Elementary Classical Phys I</div>
+                                    </div>
+                                    <div class="course-item" onclick="showTopics('physics2')">
+                                        <div class="course-title">Elementary Classical Phys II</div>
+                                    </div>
                                 </div>
-                                <div class="form-group compose-field">
-                                    <textarea id="contact-mail-body" placeholder="Compose email" style="border: none; outline: none; font-size: 13px; resize: none; height: 200px; width: 100%; box-sizing: border-box;"></textarea>
-                                </div>
-                                <div class="mail-actions">
-                                    <button id="contact-test-emailjs-btn" onclick="testEmailJS()" style="background-color: #007aff; color: white; padding: 8px 16px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;">Send</button>
+
+                                <!-- Add Topics Popup Structure -->
+                                <div class="topics-popup">
+                                    <div class="topics-content">
+                                        <div class="topics-header">
+                                            <h3 class="topics-popup-title"></h3>
+                                            <button class="topics-close">&times;</button>
+                                        </div>
+                                        <div class="topics-list">
+                                            <!-- Topics will be dynamically inserted here -->
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -397,22 +534,21 @@
                                 <div class="google-logo">
                                     <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google">
                                 </div>
-                                <div class="safari-search google-search-bar">
-                                    <i class="fas fa-search"></i>
+                                <form class="safari-search google-search-bar" onsubmit="event.preventDefault(); performSearch(document.getElementById('safari-search-input').value);">
                                     <input type="text" placeholder="Search Google" id="safari-search-input">
-                                </div>
-                                <div class="google-search-buttons">
-                                    <button id="google-search-btn" style="visibility: hidden; pointer-events: none;">Google Search</button>
-                                </div>
+                                </form>
                             </div>
                             
                             <!-- Search Results View (hidden by default) -->
                             <div class="search-results-container" id="search-results-view" style="display:none;">
                                 <div class="search-results-header">
-                                    <div class="safari-search google-search-bar results-search-bar">
+                                    <form class="safari-search google-search-bar results-search-bar" onsubmit="event.preventDefault(); performSearch(document.getElementById('results-search-input').value);">
                                         <i class="fas fa-search"></i>
                                         <input type="text" id="results-search-input">
-                                    </div>
+                                        <button type="submit" class="search-submit-btn">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </form>
                                 </div>
                                 <div class="search-results-content" id="search-results-content">
                                     <!-- Results will be populated here -->
@@ -481,31 +617,122 @@
                                     </div>
                                 </div>
                                 <div class="messages-header-right">
-                                    <div class="video-call-icon" style="width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; margin-top: -5px; cursor: pointer;">
-                                        <i class="fas fa-video" style="color: #007AFF; font-size: 20px;"></i>
-                                    </div>
                                 </div>
                             </div>
                             
                             <div class="messages-content">
                                 <div class="time-stamp" id="messages-timestamp"></div>
-                                <div class="welcome-message message message-received">
-                                    Welcome! This is a private chat. You can expect a response within 24 hours. The chat will be saved.
+                                <div class="welcome-message">
+                                    👋 Hi! Feel free to send me a message. I typically respond within 24 hours.
                                 </div>
                                 <!-- Chat messages will appear here -->
                             </div>
                             
                             <div class="messages-input-area">
-                                <div class="messages-input-attachments">
+                                <div class="messages-input-field">
                                     <div class="attachment-btn">
                                         <i class="fas fa-paperclip"></i>
                                     </div>
-                                </div>
-                                <div class="messages-input-field">
                                     <input type="text" class="messages-input" placeholder="Message">
                                     <div class="messages-send-btn">
                                         <i class="fas fa-arrow-up"></i>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Home indicator bar -->
+                        <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
+                        onmouseover="this.style.opacity='0.8'; bounce(this);" 
+                        onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
+                        onclick="goToHomeScreen()"></div>
+                    </div>
+                    
+                    <!-- 2048 Game App Screen -->
+                    <div class="app-screen" id="game2048-app">
+                        <div class="app-header">
+                            <div class="back-button" id="back-button"><i class="fas fa-chevron-left"></i></div>
+                            <div class="app-title">2048</div>
+                        </div>
+                        <div class="app-content">
+                            <!-- Leaderboard -->
+                            <div class="leaderboard-container">
+                                <div class="leaderboard-title">Leaderboard</div>
+                                <ul class="leaderboard-list" id="leaderboard-list">
+                                    <!-- Leaderboard items will be added here dynamically -->
+                                </ul>
+                            </div>
+
+                            <div class="game-container">
+                                <div class="game-header">
+                                    <div class="score-container">
+                                        <div class="score-box">
+                                            <span class="score-label">SCORE</span>
+                                            <span class="score" id="score">0</span>
+                                        </div>
+                                        <div class="score-box">
+                                            <span class="score-label">BEST</span>
+                                            <span class="score" id="best-score">0</span>
+                                        </div>
+                                    </div>
+                                    <div class="new-game-button" id="new-game-button">New Game</div>
+                                </div>
+                                <div class="game-message" id="game-message">
+                                    <p></p>
+                                    <div class="lower">
+                                        <a class="retry-button" id="retry-button">Try again</a>
+                                    </div>
+                                </div>
+                                <div class="grid-container">
+                                    <div class="grid-row">
+                                        <div class="grid-cell"></div>
+                                        <div class="grid-cell"></div>
+                                        <div class="grid-cell"></div>
+                                        <div class="grid-cell"></div>
+                                    </div>
+                                    <div class="grid-row">
+                                        <div class="grid-cell"></div>
+                                        <div class="grid-cell"></div>
+                                        <div class="grid-cell"></div>
+                                        <div class="grid-cell"></div>
+                                    </div>
+                                    <div class="grid-row">
+                                        <div class="grid-cell"></div>
+                                        <div class="grid-cell"></div>
+                                        <div class="grid-cell"></div>
+                                        <div class="grid-cell"></div>
+                                    </div>
+                                    <div class="grid-row">
+                                        <div class="grid-cell"></div>
+                                        <div class="grid-cell"></div>
+                                        <div class="grid-cell"></div>
+                                        <div class="grid-cell"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Touch Controls -->
+                                <div class="touch-controls">
+                                    <div class="touch-button touch-up" id="touch-up">
+                                        <i class="fas fa-chevron-up"></i>
+                                    </div>
+                                    <div class="touch-button touch-left" id="touch-left">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </div>
+                                    <div class="touch-button touch-right" id="touch-right">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </div>
+                                    <div class="touch-button touch-down" id="touch-down">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Name Entry Dialog -->
+                            <div class="overlay" id="overlay"></div>
+                            <div class="name-entry-dialog" id="name-entry-dialog">
+                                <div class="name-entry-title">New High Score!</div>
+                                <input type="text" class="name-entry-input" id="name-entry-input" placeholder="Enter your name" maxlength="20">
+                                <div class="name-entry-buttons">
+                                    <button class="name-entry-submit" id="name-entry-submit">Submit</button>
                                 </div>
                             </div>
                         </div>
@@ -522,23 +749,8 @@
             </div>
         </div>
         
-        <div class="content-container">
-            <h1 class="name">John Doe</h1>
-            <h2 class="title">Full Stack Developer</h2>
-            <p class="tagline">Building beautiful, responsive web applications.</p>
-            
-            <div class="content-description">
-                <p>Welcome to my interactive portfolio! Click on any app in the iPhone to explore more about me and my work.</p>
-                <div class="arrow-animation">
-                    <i class="fas fa-arrow-left"></i>
-                    <span>Tap the apps</span>
-                </div>
-            </div>
-            
-            <div class="cta-buttons">
-                <a href="#" class="cta-button primary">Download CV</a>
-                <a href="#" class="cta-button secondary">Let's Talk</a>
-            </div>
+        <!-- Content outside iPhone -->
+        <div class="content-outside">
         </div>
     </div>
     
@@ -721,6 +933,65 @@
             alert('Error sending email: ' + e.message);
         }
     }
+
+    // Remove duplicate openPDFPopup function and event listeners
+    function openPDFPopup() {
+        document.getElementById('pdf-popup').style.display = 'flex';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize PDF popup functionality
+        const pdfPopup = document.getElementById('pdf-popup');
+        const closeButton = document.querySelector('.pdf-popup-close');
+        const pdfContent = document.querySelector('.pdf-popup-content');
+
+        if (closeButton) {
+            closeButton.addEventListener('click', function() {
+                if (pdfPopup) {
+                    pdfPopup.style.display = 'none';
+                }
+            });
+        }
+
+        if (pdfPopup) {
+            pdfPopup.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                }
+            });
+        }
+
+        if (pdfContent) {
+            pdfContent.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
+
+        // Add keyboard support for closing with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && pdfPopup && pdfPopup.style.display === 'flex') {
+                pdfPopup.style.display = 'none';
+            }
+        });
+
+        // Make openPDFPopup available globally
+        window.openPDFPopup = openPDFPopup;
+    });
     </script>
+    
+    <!-- PDF Viewer Popup (outside iPhone) -->
+    <div id="pdf-popup" class="pdf-popup" style="display: none;">
+        <div class="pdf-popup-content">
+            <div class="pdf-popup-header">
+                <h3 class="pdf-popup-title">2021 Temple University Symposium</h3>
+                <button class="pdf-popup-close" aria-label="Close preview" type="button">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="pdf-viewer">
+                <embed src="https://undergradstudies.temple.edu/sites/undergradstudies/files/2021%20Symposium%20Program.pdf" type="application/pdf">
+            </div>
+        </div>
+    </div>
 </body>
 </html> 
