@@ -76,6 +76,7 @@
     </script>
     
     <!-- Removed background dependencies -->
+    <link rel="stylesheet" href="styles/project-details.css">
 </head>
 <body>
     <!-- Vanta.js background div -->
@@ -110,8 +111,9 @@
                             </div>
                             
                             <div class="app" data-app="skills">
-                                <div class="app-icon" style="background-color: #48CFAD;">
-                                    <i class="fas fa-code"></i>
+                                <div class="app-icon" style="background: linear-gradient(135deg, #4ECDC4, #1A535C); display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                    <i class="fas fa-code" style="font-size: 16px; margin-bottom: 0px;"></i>
+                                    <div style="font-size: 8px; letter-spacing: 1px; margin-top: 0px; font-weight: bold;"></div>
                                 </div>
                                 <div class="app-name">Skills</div>
                             </div>
@@ -181,8 +183,8 @@
                             <div class="back-button" id="back-button"><i class="fas fa-chevron-left"></i></div>
                             <div class="app-title">About Me</div>
                         </div>
-                        <div class="app-content" style="overflow-y: auto; padding: 0; height: calc(100% - 44px);">
-                            <div class="about-container" style="padding: 16px 16px;">
+                        <div class="app-content" style="padding: 0; height: calc(100% - 44px);">
+                            <div class="about-container">
                                 <!-- Profile Header -->
                                 <div class="profile-header" style="width: 100%; text-align: center; margin-bottom: 16px;">
                                     <h1 class="about-name" style="font-size: 32px; font-weight: 600; margin-bottom: 8px; color: #000;">Trush Patel</h1>
@@ -285,6 +287,18 @@
                                 </div>
 
                                 <div class="skill-category">
+                                    <h3>Machine Learning</h3>
+                                    <div class="skills-grid">
+                                        <div class="skill-item">TensorFlow</div>
+                                        <div class="skill-item">NumPy</div>
+                                        <div class="skill-item">Matplotlib</div>
+                                        <div class="skill-item">Pandas</div>
+                                        <div class="skill-item">Scikit-learn</div>
+                                        <div class="skill-item">OpenAI</div>
+                                    </div>
+                                </div>
+
+                                <div class="skill-category">
                                     <h3>Databases</h3>
                                     <div class="skills-grid">
                                         <div class="skill-item">PostgreSQL</div>
@@ -298,18 +312,6 @@
                                         <div class="skill-item">Knex.js</div>
                                         <div class="skill-item">Flask</div>
                                         <div class="skill-item">Django</div>
-                                    </div>
-                                </div>
-
-                                <div class="skill-category">
-                                    <h3>Machine Learning</h3>
-                                    <div class="skills-grid">
-                                        <div class="skill-item">TensorFlow</div>
-                                        <div class="skill-item">NumPy</div>
-                                        <div class="skill-item">Matplotlib</div>
-                                        <div class="skill-item">Pandas</div>
-                                        <div class="skill-item">Scikit-learn</div>
-                                        <div class="skill-item">OpenAI</div>
                                     </div>
                                 </div>
                             </div>
@@ -358,7 +360,6 @@
                                     <div class="folder-app-icon" style="background-image: url('images/Eyes.jpg'); background-size: cover; background-position: center;">
                                     </div>
                                     <div class="folder-app-name">Eye Disease</div>
-                                    <a href="https://github.com/trushpatel97/Eye-Disease-Detection" target="_blank" class="project-link" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 1;"></a>
                                 </div>
                                 <div class="folder-app" data-project="tracking">
                                     <div class="folder-app-icon" style="background-image: url('images/UPS.jpg'); background-size: cover; background-position: center;">
@@ -379,6 +380,460 @@
                         onclick="goToHomeScreen()"></div>
                     </div>
                     
+                    <!-- Vet Database Project Screen -->
+                    <div class="app-screen project-screen" id="vet-project">
+                        <div class="app-header">
+                            <div class="back-button"><i class="fas fa-chevron-left"></i></div>
+                            <div class="app-title">Vet Database</div>
+                        </div>
+                        <div class="app-content project-content">
+                            <div class="project-header">
+                                <h1 class="project-title">Veterinary Database System</h1>
+                                <p class="project-subtitle">A comprehensive database solution for veterinary clinics</p>
+                                <img src="images/VetDatabase.jpg" alt="Vet Database" class="project-image">
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Overview</h2>
+                                <p class="project-description">
+                                    The Veterinary Database System is a comprehensive solution designed to help veterinary clinics manage patient records, appointments, treatments, and billing information efficiently.
+                                </p>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Technologies</h2>
+                                <div class="technologies-list">
+                                    <span class="technology-tag">Java</span>
+                                    <span class="technology-tag">SQL</span>
+                                    <span class="technology-tag">JDBC</span>
+                                    <span class="technology-tag">JavaFX</span>
+                                    <span class="technology-tag">Git</span>
+                                </div>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Features</h2>
+                                <ul class="features-list">
+                                    <li>Patient management with complete medical history</li>
+                                    <li>Appointment scheduling and reminders</li>
+                                    <li>Treatment tracking and documentation</li>
+                                    <li>Inventory management for medications and supplies</li>
+                                    <li>Billing and invoice generation</li>
+                                    <li>User roles and permissions</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Development Process</h2>
+                                <p class="project-description">
+                                    This project was developed using an Agile methodology, with a focus on creating a maintainable and scalable database design. The system includes a normalized database schema to ensure data integrity and efficient queries.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
+                        onmouseover="this.style.opacity='0.8'; bounce(this);" 
+                        onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
+                        onclick="goToHomeScreen()"></div>
+                    </div>
+                    
+                    <!-- Chalkboard Project Screen -->
+                    <div class="app-screen project-screen" id="chalkboard-project">
+                        <div class="app-header">
+                            <div class="back-button"><i class="fas fa-chevron-left"></i></div>
+                            <div class="app-title">Chalkboard</div>
+                        </div>
+                        <div class="app-content project-content">
+                            <div class="project-header">
+                                <h1 class="project-title">Chalkboard</h1>
+                                <p class="project-subtitle">An interactive learning platform for students and teachers</p>
+                                <img src="images/ChalkboardLogo.png" alt="Chalkboard" class="project-image">
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Overview</h2>
+                                <p class="project-description">
+                                    Chalkboard is an innovative educational platform that connects students with teachers, providing tools for real-time collaboration, assignment management, and progress tracking.
+                                </p>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Technologies</h2>
+                                <div class="technologies-list">
+                                    <span class="technology-tag">React</span>
+                                    <span class="technology-tag">Node.js</span>
+                                    <span class="technology-tag">MongoDB</span>
+                                    <span class="technology-tag">WebSockets</span>
+                                    <span class="technology-tag">Express</span>
+                                    <span class="technology-tag">JWT</span>
+                                </div>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Features</h2>
+                                <ul class="features-list">
+                                    <li>Virtual classrooms with video conferencing</li>
+                                    <li>Interactive whiteboard for teaching</li>
+                                    <li>Assignment creation and submission</li>
+                                    <li>Automated grading for certain question types</li>
+                                    <li>Progress tracking with visual analytics</li>
+                                    <li>Resource sharing and organization</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Highlighted at Temple University Symposium</h2>
+                                <p class="project-description">
+                                    This project was selected and presented at the 2021 Temple University Symposium, receiving recognition for its innovative approach to distance learning and educational technology.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
+                        onmouseover="this.style.opacity='0.8'; bounce(this);" 
+                        onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
+                        onclick="goToHomeScreen()"></div>
+                    </div>
+                    
+                    <!-- Story Spinner Project Screen -->
+                    <div class="app-screen project-screen" id="story-project">
+                        <div class="app-header">
+                            <div class="back-button"><i class="fas fa-chevron-left"></i></div>
+                            <div class="app-title">Story Spinner</div>
+                        </div>
+                        <div class="app-content project-content">
+                            <div class="project-header">
+                                <h1 class="project-title">Story Spinner</h1>
+                                <p class="project-subtitle">AI-powered creative writing assistant</p>
+                                <img src="images/StorySpinner.jpg" alt="Story Spinner" class="project-image">
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Overview</h2>
+                                <p class="project-description">
+                                    Story Spinner is an AI-powered tool designed to help writers overcome creative blocks by generating story prompts, plot ideas, character profiles, and even complete paragraphs based on user input.
+                                </p>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Technologies</h2>
+                                <div class="technologies-list">
+                                    <span class="technology-tag">Python</span>
+                                    <span class="technology-tag">Flask</span>
+                                    <span class="technology-tag">GPT-3</span>
+                                    <span class="technology-tag">NLP</span>
+                                    <span class="technology-tag">React</span>
+                                    <span class="technology-tag">PostgreSQL</span>
+                                </div>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Features</h2>
+                                <ul class="features-list">
+                                    <li>AI-generated story prompts and plot ideas</li>
+                                    <li>Character development tools with personality traits</li>
+                                    <li>Scene setting and description generator</li>
+                                    <li>Plot hole detection and suggestions</li>
+                                    <li>Genre-specific writing assistance</li>
+                                    <li>Story structure templates (Hero's Journey, Three-Act, etc.)</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Impact</h2>
+                                <p class="project-description">
+                                    Story Spinner has helped over 500 writers complete their creative projects, with many users reporting significant improvements in productivity and creativity when facing writer's block.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
+                        onmouseover="this.style.opacity='0.8'; bounce(this);" 
+                        onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
+                        onclick="goToHomeScreen()"></div>
+                    </div>
+                    
+                    <!-- Mousetrap Project Screen -->
+                    <div class="app-screen project-screen" id="mousetrap-project">
+                        <div class="app-header">
+                            <div class="back-button"><i class="fas fa-chevron-left"></i></div>
+                            <div class="app-title">Mousetrap</div>
+                        </div>
+                        <div class="app-content project-content">
+                            <div class="project-header">
+                                <h1 class="project-title">Mousetrap</h1>
+                                <p class="project-subtitle">Advanced user behavior analytics platform</p>
+                                <img src="images/Mousetrap.JPEG" alt="Mousetrap" class="project-image">
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Overview</h2>
+                                <p class="project-description">
+                                    Mousetrap is a sophisticated analytics platform that tracks and analyzes user behavior on websites and applications, providing actionable insights to improve user experience and conversion rates.
+                                </p>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Technologies</h2>
+                                <div class="technologies-list">
+                                    <span class="technology-tag">JavaScript</span>
+                                    <span class="technology-tag">D3.js</span>
+                                    <span class="technology-tag">Node.js</span>
+                                    <span class="technology-tag">MongoDB</span>
+                                    <span class="technology-tag">WebSockets</span>
+                                    <span class="technology-tag">AWS</span>
+                                </div>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Features</h2>
+                                <ul class="features-list">
+                                    <li>Mouse movement heatmaps and tracking</li>
+                                    <li>Click and scroll depth analysis</li>
+                                    <li>Form interaction and abandonment analytics</li>
+                                    <li>Session recording and playback</li>
+                                    <li>Real-time user behavior monitoring</li>
+                                    <li>A/B testing integration</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Results</h2>
+                                <p class="project-description">
+                                    Implementation of Mousetrap has led to an average 23% increase in user engagement and a 15% improvement in conversion rates for client websites through targeted UX improvements based on the collected data.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
+                        onmouseover="this.style.opacity='0.8'; bounce(this);" 
+                        onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
+                        onclick="goToHomeScreen()"></div>
+                    </div>
+                    
+                    <!-- Celebrity Look-alike Project Screen -->
+                    <div class="app-screen project-screen" id="celebrity-project">
+                        <div class="app-header">
+                            <div class="back-button"><i class="fas fa-chevron-left"></i></div>
+                            <div class="app-title">Celebrity Look-alike</div>
+                        </div>
+                        <div class="app-content project-content">
+                            <div class="project-header">
+                                <h1 class="project-title">Celebrity Look-alike Detector</h1>
+                                <p class="project-subtitle">AI-powered facial recognition app</p>
+                                <img src="images/Celebrity.jpg" alt="Celebrity Look-alike" class="project-image">
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Overview</h2>
+                                <p class="project-description">
+                                    The Celebrity Look-alike Detector is a fun and engaging application that uses advanced facial recognition algorithms to find celebrity matches for user-uploaded photos, providing similarity scores and interesting facts.
+                                </p>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Technologies</h2>
+                                <div class="technologies-list">
+                                    <span class="technology-tag">Python</span>
+                                    <span class="technology-tag">TensorFlow</span>
+                                    <span class="technology-tag">OpenCV</span>
+                                    <span class="technology-tag">React Native</span>
+                                    <span class="technology-tag">Google Cloud</span>
+                                    <span class="technology-tag">Firebase</span>
+                                </div>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Features</h2>
+                                <ul class="features-list">
+                                    <li>Real-time facial recognition and analysis</li>
+                                    <li>Database of over 10,000 celebrity faces</li>
+                                    <li>Similarity scoring system with detailed facial feature mapping</li>
+                                    <li>Social media sharing of results</li>
+                                    <li>Historical look-alike trends and statistics</li>
+                                    <li>Celebrity facts and information</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Technical Highlights</h2>
+                                <p class="project-description">
+                                    The application leverages a custom-trained convolutional neural network with 85% accuracy in facial recognition, preprocessing images to normalize lighting and angles for improved matching results.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
+                        onmouseover="this.style.opacity='0.8'; bounce(this);" 
+                        onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
+                        onclick="goToHomeScreen()"></div>
+                    </div>
+                    
+                    <!-- Eye Disease Project Screen -->
+                    <div class="app-screen project-screen" id="eye-project">
+                        <div class="app-header">
+                            <div class="back-button"><i class="fas fa-chevron-left"></i></div>
+                            <div class="app-title">Eye Disease Detection</div>
+                        </div>
+                        <div class="app-content project-content">
+                            <div class="project-header">
+                                <h1 class="project-title">Eye Disease Detection</h1>
+                                <p class="project-subtitle">AI-based medical diagnostic tool</p>
+                                <img src="images/Eyes.jpg" alt="Eye Disease Detection" class="project-image">
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Overview</h2>
+                                <p class="project-description">
+                                    This research project developed a neural network model to detect and classify various eye diseases from retinal images with high accuracy, aiming to assist medical professionals in early diagnosis.
+                                </p>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Technologies</h2>
+                                <div class="technologies-list">
+                                    <span class="technology-tag">Python</span>
+                                    <span class="technology-tag">TensorFlow</span>
+                                    <span class="technology-tag">Keras</span>
+                                    <span class="technology-tag">OpenCV</span>
+                                    <span class="technology-tag">Scikit-learn</span>
+                                    <span class="technology-tag">Matplotlib</span>
+                                </div>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Achievements</h2>
+                                <ul class="features-list">
+                                    <li>Achieved 97.9% accuracy in identifying retinal diseases</li>
+                                    <li>Improved model performance by 3.8% through hyperparameter tuning</li>
+                                    <li>Tested across 4 different datasets for robustness</li>
+                                    <li>Created an explainable AI component for diagnosis transparency</li>
+                                    <li>Developed in collaboration with ophthalmologists</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Research Impact</h2>
+                                <p class="project-description">
+                                    This research contributes to improving early diagnosis of eye diseases such as diabetic retinopathy, glaucoma, and age-related macular degeneration, potentially helping to prevent vision loss through timely treatment.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
+                        onmouseover="this.style.opacity='0.8'; bounce(this);" 
+                        onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
+                        onclick="goToHomeScreen()"></div>
+                    </div>
+                    
+                    <!-- Package Tracking Project Screen -->
+                    <div class="app-screen project-screen" id="tracking-project">
+                        <div class="app-header">
+                            <div class="back-button"><i class="fas fa-chevron-left"></i></div>
+                            <div class="app-title">Package Tracking</div>
+                        </div>
+                        <div class="app-content project-content">
+                            <div class="project-header">
+                                <h1 class="project-title">Package Tracking System</h1>
+                                <p class="project-subtitle">Real-time logistics management solution</p>
+                                <img src="images/UPS.jpg" alt="Package Tracking" class="project-image">
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Overview</h2>
+                                <p class="project-description">
+                                    Developed for UPS through TCS, this package tracking system provides real-time visibility into package locations, status updates, and delivery estimates, enhancing the customer experience and operational efficiency.
+                                </p>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Technologies</h2>
+                                <div class="technologies-list">
+                                    <span class="technology-tag">Python</span>
+                                    <span class="technology-tag">Java</span>
+                                    <span class="technology-tag">RESTful APIs</span>
+                                    <span class="technology-tag">PostgreSQL</span>
+                                    <span class="technology-tag">Google Maps API</span>
+                                    <span class="technology-tag">React</span>
+                                </div>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Features</h2>
+                                <ul class="features-list">
+                                    <li>Real-time package location tracking</li>
+                                    <li>Automated status updates and notifications</li>
+                                    <li>Delivery time predictions using machine learning</li>
+                                    <li>Route optimization for delivery efficiency</li>
+                                    <li>Customer communication portal</li>
+                                    <li>Delivery exception handling</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Business Impact</h2>
+                                <p class="project-description">
+                                    The implementation of this system resulted in a 28% reduction in customer service inquiries about package status and a 15% improvement in on-time delivery rates through better route planning and exception handling.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
+                        onmouseover="this.style.opacity='0.8'; bounce(this);" 
+                        onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
+                        onclick="goToHomeScreen()"></div>
+                    </div>
+                    
+                    <!-- BigData Project Screen -->
+                    <div class="app-screen project-screen" id="bigdata-project">
+                        <div class="app-header">
+                            <div class="back-button"><i class="fas fa-chevron-left"></i></div>
+                            <div class="app-title">BigData</div>
+                        </div>
+                        <div class="app-content project-content">
+                            <div class="project-header">
+                                <h1 class="project-title">BigData Migration & Analysis</h1>
+                                <p class="project-subtitle">Enterprise data pipeline infrastructure</p>
+                                <img src="images/GCP.jpg" alt="BigData" class="project-image">
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Overview</h2>
+                                <p class="project-description">
+                                    This project involved migrating billions of records from Oracle to Google BigQuery, creating efficient data pipelines, and implementing analytics solutions to derive business insights from massive datasets.
+                                </p>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Technologies</h2>
+                                <div class="technologies-list">
+                                    <span class="technology-tag">Google Cloud Platform</span>
+                                    <span class="technology-tag">BigQuery</span>
+                                    <span class="technology-tag">Striim</span>
+                                    <span class="technology-tag">Python</span>
+                                    <span class="technology-tag">Oracle</span>
+                                    <span class="technology-tag">TQL</span>
+                                </div>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Achievements</h2>
+                                <ul class="features-list">
+                                    <li>Designed a Python script to compare 250+ tables between Oracle and BigQuery</li>
+                                    <li>Modified TQL scripts for efficient data migration</li>
+                                    <li>Achieved over 99.9% data integrity during migration</li>
+                                    <li>Reduced query processing time by 75%</li>
+                                    <li>Implemented data validation frameworks</li>
+                                    <li>Set up PEP8 compliance for code structure</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Technical Challenge</h2>
+                                <p class="project-description">
+                                    One of the key challenges was ensuring zero data loss during the migration of critical business data. We developed a custom validation framework that compared record counts, checksums, and sample data points to verify complete and accurate data transfer.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
+                        onmouseover="this.style.opacity='0.8'; bounce(this);" 
+                        onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
+                        onclick="goToHomeScreen()"></div>
+                    </div>
+                    
                     <div class="app-screen" id="experience-app">
                         <div class="app-header">
                             <div class="back-button" id="back-button"><i class="fas fa-chevron-left"></i></div>
@@ -388,23 +843,31 @@
                             <div class="experience-list">
                                 <div class="experience-item">
                                     <div class="experience-header">
-                                        <span class="date">2020 - Present</span>
+                                        <span class="date">Sep 2021 – October 2024</span>
                                     </div>
-                                    <h3>Full Stack Developer</h3>
-                                    <h4>Tech Solutions Inc.</h4>
-                                    <p>Leading frontend development for enterprise applications, mentoring junior developers, and implementing best practices.</p>
+                                    <h3>Software Engineer</h3>
+                                    <h4>Tata Consultancy Services, Remote</h4>
+                                    <p>Applied Google Cloud Platform services and worked with OpenAI to automate email inquires about packages</p>
+                                    <ul>
+                                        <li>Designed a Python script to generate a spreadsheet comparing 250+ tables from Oracle and BigQuery</li>
+                                        <li>Modified TQL scripts to transfer billions of data from Oracle to BigQuery using Striim</li>
+                                        <li>Certified as a Google Cloud Associate Engineer</li>
+                                        <li>Implemented an API to track packages based of their tracking number</li>
+                                        <li>Set PEP8 requirements of code structure using Pylint</li>
+                                        <li>Tested backend APIs using Postman</li>
+                                    </ul>
                                 </div>
                                 <div class="experience-item">
-                                    <div class="experience-date">2019 - 2021</div>
-                                    <h3>Full Stack Developer</h3>
-                                    <h4>Digital Innovations Co.</h4>
-                                    <p>Developed multiple web applications using React, Node.js, and MongoDB with a focus on responsive design and performance.</p>
-                                </div>
-                                <div class="experience-item">
-                                    <div class="experience-date">2017 - 2019</div>
-                                    <h3>Junior Web Developer</h3>
-                                    <h4>Webcraft Studios</h4>
-                                    <p>Built responsive websites for clients using HTML, CSS, JavaScript, and WordPress.</p>
+                                    <div class="experience-header">
+                                        <span class="date">May 2020 - Jan 2021</span>
+                                    </div>
+                                    <h3>Eye Disease Detection Research</h3>
+                                    <h4>Temple University, Philadelphia, PA</h4>
+                                    <p>Utilized Machine Learning to classify the presence of eye diseases in images using Python</p>
+                                    <ul>
+                                        <li>Achieved 97.9% accuracy in the testing phase across 4 datasets</li>
+                                        <li>Improved model accuracy by 3.8% through hyperparameter tuning</li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
@@ -756,6 +1219,7 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="script.js"></script>
+    <script src="scripts/projects.js"></script>
     <script>
     function testEmailJS() {
         console.log('Sending email...');

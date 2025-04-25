@@ -212,25 +212,6 @@
     font-weight: 600;
 }
 
-/* Scrollbar styling for education list */
-.education-list::-webkit-scrollbar {
-    width: 6px;
-}
-
-.education-list::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.education-list::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 3px;
-}
-
-.education-list::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-
 /* Responsive adjustments */
 @media (max-width: 480px) {
     .courses-section {
@@ -318,59 +299,48 @@
     background-color: #e9ecef;
 }
 
-/* Scrollbar styling */
-.topics-list::-webkit-scrollbar {
-    width: 6px;
-}
-
-.topics-list::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.topics-list::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 3px;
-}
-
-.topics-list::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-
-/* Custom scrollbar styles */
-.courses-section::-webkit-scrollbar {
-    width: 6px;
-}
-
-.courses-section::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.courses-section::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 3px;
-}
-
-.courses-section::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-
-.app-content {
+#education-app .app-content {
     height: calc(100% - 44px);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 20px;
+    overflow: hidden;
+    padding: 0;
+    position: relative;
+    background-color: #fff;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .education-list {
     height: 100%;
     overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
     padding: 15px 0;
+    padding-bottom: 50px; /* Extra padding at bottom for home indicator */
+    width: 100%;
+    margin: 0;
+    box-sizing: border-box;
 }
 
+/* Hide scrollbar completely */
+.education-list::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+}
 
+.education-list::-webkit-scrollbar-thumb {
+    display: none !important;
+}
 
+.education-list::-webkit-scrollbar-track {
+    display: none !important;
+}
+
+/* Additional style to hide scrollbars for Firefox */
+.education-list {
+    scrollbar-width: none;
+}
 
 .certification-title {
     color: #007AFF;

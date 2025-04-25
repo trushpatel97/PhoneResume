@@ -1,0 +1,138 @@
+/* Project Details App Styles */
+.project-details-app {
+    background-color: #f5f5f7;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.project-content {
+    padding: 16px 16px 50px 16px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    max-height: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    background-color: #f5f5f7;
+    scrollbar-width: none; /* Firefox */
+}
+
+.project-content::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+}
+
+.project-content::-webkit-scrollbar-thumb,
+.project-content::-webkit-scrollbar-track {
+    display: none !important;
+}
+
+.project-header {
+    margin-bottom: 20px;
+}
+
+.project-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.project-subtitle {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.project-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.project-section {
+    margin-bottom: 20px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+}
+
+.project-description {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+.technologies-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.technology-tag {
+    background-color: #e9ecef;
+    padding: 6px 12px;
+    border-radius: 100px;
+    font-size: 12px;
+    color: #495057;
+    font-weight: 500;
+}
+
+.features-list {
+    padding-left: 20px;
+    margin-top: 10px;
+}
+
+.features-list li {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.project-link-button {
+    display: inline-block;
+    background-color: #007AFF;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+
+.project-link-button:hover {
+    background-color: #0056b3;
+}
+
+.project-gallery {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.gallery-image {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+} 

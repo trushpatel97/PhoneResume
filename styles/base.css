@@ -29,6 +29,54 @@ body {
     background-color: transparent;
 }
 
+/* Consistent scrollbar styles for all app content */
+.app-content, .about-container, .skills-container, .education-list, .projects-folder, .courses-section, .topics-list {
+    scrollbar-width: thin; /* For Firefox */
+    -ms-overflow-style: thin; /* For IE and Edge */
+}
+
+.app-content::-webkit-scrollbar, 
+.about-container::-webkit-scrollbar, 
+.skills-container::-webkit-scrollbar, 
+.education-list::-webkit-scrollbar, 
+.projects-folder::-webkit-scrollbar, 
+.courses-section::-webkit-scrollbar, 
+.topics-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.app-content::-webkit-scrollbar-track, 
+.about-container::-webkit-scrollbar-track, 
+.skills-container::-webkit-scrollbar-track, 
+.education-list::-webkit-scrollbar-track, 
+.projects-folder::-webkit-scrollbar-track, 
+.courses-section::-webkit-scrollbar-track, 
+.topics-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.app-content::-webkit-scrollbar-thumb, 
+.about-container::-webkit-scrollbar-thumb, 
+.skills-container::-webkit-scrollbar-thumb, 
+.education-list::-webkit-scrollbar-thumb, 
+.projects-folder::-webkit-scrollbar-thumb, 
+.courses-section::-webkit-scrollbar-thumb, 
+.topics-list::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+.app-content::-webkit-scrollbar-thumb:hover, 
+.about-container::-webkit-scrollbar-thumb:hover, 
+.skills-container::-webkit-scrollbar-thumb:hover, 
+.education-list::-webkit-scrollbar-thumb:hover, 
+.projects-folder::-webkit-scrollbar-thumb:hover, 
+.courses-section::-webkit-scrollbar-thumb:hover, 
+.topics-list::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
 /* Vanta background styles */
 #vanta-background {
     position: fixed;

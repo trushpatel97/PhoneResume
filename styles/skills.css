@@ -35,25 +35,53 @@
 
 .app-content {
     height: calc(100% - 44px);
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 60px;
+    overflow: hidden;
+    padding: 0;
     position: relative;
     background-color: #fff;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .skills-container {
-    padding: 20px;
-    padding-bottom: 80px;
-    height: auto;
+    padding: 16px 16px 80px 16px;
+    height: 100%;
     min-height: 100%;
-    overflow-y: visible;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    max-height: 100%;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+}
+
+/* Hide scrollbar completely */
+.skills-container::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+}
+
+.skills-container::-webkit-scrollbar-thumb {
+    display: none !important;
+}
+
+.skills-container::-webkit-scrollbar-track {
+    display: none !important;
+}
+
+/* Additional style to hide scrollbars for Firefox */
+.skills-container {
+    scrollbar-width: none;
 }
 
 .skill-category {
     margin-bottom: 25px;
     opacity: 1;
     transform: translateZ(0);
+    width: 100%;
 }
 
 .skill-category h3 {
@@ -71,6 +99,7 @@
     gap: 12px;
     transform: translateZ(0);
     will-change: transform;
+    margin-bottom: 20px;
 }
 
 .skill-item {
@@ -85,6 +114,10 @@
     text-align: center;
     transition: all 0.3s ease;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .skill-item:hover {
@@ -98,27 +131,6 @@
     position: fixed !important;
     bottom: 8px;
     z-index: 1000;
-}
-
-/* Custom scrollbar styles */
-.app-content::-webkit-scrollbar {
-    width: 6px;
-    position: absolute;
-    right: 0;
-}
-
-.app-content::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.app-content::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 3px;
-}
-
-.app-content::-webkit-scrollbar-thumb:hover {
-    background: #555;
 }
 
 /* Ensure content is properly spaced */
