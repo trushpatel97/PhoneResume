@@ -22,26 +22,6 @@
     margin: 0;
 }
 
-/* Hide scrollbar completely */
-.about-container::-webkit-scrollbar {
-    width: 0 !important;
-    height: 0 !important;
-    display: none !important;
-}
-
-.about-container::-webkit-scrollbar-thumb {
-    display: none !important;
-}
-
-.about-container::-webkit-scrollbar-track {
-    display: none !important;
-}
-
-/* Additional style to hide scrollbars for Firefox */
-.about-container {
-    scrollbar-width: none;
-}
-
 .about-content {
     margin-top: 20px;
     padding: 0;

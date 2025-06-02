@@ -80,6 +80,15 @@
     margin-top: -5px;
 }
 
+/* Mobile view time adjustments */
+@media (max-width: 480px) {
+    .status-bar > div:first-child {
+        font-size: 13px; /* 20% smaller than original 16px */
+        padding-left: 0;
+        margin-left: 0px; /* Shift to the left */
+    }
+}
+
 .status-bar.in-app {
     color: black;
 }
@@ -115,16 +124,6 @@
 
 .app-screen.active {
     display: flex;
-    animation: slideIn 0.3s ease;
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-    }
-    to {
-        transform: translateX(0);
-    }
 }
 
 .app-header {
@@ -158,4 +157,8 @@
     padding: 20px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+}
+
+.app-screen#projects-app {
+    background-color: transparent !important;
 } 

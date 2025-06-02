@@ -1,6 +1,205 @@
-﻿document.addEventListener('DOMContentLoaded', () => {
-    // Initialize Vanta.js background first - moved to top for priority
-    initVantaBackground();
+document.addEventListener('DOMContentLoaded', () => {
+    // Rate Limiting System
+    const RateLimiter = {
+        // Configuration for different action types
+        limits: {
+            messages: { max: 50, window: 3600000 }, // 50 messages per hour
+            attachments: { max: 10, window: 86400000 }, // 10 attachments per day
+            emails: { max: 2, window: 86400000 }, // 2 emails per day
+            searches: { max: 20, window: 86400000 }, // 20 searches per day
+            totalMessages: { max: 200, window: 86400000 }, // 200 total messages per day
+            totalStorage: { max: 20 * 1024 * 1024, window: 86400000 } // 20MB storage per day
+        },
+        
+        // Get device ID (stored in localStorage)
+        getDeviceId() {
+            let deviceId = localStorage.getItem('device_id');
+            if (!deviceId) {
+                deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15);
+                localStorage.setItem('device_id', deviceId);
+            }
+            return deviceId;
+        },
+        
+        // Get current usage data
+        getUsageData() {
+            const data = localStorage.getItem('rate_limit_data');
+            return data ? JSON.parse(data) : {};
+        },
+        
+        // Save usage data
+        saveUsageData(data) {
+            localStorage.setItem('rate_limit_data', JSON.stringify(data));
+        },
+        
+        // Clean old entries
+        cleanOldEntries(actionType, windowMs) {
+            const data = this.getUsageData();
+            const deviceId = this.getDeviceId();
+            const now = Date.now();
+            
+            if (data[deviceId] && data[deviceId][actionType]) {
+                data[deviceId][actionType] = data[deviceId][actionType].filter(entry => {
+                    // Handle both timestamp numbers and objects with timestamp property
+                    const timestamp = typeof entry === 'number' ? entry : entry.timestamp;
+                    return now - timestamp < windowMs;
+                });
+                
+                if (data[deviceId][actionType].length === 0) {
+                    delete data[deviceId][actionType];
+                }
+            }
+            
+            this.saveUsageData(data);
+        },
+        
+        // Check if action is allowed
+        canPerformAction(actionType, size = 0) {
+            const limit = this.limits[actionType];
+            if (!limit) return true;
+            
+            this.cleanOldEntries(actionType, limit.window);
+            
+            const data = this.getUsageData();
+            const deviceId = this.getDeviceId();
+            const deviceData = data[deviceId] || {};
+            const actionData = deviceData[actionType] || [];
+            
+            // For storage limits, calculate total size
+            if (actionType === 'totalStorage') {
+                const totalSize = actionData.reduce((sum, entry) => sum + (entry.size || 0), 0);
+                return totalSize + size <= limit.max;
+            }
+            
+            // For count-based limits
+            return actionData.length < limit.max;
+        },
+        
+        // Record an action
+        recordAction(actionType, metadata = {}) {
+            const data = this.getUsageData();
+            const deviceId = this.getDeviceId();
+            
+            if (!data[deviceId]) {
+                data[deviceId] = {};
+            }
+            
+            if (!data[deviceId][actionType]) {
+                data[deviceId][actionType] = [];
+            }
+            
+            // For storage, record size
+            if (actionType === 'totalStorage') {
+                data[deviceId][actionType].push({
+                    timestamp: Date.now(),
+                    size: metadata.size || 0
+                });
+            } else {
+                data[deviceId][actionType].push(Date.now());
+            }
+            
+            this.saveUsageData(data);
+        },
+        
+        // Get remaining allowance
+        getRemainingAllowance(actionType) {
+            const limit = this.limits[actionType];
+            if (!limit) return Infinity;
+            
+            this.cleanOldEntries(actionType, limit.window);
+            
+            const data = this.getUsageData();
+            const deviceId = this.getDeviceId();
+            const deviceData = data[deviceId] || {};
+            const actionData = deviceData[actionType] || [];
+            
+            if (actionType === 'totalStorage') {
+                const totalSize = actionData.reduce((sum, entry) => sum + (entry.size || 0), 0);
+                return Math.max(0, limit.max - totalSize);
+            }
+            
+            return Math.max(0, limit.max - actionData.length);
+        },
+        
+        // Get current usage for an action type
+        getCurrentUsage(actionType) {
+            const limit = this.limits[actionType];
+            if (!limit) return 0;
+            
+            this.cleanOldEntries(actionType, limit.window);
+            
+            const data = this.getUsageData();
+            const deviceId = this.getDeviceId();
+            const deviceData = data[deviceId] || {};
+            const actionData = deviceData[actionType] || [];
+            
+            if (actionType === 'totalStorage') {
+                return actionData.reduce((sum, entry) => sum + (entry.size || 0), 0);
+            }
+            
+            return actionData.length;
+        },
+        
+        // Get time until reset
+        getTimeUntilReset(actionType) {
+            const limit = this.limits[actionType];
+            if (!limit) return 0;
+            
+            const data = this.getUsageData();
+            const deviceId = this.getDeviceId();
+            const deviceData = data[deviceId] || {};
+            const actionData = deviceData[actionType] || [];
+            
+            if (actionData.length === 0) return 0;
+            
+            // Find the oldest entry
+            const oldestTimestamp = Math.min(...actionData.map(entry => 
+                typeof entry === 'number' ? entry : entry.timestamp
+            ));
+            
+            const resetTime = oldestTimestamp + limit.window;
+            const timeLeft = Math.max(0, resetTime - Date.now());
+            
+            return timeLeft;
+        },
+        
+        // Format time for display
+        formatTimeRemaining(ms) {
+            const hours = Math.floor(ms / 3600000);
+            const minutes = Math.floor((ms % 3600000) / 60000);
+            
+            if (hours > 0) {
+                return `${hours}h ${minutes}m`;
+            }
+            return `${minutes}m`;
+        },
+        
+        // Show rate limit error
+        showRateLimitError(actionType, customMessage = null) {
+            const limit = this.limits[actionType];
+            const timeLeft = this.getTimeUntilReset(actionType);
+            const formattedTime = this.formatTimeRemaining(timeLeft);
+            
+            let message = customMessage || `You've reached the limit for ${actionType.replace(/([A-Z])/g, ' $1').toLowerCase()}.`;
+            
+            // Add detailed info for storage
+            if (actionType === 'totalStorage') {
+                const currentUsage = this.getCurrentUsage('totalStorage');
+                const currentMB = (currentUsage / (1024 * 1024)).toFixed(1);
+                const limitMB = (limit.max / (1024 * 1024)).toFixed(0);
+                message = `You've used ${currentMB}MB of your ${limitMB}MB daily storage limit.`;
+            }
+            
+            if (timeLeft > 0) {
+                message += ` Try again in ${formattedTime}.`;
+            }
+            
+            alert(message);
+        }
+    };
+    
+    // Make RateLimiter globally available
+    window.RateLimiter = RateLimiter;
     
     // Update time in status bar
     updateTime();
@@ -395,6 +594,12 @@
             const query = searchTerm.trim();
             if (!query) return;
             
+            // Check rate limit for searches
+            if (window.RateLimiter && !window.RateLimiter.canPerformAction('searches')) {
+                window.RateLimiter.showRateLimitError('searches', 'You have reached your daily search limit.');
+                return;
+            }
+            
             // Show the search results view
             googleHomeView.style.display = 'none';
             searchResultsView.style.display = 'flex';
@@ -450,6 +655,11 @@
                 
                 // Update rate limit counter
                 updateRateLimit(query);
+                
+                // Record in new rate limiter
+                if (window.RateLimiter) {
+                    window.RateLimiter.recordAction('searches');
+                }
                 
                 // Use the real Google API
                 fetchGoogleResults(query, isLucky);
@@ -1328,6 +1538,37 @@
                 alert(`You've reached your daily upload limit of ${MAX_UPLOADS_PER_DAY} files. Please try again tomorrow.`);
                 return;
             }
+            
+            // Check all attachment-related rate limits
+            if (!window.RateLimiter.canPerformAction('attachments')) {
+                window.RateLimiter.showRateLimitError('attachments', 'You have reached your daily attachment limit.');
+                return;
+            }
+            
+            if (!window.RateLimiter.canPerformAction('totalMessages')) {
+                window.RateLimiter.showRateLimitError('totalMessages', 'You have reached your daily message limit.');
+                return;
+            }
+            
+            // Check if we're close to storage limit
+            const currentStorage = window.RateLimiter.getCurrentUsage('totalStorage');
+            const remainingStorage = window.RateLimiter.getRemainingAllowance('totalStorage');
+            
+            if (remainingStorage < 1024 * 1024) { // Less than 1MB remaining
+                const currentMB = (currentStorage / (1024 * 1024)).toFixed(1);
+                const remainingKB = (remainingStorage / 1024).toFixed(0);
+                alert(`Storage limit warning!\n\nYou've used ${currentMB}MB of your 20MB daily limit.\nOnly ${remainingKB}KB remaining.\n\nConsider waiting until tomorrow when your limit resets.`);
+                return;
+            }
+            
+            // If no storage remaining at all, prevent file selection
+            if (remainingStorage <= 0) {
+                const currentMB = (currentStorage / (1024 * 1024)).toFixed(1);
+                const timeUntilReset = window.RateLimiter.getTimeUntilReset('totalStorage');
+                const hoursUntilReset = Math.ceil(timeUntilReset / (1000 * 60 * 60));
+                alert(`Storage limit reached!\n\nYou've used all ${currentMB}MB of your daily storage allowance.\n\nYour limit will reset in ${hoursUntilReset} hours.`);
+                return;
+            }
 
             const fileInput = document.createElement('input');
             fileInput.type = 'file';
@@ -1395,6 +1636,15 @@
                     });
 
                     incrementUserUploads();
+                    
+                    // Record rate limit usage
+                    window.RateLimiter.recordAction('attachments');
+                    window.RateLimiter.recordAction('totalStorage', { size: file.size });
+                    
+                    // Update storage usage bar
+                    if (window.updateStorageUsageBar) {
+                        window.updateStorageUsageBar();
+                    }
                 } catch (error) {
                     console.error('Error handling attachment:', error);
                     alert('Failed to process attachment. Please try again.');
@@ -1460,7 +1710,112 @@
             } else {
                 messagesInputField.classList.remove('has-content');
             }
+            
+            // Update rate limit indicator
+            updateRateLimitIndicator();
         });
+        
+        // Function to update rate limit indicator
+        function updateRateLimitIndicator() {
+            if (!window.RateLimiter) return;
+            
+            const messagesRemaining = window.RateLimiter.getRemainingAllowance('messages');
+            const attachmentsRemaining = window.RateLimiter.getRemainingAllowance('attachments');
+            const storageRemaining = window.RateLimiter.getRemainingAllowance('totalStorage');
+            const storageMB = (storageRemaining / (1024 * 1024)).toFixed(1);
+            
+            // Remove existing indicator
+            const existingIndicator = document.querySelector('.rate-limit-indicator');
+            if (existingIndicator) {
+                existingIndicator.remove();
+            }
+            
+            // Add indicator if limits are low
+            if (messagesRemaining < 10 || attachmentsRemaining < 3 || storageRemaining < 5 * 1024 * 1024) {
+                const indicator = document.createElement('div');
+                indicator.className = 'rate-limit-indicator';
+                indicator.style.cssText = `
+                    position: absolute;
+                    top: -25px;
+                    right: 10px;
+                    font-size: 11px;
+                    color: #ff9500;
+                    background: rgba(255, 149, 0, 0.1);
+                    padding: 3px 8px;
+                    border-radius: 10px;
+                `;
+                
+                const parts = [];
+                if (messagesRemaining < 10) parts.push(`${messagesRemaining} msgs`);
+                if (attachmentsRemaining < 3) parts.push(`${attachmentsRemaining} files`);
+                if (storageRemaining < 5 * 1024 * 1024) parts.push(`${storageMB}MB`);
+                
+                indicator.textContent = `Remaining: ${parts.join(', ')}`;
+                messagesInputField.appendChild(indicator);
+            }
+        }
+        
+        // Update indicator on load
+        updateRateLimitIndicator();
+        
+        // Add storage usage bar
+        function updateStorageUsageBar() {
+            if (!window.RateLimiter) return;
+            
+            // Remove existing bar if any
+            const existingBar = document.querySelector('.storage-usage-bar-container');
+            if (existingBar) {
+                existingBar.remove();
+            }
+            
+            const currentStorage = window.RateLimiter.getCurrentUsage('totalStorage');
+            const maxStorage = window.RateLimiter.limits.totalStorage.max;
+            const percentage = (currentStorage / maxStorage) * 100;
+            const currentMB = (currentStorage / (1024 * 1024)).toFixed(1);
+            const maxMB = (maxStorage / (1024 * 1024)).toFixed(0);
+            
+            // Only show if user has used some storage
+            if (currentStorage > 0) {
+                const barContainer = document.createElement('div');
+                barContainer.className = 'storage-usage-bar-container';
+                barContainer.style.cssText = `
+                    position: absolute;
+                    bottom: 60px;
+                    left: 10px;
+                    right: 10px;
+                    background: rgba(0, 0, 0, 0.05);
+                    border-radius: 8px;
+                    padding: 8px;
+                    font-size: 11px;
+                `;
+                
+                barContainer.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                        <span style="color: #666;">Storage Used</span>
+                        <span style="color: #000; font-weight: 500;">${currentMB}MB / ${maxMB}MB</span>
+                    </div>
+                    <div style="background: #e0e0e0; height: 4px; border-radius: 2px; overflow: hidden;">
+                        <div style="
+                            background: ${percentage > 80 ? '#ff3b30' : percentage > 60 ? '#ff9500' : '#34c759'};
+                            width: ${percentage}%;
+                            height: 100%;
+                            transition: width 0.3s ease;
+                        "></div>
+                    </div>
+                `;
+                
+                const messagesInputArea = document.querySelector('.messages-input-area');
+                if (messagesInputArea) {
+                    messagesInputArea.appendChild(barContainer);
+                }
+            }
+        }
+        
+        // Make it globally accessible
+        window.updateStorageUsageBar = updateStorageUsageBar;
+        
+        // Update storage bar on load and after each upload
+        updateStorageUsageBar();
 
         // Handle Enter key press
         messagesInput.addEventListener('keypress', (e) => {
@@ -1484,6 +1839,320 @@
         // ... existing code ...
         setupMessagesInput();
     });
+
+    // Add notification styles
+    const notificationStyles = `
+        .ios-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 14px;
+            padding: 12px 16px;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 14px;
+            max-width: 90%;
+            width: 320px;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            animation: slideDown 0.3s ease-out;
+            cursor: pointer;
+        }
+
+        .ios-notification .notification-icon {
+            width: 32px;
+            height: 32px;
+            background-color: #007AFF;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .ios-notification .notification-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .ios-notification .notification-title {
+            font-weight: 600;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .ios-notification .notification-message {
+            opacity: 0.9;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translate(-50%, -100%);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
+            to {
+                transform: translate(-50%, -100%);
+                opacity: 0;
+            }
+        }
+
+        .ios-notification.hiding {
+            animation: slideUp 0.3s ease-in forwards;
+        }
+    `;
+
+    // Add styles to document
+    const notificationStyleElement = document.createElement('style');
+    notificationStyleElement.textContent = notificationStyles;
+    document.head.appendChild(notificationStyleElement);
+
+    // Function to show iOS-style notification
+    function showIOSNotification(message) {
+        console.log('Attempting to show notification:', message);
+        
+        // Remove any existing notification
+        const existingNotification = document.querySelector('.ios-notification');
+        if (existingNotification) {
+            console.log('Removing existing notification');
+            existingNotification.remove();
+        }
+
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = 'ios-notification';
+        
+        // Get current time
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const displayHours = hours % 12 || 12;
+        const timeString = `${displayHours}:${minutes} ${ampm}`;
+
+        // Create notification content
+        notification.innerHTML = `
+            <div class="notification-icon">
+                <i class="fas fa-user" style="color: white;"></i>
+            </div>
+            <div class="notification-content">
+                <div class="notification-title">Trush Patel</div>
+                <div class="notification-message">${message}</div>
+            </div>
+        `;
+
+        // Add click handler to focus chat
+        notification.addEventListener('click', () => {
+            console.log('Notification clicked');
+            const messagesApp = document.getElementById('messages-app');
+            if (messagesApp) {
+                messagesApp.scrollIntoView({ behavior: 'smooth' });
+                // Highlight the chat briefly
+                messagesApp.style.transition = 'background-color 0.3s ease';
+                messagesApp.style.backgroundColor = 'rgba(0, 122, 255, 0.1)';
+                setTimeout(() => {
+                    messagesApp.style.backgroundColor = '';
+                }, 1000);
+            }
+            notification.remove();
+        });
+
+        // Add to document
+        document.body.appendChild(notification);
+        console.log('Notification added to document');
+
+        // Auto-hide after 4 seconds
+        setTimeout(() => {
+            console.log('Auto-hiding notification');
+            notification.classList.add('hiding');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                    console.log('Notification removed');
+                }
+            }, 300);
+        }, 4000);
+    }
+
+    // Modify the setupChatListener function to show notifications for new admin messages
+    function setupChatListener(chatRef, messagesContent) {
+        // Track seen messages to prevent duplicates
+        const seenMessageIds = new Set();
+        
+        // Clear any existing messages first to prevent duplicates
+        messagesContent.innerHTML = '';
+        
+        // Show welcome message
+        showWelcomeMessage(messagesContent);
+        
+        // Also listen for deletion events on the user document
+        const userId = getChatUserId();
+        const userStatusRef = firebase.firestore().collection('users').doc(userId);
+        const userStatusUnsubscribe = userStatusRef.onSnapshot(doc => {
+            if (doc.exists && doc.data().chatDeleted) {
+                // Chat was deleted by admin while user was active
+                clearChatHistory();
+                
+                // Reset the deleted flag
+                userStatusRef.update({
+                    chatDeleted: false
+                }).catch(err => console.error("Error resetting chat deleted flag:", err));
+                
+                // Show deletion message
+                messagesContent.innerHTML = '';
+                showChatDeletedMessage(messagesContent);
+            }
+        }, error => {
+            console.error("Error listening for chat deletion:", error);
+        });
+        
+        // Mark previous messages as delivered
+        chatRef.where('sender', '==', 'user')
+            .where('delivered', '==', false)
+            .get()
+            .then(snapshot => {
+                const batch = firebase.firestore().batch();
+                snapshot.forEach(doc => {
+                    batch.update(doc.ref, { delivered: true });
+                });
+                return batch.commit();
+            })
+            .catch(error => {
+                console.error("Error marking messages as delivered:", error);
+            });
+        
+        // Listen for new messages
+        const messagesUnsubscribe = chatRef.orderBy('timestamp', 'asc').onSnapshot(snapshot => {
+            // Process all messages to ensure proper ordering
+            const allMessages = [];
+            let userMessages = [];
+            
+            snapshot.forEach(doc => {
+                const messageData = doc.data();
+                const messageId = doc.id;
+                
+                if (messageData && messageData.timestamp) {
+                    allMessages.push({
+                        id: messageId,
+                        data: messageData
+                    });
+                    
+                    // Track user messages for status updates
+                    if (messageData.sender === 'user') {
+                        const timestamp = messageData.timestamp ? 
+                            (messageData.timestamp.toDate ? messageData.timestamp.toDate().getTime() : new Date(messageData.timestamp).getTime()) 
+                            : Date.now();
+                        
+                        userMessages.push({
+                            id: messageId,
+                            data: messageData,
+                            timestamp: timestamp
+                        });
+                    }
+                }
+            });
+            
+            // Clear and re-render all messages
+            messagesContent.innerHTML = '';
+            showWelcomeMessage(messagesContent);
+            
+            // Display all messages
+            allMessages.forEach(message => {
+                const messageId = message.id;
+                const messageData = message.data;
+                
+                // Mark admin messages as seen if not already
+                if (messageData.sender === 'admin' && !messageData.seen && !seenMessageIds.has(messageId)) {
+                    chatRef.doc(messageId).update({ 
+                        seen: true,
+                        seenAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }).catch(error => console.error("Error marking message as seen:", error));
+                    
+                    // Show notification for new admin messages
+                    console.log('New admin message received:', messageData);
+                    const messageText = messageData.text || 
+                        (messageData.imageUrl ? '📷 Image' : 
+                        (messageData.fileUrl ? '📎 File attachment' : 'New message'));
+                    
+                    showIOSNotification(messageText);
+                }
+                
+                // Mark user messages as delivered if not already
+                if (messageData.sender === 'user' && !messageData.delivered) {
+                    chatRef.doc(messageId).update({ delivered: true })
+                        .catch(error => console.error("Error marking message as delivered:", error));
+                }
+                
+                // Add to seen set
+                seenMessageIds.add(messageId);
+                
+                // Display the message
+                displayMessage(messagesContent, messageData, messageId, false);
+            });
+            
+            // Sort user messages by timestamp
+            userMessages.sort((a, b) => a.timestamp - b.timestamp);
+            
+            // Find latest read message
+            let latestReadMessage = null;
+            for (let i = userMessages.length - 1; i >= 0; i--) {
+                if (userMessages[i].data.seen) {
+                    latestReadMessage = userMessages[i];
+                    break;
+                }
+            }
+            
+            // Find latest delivered message (if no read message)
+            let latestDeliveredMessage = null;
+            if (!latestReadMessage) {
+                for (let i = userMessages.length - 1; i >= 0; i--) {
+                    if (userMessages[i].data.delivered) {
+                        latestDeliveredMessage = userMessages[i];
+                        break;
+                    }
+                }
+            }
+            
+            // Update status displays
+            updateMessageStatuses(messagesContent, latestReadMessage, latestDeliveredMessage);
+            
+            // Scroll to bottom after rendering
+            setTimeout(() => scrollToBottom(messagesContent), 100);
+        }, error => {
+            console.error("Error loading messages:", error);
+            showChatError("Failed to load messages. Please try again later.");
+        });
+        
+        // Return a combined unsubscribe function
+        return function() {
+            userStatusUnsubscribe();
+            messagesUnsubscribe();
+        };
+    }
+
+    // ... existing code ...
 });
 
 // Update time in status bar
@@ -1581,14 +2250,6 @@ function updateContentDisplay(appName) {
         });
     }
     // Add more else-if blocks for other apps that need special handling
-}
-
-// Initialize Vanta.js background
-function initVantaBackground() {
-    // Use a simple gradient background
-    const el = document.getElementById('vanta-background');
-    el.style.background = 'linear-gradient(45deg, #0d1630, #153456)';
-    el.style.opacity = '1';
 }
 
 // Function to go back to home screen when black bar is clicked
@@ -1805,7 +2466,7 @@ function showChatDeletedMessage(messagesContent) {
 function showWelcomeMessage(messagesContent) {
     const welcomeMessage = document.createElement('div');
     welcomeMessage.className = 'message message-received welcome-message';
-    welcomeMessage.textContent = 'Welcome! This is a private chat. You can expect a response within 24 hours.';
+    welcomeMessage.textContent = 'Welcome! This is a private chat. You can expect a response within 24 hours. Please leave your name along with your message.';
     messagesContent.appendChild(welcomeMessage);
 }
 
@@ -1900,10 +2561,6 @@ function setupChatListener(chatRef, messagesContent) {
     // Show welcome message
     showWelcomeMessage(messagesContent);
     
-    // Track timestamps for determining latest messages
-    let latestReadTimestamp = 0;
-    let latestDeliveredTimestamp = 0;
-    
     // Also listen for deletion events on the user document
     const userId = getChatUserId();
     const userStatusRef = firebase.firestore().collection('users').doc(userId);
@@ -1942,53 +2599,74 @@ function setupChatListener(chatRef, messagesContent) {
     
     // Listen for new messages
     const messagesUnsubscribe = chatRef.orderBy('timestamp', 'asc').onSnapshot(snapshot => {
-        // First, collect all messages to determine which is the latest read/delivered
-        const userMessages = [];
+        // Process all messages to ensure proper ordering
+        const allMessages = [];
+        let userMessages = [];
         
-        // Process changes
-        snapshot.docChanges().forEach(change => {
-            if (change.type === 'added' || change.type === 'modified') {
-                const messageId = change.doc.id;
-                const messageData = change.doc.data();
+        snapshot.forEach(doc => {
+            const messageData = doc.data();
+            const messageId = doc.id;
+            
+            if (messageData && messageData.timestamp) {
+                allMessages.push({
+                    id: messageId,
+                    data: messageData
+                });
                 
-                // Process the message based on sender type
+                // Track user messages for status updates
                 if (messageData.sender === 'user') {
-                    // Get timestamp (for sorting)
                     const timestamp = messageData.timestamp ? 
                         (messageData.timestamp.toDate ? messageData.timestamp.toDate().getTime() : new Date(messageData.timestamp).getTime()) 
                         : Date.now();
                     
-                    // Store user message for status processing
                     userMessages.push({
                         id: messageId,
                         data: messageData,
                         timestamp: timestamp
                     });
-                    
-                    // Mark user messages as delivered when they appear
-                    if (change.type === 'added' && !messageData.delivered) {
-                        chatRef.doc(messageId).update({ delivered: true })
-                            .catch(error => console.error("Error marking message as delivered:", error));
-                    }
-                } else if (messageData.sender === 'admin') {
-                    // Mark admin messages as seen
-                    if (change.type === 'added' && !messageData.seen) {
-                        chatRef.doc(messageId).update({ seen: true })
-                            .catch(error => console.error("Error marking message as seen:", error));
-                    }
-                }
-                
-                // Add all messages to seen set to prevent re-processing
-                if (change.type === 'added' && !seenMessageIds.has(messageId)) {
-                    seenMessageIds.add(messageId);
-                    
-                    // Display the message (without status)
-                    displayMessage(messagesContent, messageData, messageId, false);
                 }
             }
         });
         
-        // Sort messages by timestamp
+        // Clear and re-render all messages
+        messagesContent.innerHTML = '';
+        showWelcomeMessage(messagesContent);
+        
+        // Display all messages
+        allMessages.forEach(message => {
+            const messageId = message.id;
+            const messageData = message.data;
+            
+            // Mark admin messages as seen if not already
+            if (messageData.sender === 'admin' && !messageData.seen && !seenMessageIds.has(messageId)) {
+                chatRef.doc(messageId).update({ 
+                    seen: true,
+                    seenAt: firebase.firestore.FieldValue.serverTimestamp()
+                }).catch(error => console.error("Error marking message as seen:", error));
+                
+                // Show notification for new admin messages
+                console.log('New admin message received:', messageData);
+                const messageText = messageData.text || 
+                    (messageData.imageUrl ? '📷 Image' : 
+                    (messageData.fileUrl ? '📎 File attachment' : 'New message'));
+                
+                showIOSNotification(messageText);
+            }
+            
+            // Mark user messages as delivered if not already
+            if (messageData.sender === 'user' && !messageData.delivered) {
+                chatRef.doc(messageId).update({ delivered: true })
+                    .catch(error => console.error("Error marking message as delivered:", error));
+            }
+            
+            // Add to seen set
+            seenMessageIds.add(messageId);
+            
+            // Display the message
+            displayMessage(messagesContent, messageData, messageId, false);
+        });
+        
+        // Sort user messages by timestamp
         userMessages.sort((a, b) => a.timestamp - b.timestamp);
         
         // Find latest read message
@@ -2014,10 +2692,8 @@ function setupChatListener(chatRef, messagesContent) {
         // Update status displays
         updateMessageStatuses(messagesContent, latestReadMessage, latestDeliveredMessage);
         
-        // Only scroll to bottom for new messages, not for edits or deletions
-        if (snapshot.docChanges().some(change => change.type === 'added')) {
-            setTimeout(() => scrollToBottom(messagesContent), 100);
-        }
+        // Scroll to bottom after rendering
+        setTimeout(() => scrollToBottom(messagesContent), 100);
     }, error => {
         console.error("Error loading messages:", error);
         showChatError("Failed to load messages. Please try again later.");
@@ -2079,6 +2755,9 @@ function updateMessageStatuses(messagesContent, latestReadMessage, latestDeliver
 function displayMessage(messagesContent, messageData, messageId, showStatus = false) {
     // Skip if missing required data
     if (!messageData) return;
+    
+    // Debug log to check message data
+    console.log('Displaying message:', { messageData, messageId, sender: messageData.sender });
     
     // Get formatted timestamp for the message
     const timestamp = messageData.timestamp ? 
@@ -2776,6 +3455,33 @@ function setupMessageSending(messageInput, sendButton, chatRef, userId) {
         
         if (!text && !imagePreview) return;
         
+        // Check all rate limits before proceeding
+        const limits = [
+            { type: 'messages', error: 'You have sent too many messages. Please wait before sending more.' },
+            { type: 'totalMessages', error: 'You have reached your daily message limit.' }
+        ];
+        
+        for (const limit of limits) {
+            if (!window.RateLimiter.canPerformAction(limit.type)) {
+                window.RateLimiter.showRateLimitError(limit.type, limit.error);
+                return;
+            }
+        }
+        
+        // Additional check if we have reached absolute Firebase limits
+        const messageCount = window.RateLimiter.getCurrentUsage('totalMessages');
+        const storageUsed = window.RateLimiter.getCurrentUsage('totalStorage');
+        
+        if (messageCount >= 200) {
+            alert('Daily message limit reached (200 messages). This limit helps prevent Firebase quota exhaustion. Please try again tomorrow.');
+            return;
+        }
+        
+        if (storageUsed >= 20 * 1024 * 1024) {
+            alert('Daily storage limit reached (20MB). This limit helps prevent Firebase quota exhaustion. Please try again tomorrow.');
+            return;
+        }
+        
         // Clear input immediately
         messageInput.value = '';
         
@@ -2853,6 +3559,10 @@ function setupMessageSending(messageInput, sendButton, chatRef, userId) {
             
             // Add message to Firestore
             await chatRef.add(messageData);
+            
+            // Record rate limit usage
+            window.RateLimiter.recordAction('messages');
+            window.RateLimiter.recordAction('totalMessages');
             
             // Remove temporary message (the real message will be added by the listener)
             if (tempContainer && tempContainer.parentNode) {
@@ -2944,6 +3654,19 @@ function handleAttachmentClick() {
                 return;
             }
             
+            // Check storage rate limit
+            if (!window.RateLimiter.canPerformAction('totalStorage', file.size)) {
+                const currentUsage = window.RateLimiter.getCurrentUsage('totalStorage');
+                const remaining = window.RateLimiter.getRemainingAllowance('totalStorage');
+                const currentMB = (currentUsage / (1024 * 1024)).toFixed(1);
+                const remainingMB = (remaining / (1024 * 1024)).toFixed(1);
+                const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1);
+                
+                alert(`Storage limit exceeded!\n\nFile size: ${fileSizeMB}MB\nUsed today: ${currentMB}MB\nRemaining: ${remainingMB}MB\n\nYour daily limit is 20MB. This resets every 24 hours.`);
+                document.body.removeChild(fileInput);
+                return;
+            }
+            
             // Create a temporary message container with loading state
             const tempContainer = document.createElement('div');
             tempContainer.className = 'message-container temp-message';
@@ -3016,26 +3739,88 @@ function handleAttachmentClick() {
                     const base64Data = event.target.result;
                     console.log("File processed as base64");
                     
+                    // Check file size - Firestore has a 1MB limit per document
+                    const base64Size = base64Data.length;
+                    const estimatedMB = (base64Size * 0.75) / (1024 * 1024); // Base64 is ~33% larger
+                    
+                    console.log(`File size check:`, {
+                        fileName: file.name,
+                        fileType: file.type,
+                        originalSizeMB: (file.size / (1024 * 1024)).toFixed(2),
+                        base64Length: base64Size,
+                        estimatedSizeMB: estimatedMB.toFixed(2),
+                        isWordDoc: file.type.includes('word') || file.type.includes('officedocument')
+                    });
+                    
                     // Add message to Firestore
                     const chatRef = firebase.firestore()
                         .collection('chats')
                         .doc(getChatUserId())
                         .collection('messages');
                     
-                    const messageData = {
-                        sender: 'user',
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                        delivered: false,
-                        seen: false,
-                        fileName: file.name,
-                        fileType: file.type,
-                        fileData: base64Data,
-                        isInlineFile: true
-                    };
-                    
-                    console.log("Saving message to Firestore");
-                    await chatRef.add(messageData);
-                    console.log("Message saved");
+                    // If file is too large for Firestore (approaching 1MB limit), use Firebase Storage instead
+                    if (base64Size > 900000) { // ~675KB actual size, leaving some buffer
+                        console.log("File too large for inline storage, using Firebase Storage instead");
+                        
+                        tempStatus.textContent = 'Uploading large file...';
+                        
+                        // Upload to Firebase Storage
+                        const timestamp = Date.now();
+                        const uniqueFilename = `chat_files/${getChatUserId()}/${timestamp}_${file.name}`;
+                        const storageRef = firebase.storage().ref(uniqueFilename);
+                        const uploadTask = await storageRef.put(file);
+                        const downloadURL = await uploadTask.ref.getDownloadURL();
+                        
+                        // Save reference in Firestore
+                        const messageData = {
+                            sender: 'user',
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                            delivered: false,
+                            seen: false,
+                            fileName: file.name,
+                            fileType: file.type,
+                            fileUrl: downloadURL,
+                            fileSize: file.size
+                        };
+                        
+                        console.log("Saving file reference to Firestore");
+                        await chatRef.add(messageData);
+                        console.log("File reference saved");
+                        
+                        // Record rate limit usage
+                        window.RateLimiter.recordAction('attachments');
+                        window.RateLimiter.recordAction('totalStorage', { size: file.size });
+                        
+                        // Update storage usage bar
+                        if (window.updateStorageUsageBar) {
+                            window.updateStorageUsageBar();
+                        }
+                    } else {
+                        // Small file, store inline as before
+                        const messageData = {
+                            sender: 'user',
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                            delivered: false,
+                            seen: false,
+                            fileName: file.name,
+                            fileType: file.type,
+                            fileData: base64Data,
+                            isInlineFile: true
+                        };
+                        
+                        console.log("Saving message to Firestore");
+                        await chatRef.add(messageData);
+                        console.log("Message saved");
+                        
+                        // Record rate limit usage
+                        window.RateLimiter.recordAction('attachments');
+                        window.RateLimiter.recordAction('totalStorage', { size: file.size });
+                        
+                        // Update storage usage bar
+                        if (window.updateStorageUsageBar) {
+                            window.updateStorageUsageBar();
+                        }
+                    }
                     
                     // Remove temporary message
                     if (tempContainer && tempContainer.parentNode) {
@@ -3180,3 +3965,428 @@ async function handleSendMessage() {
         alert('Failed to send message. Please try again.');
     }
 } 
+
+// ... existing code ...
+// Typewriter animation for background text (two lines, two spans)
+(function typewriterEffect() {
+    // Check if mobile device - skip typewriter animations on mobile
+    if (window.innerWidth <= 768) {
+        return; // Exit early on mobile devices
+    }
+    
+    const line1 = 'Trush Patel';
+    const line2 = 'Software Engineer';
+    const line3 = 'Download Resume';
+    const el1 = document.getElementById('typewriter-line1');
+    const el2 = document.getElementById('typewriter-line2');
+    const el3 = document.getElementById('typewriter-line3');
+    let char1 = 0, char2 = 0, char3 = 0;
+    const delay = 80;
+
+    // Hide the second and third lines initially
+    if (el2) el2.style.visibility = 'hidden';
+    if (el3) el3.style.visibility = 'hidden';
+    if (el1) el1.style.width = '0px';
+    if (el2) el2.style.width = '0px';
+    if (el3) el3.style.width = '0px';
+
+    function typeLine1() {
+        if (char1 < line1.length) {
+            el1.textContent += line1[char1++];
+            // Expand width to fit content
+            el1.style.width = el1.scrollWidth + 'px';
+            setTimeout(typeLine1, delay);
+        } else {
+            setTimeout(() => {
+                if (el2) el2.style.visibility = 'visible';
+                typeLine2();
+            }, 400);
+        }
+    }
+    function typeLine2() {
+        if (char2 < line2.length) {
+            el2.textContent += line2[char2++];
+            // Expand width to fit content
+            el2.style.width = el2.scrollWidth + 'px';
+            setTimeout(typeLine2, delay);
+        } else {
+            setTimeout(() => {
+                if (el3) el3.style.visibility = 'visible';
+                typeLine3();
+            }, 400);
+        }
+    }
+    function typeLine3() {
+        if (char3 < line3.length) {
+            el3.textContent += line3[char3++];
+            // Expand width to fit content
+            el3.style.width = el3.scrollWidth + 'px';
+            setTimeout(typeLine3, delay);
+        } else {
+            // Add click functionality for Download Resume
+            el3.addEventListener('click', () => {
+                // Create a temporary link element to download the resume
+                const link = document.createElement('a');
+                link.href = 'files/TrushPatel_Resume.pdf';
+                link.download = 'TrushPatel_Resume.pdf';
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+            // Left-side typewriter is complete, now start the right-side typewriter
+            setTimeout(() => {
+                startRightTypewriter();
+            }, 600); // Small delay before starting right-side
+        }
+    }
+    if (el1 && el2 && el3) typeLine1();
+})();
+
+// Typewriter animation for right-side text (three lines, clickable)
+function startRightTypewriter() {
+    // Check if mobile device - skip typewriter animations on mobile
+    if (window.innerWidth <= 768) {
+        return; // Exit early on mobile devices
+    }
+    
+    const line1 = 'GitHub';
+    const line2 = 'LinkedIn';
+    const line3 = 'Contact me';
+    const el1 = document.getElementById('typewriter-line-right1');
+    const el2 = document.getElementById('typewriter-line-right2');
+    const el3 = document.getElementById('typewriter-line-right3');
+    let char1 = 0, char2 = 0, char3 = 0;
+    const delay = 80;
+
+    // Ensure all elements exist before starting
+    if (!el1 || !el2 || !el3) return;
+
+    // Make the first element visible and initialize
+    el1.style.visibility = 'visible';
+    el2.style.visibility = 'hidden';
+    el3.style.visibility = 'hidden';
+    el1.style.width = '0px';
+    el2.style.width = '0px';
+    el3.style.width = '0px';
+
+    function typeLine1() {
+        if (char1 < line1.length) {
+            el1.textContent += line1[char1++];
+            el1.style.width = el1.scrollWidth + 'px';
+            setTimeout(typeLine1, delay);
+        } else {
+            // Add click functionality for GitHub
+            el1.addEventListener('click', () => {
+                window.open('https://github.com/trushpatel97', '_blank');
+            });
+            setTimeout(() => {
+                if (el2) {
+                    el2.style.visibility = 'visible';
+                    typeLine2();
+                }
+            }, 400);
+        }
+    }
+    
+    function typeLine2() {
+        if (char2 < line2.length) {
+            el2.textContent += line2[char2++];
+            el2.style.width = el2.scrollWidth + 'px';
+            setTimeout(typeLine2, delay);
+        } else {
+            // Add click functionality for LinkedIn
+            el2.addEventListener('click', () => {
+                window.open('https://www.linkedin.com/in/trush-patel-163813128/', '_blank');
+            });
+            setTimeout(() => {
+                if (el3) {
+                    el3.style.visibility = 'visible';
+                    typeLine3();
+                }
+            }, 400);
+        }
+    }
+    
+    function typeLine3() {
+        if (char3 < line3.length) {
+            el3.textContent += line3[char3++];
+            el3.style.width = el3.scrollWidth + 'px';
+            setTimeout(typeLine3, delay);
+        } else {
+            // Add click functionality for Contact me
+            el3.addEventListener('click', () => {
+                // Open messages app (same as clicking messages app from phone)
+                const messagesApp = document.getElementById('messages-app');
+                if (messagesApp) {
+                    // Add active class to show app screen
+                    messagesApp.classList.add('active');
+                    // Update status bar to black for apps
+                    const statusBar = document.querySelector('.status-bar');
+                    statusBar.classList.add('in-app');
+                    statusBar.classList.remove('light-mode');
+                    
+                    // Update content display
+                    updateContentDisplay('messages');
+                }
+            });
+            
+            // Start bottom right typewriter after completion
+            setTimeout(() => {
+                startBottomRightTypewriter();
+            }, 400);
+        }
+    }
+    
+    typeLine1();
+}
+
+// Typewriter animation for bottom-right text (Book Interview)
+function startBottomRightTypewriter() {
+    // Check if mobile device - skip typewriter animations on mobile
+    if (window.innerWidth <= 768) {
+        return; // Exit early on mobile devices
+    }
+    
+    const line = '';
+    const el = document.getElementById('typewriter-line-bottom-right');
+    const qrContainer = document.getElementById('qr-code-container');
+    const qrImage = document.getElementById('qr-code-image');
+    let char = 0;
+    const delay = 80;
+
+    // Ensure element exists before starting
+    if (!el) return;
+
+    // Make the element visible and initialize
+    el.style.visibility = 'visible';
+    el.style.width = '0px';
+
+    function typeLine() {
+        if (char < line.length) {
+            el.textContent += line[char++];
+            el.style.width = el.scrollWidth + 'px';
+            setTimeout(typeLine, delay);
+        } else {
+            // Add click functionality for Book Interview
+            el.addEventListener('click', () => {
+                window.open('https://calendly.com/trushp097/30min', '_blank');
+            });
+            
+            // Show QR code after typing completes
+            setTimeout(() => {
+                if (qrContainer) {
+                    qrContainer.classList.add('visible');
+                    
+                    // Make QR code clickable
+                    if (qrImage) {
+                        qrImage.style.cursor = 'pointer';
+                        qrImage.addEventListener('click', () => {
+                            window.open('https://calendly.com/trushp097/30min', '_blank');
+                        });
+                        
+                        // Add hover effect to QR code
+                        qrImage.addEventListener('mouseenter', () => {
+                            qrImage.style.transform = 'scale(1.05)';
+                            qrImage.style.transition = 'transform 0.2s ease';
+                        });
+                        
+                        qrImage.addEventListener('mouseleave', () => {
+                            qrImage.style.transform = 'scale(1)';
+                        });
+                    }
+                }
+            }, 200);
+        }
+    }
+    
+    typeLine();
+}
+// ... existing code ...
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Lofi Music Player Button Logic with floating volume slider and playlist navigation
+    (function() {
+        const toggleWrapper = document.getElementById('lofi-toggle-wrapper');
+        const toggleBtn = document.getElementById('lofi-toggle');
+        const icon = document.getElementById('icon-volume');
+        const sliderPanel = document.getElementById('lofi-volume-slider');
+        const slider = document.getElementById('lofi-slider');
+        const audio = document.getElementById('lofi-audio');
+        const skipBtn = document.getElementById('lofi-skip');
+        const backBtn = document.getElementById('lofi-back');
+        const songTitle = document.getElementById('lofi-song-title');
+        let hideTimeout = null;
+
+        // Playlist definition
+        const playlist = [
+            { title: 'Kingdom by the Sea - Mrmcchickino', start: 25, end: 102 }, // 1:42 (skipping first 25 seconds)
+            { title: 'Stargaze Walk With Me - Growhead', start: 102, end: 199 }, // 3:19
+            { title: 'Departure (ft. Snug) - Peak Twilight', start: 199, end: 288 }, // 4:48
+            { title: 'Mirage - Sebastian Kamae & Sleepermane', start: 288, end: 423 }, // 7:03
+            { title: 'Miles Away - Fnonose', start: 423, end: 543 }, // 9:03
+            { title: 'Goodnight & Sweetdreams - Boone', start: 543, end: 672 }, // 11:12
+            { title: 'Tales Of Ibon Ulan (Ame No UTA) - Ihatemago', start: 672, end: 801 }, // 13:21
+            { title: 'Belong - Zadbeatz, Tosama Beats', start: 801, end: 911 }, // 15:11
+            { title: 'Gentle Soul - Kaspa. x Softy', start: 911, end: 1055 }, // 17:35
+            { title: 'Seaside - reidenshi, a/wshhine', start: 1055, end: 9999 } // End
+        ];
+        let currentSong = 0;
+
+        function setSong(index, play = true) {
+            currentSong = Math.max(0, Math.min(index, playlist.length - 1));
+            audio.currentTime = playlist[currentSong].start;
+            if (play) audio.play();
+            updateSongTitle();
+        }
+
+        function updateSongTitle() {
+            if (songTitle) {
+                const marquee = songTitle.querySelector('.marquee');
+                const marqueeTexts = songTitle.querySelectorAll('.marquee-text');
+                if (marquee && marqueeTexts.length === 2) {
+                    marqueeTexts[0].textContent = playlist[currentSong].title;
+                    marqueeTexts[1].textContent = playlist[currentSong].title;
+                    // Wait for DOM update
+                    setTimeout(() => {
+                        const parentWidth = songTitle.offsetWidth;
+                        const textWidth = marqueeTexts[0].scrollWidth;
+                        if (textWidth > parentWidth) {
+                            const duration = Math.max(6, (textWidth / 30) * 2); // 15px/sec, min 6s
+                            marquee.style.animationDuration = duration + 's';
+                            marquee.style.animationPlayState = 'running';
+                        } else {
+                            marquee.style.animationPlayState = 'paused';
+                            marquee.style.transform = 'translateX(0)';
+                        }
+                    }, 10);
+                }
+            }
+        }
+
+        // Skip to next song
+        if (skipBtn) {
+            skipBtn.addEventListener('click', function(e) {
+                setSong((currentSong + 1) % playlist.length);
+            });
+        }
+        // Go to previous song (or restart current if >2s in)
+        if (backBtn) {
+            backBtn.addEventListener('click', function(e) {
+                if (audio.currentTime - playlist[currentSong].start > 2) {
+                    setSong(currentSong, true);
+                } else {
+                    setSong((currentSong - 1 + playlist.length) % playlist.length);
+                }
+            });
+        }
+        // Auto-advance to next song
+        audio.addEventListener('timeupdate', function() {
+            if (audio.currentTime >= playlist[currentSong].end) {
+                if (currentSong < playlist.length - 1) {
+                    setSong(currentSong + 1);
+                } else {
+                    audio.pause();
+                }
+            }
+        });
+        // If user seeks, update currentSong
+        audio.addEventListener('seeked', function() {
+            for (let i = 0; i < playlist.length; i++) {
+                if (audio.currentTime >= playlist[i].start && audio.currentTime < playlist[i].end) {
+                    currentSong = i;
+                    updateSongTitle();
+                    break;
+                }
+            }
+        });
+
+        // On load, set initial song title
+        updateSongTitle();
+
+        // Set initial audio position to skip first 25 seconds of Kingdom by the Sea
+        if (audio) {
+            audio.currentTime = playlist[currentSong].start; // Start at 25 seconds for the first song
+        }
+
+        // ... existing lofi logic ...
+        // Helper: update icon based on volume/mute
+        function updateIcon() {
+            if (audio.muted || audio.volume === 0) {
+                // Muted icon (volume off with slash)
+                icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#fff" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.74 2.5-2.26 2.5-4.02z"/><path d="M3 10v4h4l5 5V5l-5 5H3z"/><line x1="21" y1="3" x2="3" y2="21" stroke="#fff" stroke-width="2"/></svg>';
+            } else {
+                // Regular volume icon
+                icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#fff" viewBox="0 0 24 24"><path d="M3 10v4h4l5 5V5l-5 5H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.74 2.5-2.26 2.5-4.02z"/></svg>';
+            }
+        }
+
+        // Show slider on click or hover
+        function showSlider() {
+            if (hideTimeout) {
+                clearTimeout(hideTimeout);
+                hideTimeout = null;
+            }
+            sliderPanel.style.opacity = '1';
+            sliderPanel.style.pointerEvents = 'auto';
+            sliderPanel.style.display = 'block';
+        }
+        // Hide slider with fade after 1s
+        function hideSlider() {
+            if (hideTimeout) clearTimeout(hideTimeout);
+            hideTimeout = setTimeout(() => {
+                sliderPanel.style.opacity = '0';
+                sliderPanel.style.pointerEvents = 'none';
+                setTimeout(() => {
+                    sliderPanel.style.display = 'none';
+                }, 300); // match CSS transition
+            }, 1000);
+        }
+
+        // Toggle mute/unmute on icon click
+        icon.parentElement.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent play/pause toggle
+            audio.muted = !audio.muted;
+            updateIcon();
+        });
+
+        // Toggle play/pause on button click, show slider
+        toggleBtn.addEventListener('click', function(e) {
+            // Only play/pause, do not toggle mute here
+            audio.volume = parseFloat(slider.value);
+            if (audio.paused) {
+                audio.play();
+            } else {
+                audio.pause();
+            }
+            updateIcon();
+            showSlider();
+        });
+
+        // Show slider on hover
+        toggleWrapper.addEventListener('mouseenter', showSlider);
+        // Hide slider when mouse leaves the wrapper (button + slider)
+        toggleWrapper.addEventListener('mouseleave', hideSlider);
+
+        // Adjust volume live
+        slider.addEventListener('input', function() {
+            audio.volume = parseFloat(slider.value);
+            audio.muted = audio.volume === 0;
+            updateIcon();
+            if (audio.paused && audio.volume > 0) {
+                audio.play();
+            }
+        });
+
+        // Update icon on play/pause/mute/volume
+        audio.addEventListener('play', updateIcon);
+        audio.addEventListener('pause', updateIcon);
+        audio.addEventListener('volumechange', updateIcon);
+        audio.addEventListener('ended', updateIcon);
+
+        // Set initial icon and slider
+        slider.value = audio.volume;
+        updateIcon();
+    })();
+});
+// ... existing code ...

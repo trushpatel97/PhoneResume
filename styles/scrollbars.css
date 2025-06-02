@@ -1,0 +1,112 @@
+/* iOS-style Scrollbars for Mobile */
+@media (max-width: 768px) {
+    /* Common scrollbar styles for all scrollable containers */
+    .app-content,
+    .about-container,
+    .skills-container,
+    .education-list,
+    .experience-list,
+    .project-content,
+    .messages-content,
+    .topics-list,
+    .projects-folder,
+    .folder-grid-container {
+        /* Enable smooth scrolling */
+        -webkit-overflow-scrolling: touch;
+        
+        /* Show scrollbar */
+        scrollbar-width: thin;
+        -ms-overflow-style: -ms-autohiding-scrollbar;
+        
+        /* Basic scrollbar styling */
+        &::-webkit-scrollbar {
+            width: 5px;
+            background-color: transparent;
+        }
+        
+        &::-webkit-scrollbar-track {
+            background-color: transparent;
+        }
+        
+        &::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+            transition: background-color 0.2s ease;
+        }
+        
+        /* Fade in scrollbar on hover/touch */
+        &:hover::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Active scrolling state */
+        &:active::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+    }
+
+    /* Ensure proper padding for scrollable content */
+    .app-content {
+        padding-bottom: 60px !important; /* Space for home indicator */
+    }
+
+    /* Specific adjustments for different apps */
+    .about-container,
+    .skills-container,
+    .education-list,
+    .experience-list,
+    .project-content {
+        padding-bottom: 80px !important; /* Extra space for longer content */
+    }
+
+    /* Projects folder specific adjustments */
+    .projects-folder {
+        padding-bottom: 70px !important;
+        overflow-y: auto !important;
+        height: 100% !important;
+    }
+
+    .folder-grid-container {
+        padding-bottom: 20px !important;
+        overflow-y: auto !important;
+    }
+
+    /* Messages app specific adjustments */
+    .messages-content {
+        padding-bottom: 70px !important; /* Space for input area */
+    }
+}
+
+/* Hide scrollbars while maintaining scroll functionality */
+.app-content,
+.about-container,
+.skills-container,
+.education-list,
+.experience-list,
+.project-content,
+.messages-content,
+.topics-list,
+.projects-folder,
+.folder-grid-container,
+.leaderboard-list,
+.search-results-content {
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+    
+    /* Enable smooth scrolling */
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Remove any existing scrollbar styles */
+&::-webkit-scrollbar-track,
+&::-webkit-scrollbar-thumb {
+    display: none;
+} 

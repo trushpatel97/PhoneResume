@@ -203,4 +203,25 @@
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+/* Mobile view adjustments */
+@media (max-width: 480px) {
+    .google-search-container {
+        justify-content: flex-start;
+        padding-top: 25vh; /* Push content down to center vertically */
+    }
+
+    .google-logo {
+        margin-bottom: 20px; /* Reduced margin for mobile */
+    }
+
+    .google-logo img {
+        width: 160px; /* Slightly smaller logo for mobile */
+    }
+
+    .safari-search {
+        width: 90%; /* Slightly narrower search box on mobile */
+        max-width: none;
+    }
 } 

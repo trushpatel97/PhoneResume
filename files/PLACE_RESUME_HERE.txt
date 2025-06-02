@@ -1,0 +1,9 @@
+IMPORTANT: Add Your Resume Here
+================================
+
+Please add your resume PDF file to this directory with the filename:
+TrushPatel_Resume.pdf
+
+The "Download Resume" button will download this file when clicked.
+
+Make sure the file is named exactly as shown above for the download feature to work correctly. 

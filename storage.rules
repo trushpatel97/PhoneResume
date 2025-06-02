@@ -1,0 +1,67 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return request.auth != null && 
+        (request.auth.token.admin == true || 
+         firestore.get(/databases/(default)/documents/adminUsers/$(request.auth.uid)).data.isAdmin == true);
+    }
+    
+    function isValidFileType() {
+      return request.resource.contentType.matches('image/.*') ||
+             request.resource.contentType.matches('application/pdf') ||
+             request.resource.contentType.matches('application/msword') ||
+             request.resource.contentType.matches('application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    }
+    
+    function isValidFileSize() {
+      return request.resource.size < 50 * 1024 * 1024; // 50MB max file size
+    }
+
+    // Chat files section - accessible by web users and authenticated users
+    match /chat_files/{userId}/{fileName} {
+      // Allow access for web users (user_ prefix)
+      allow read, write: if userId.matches('user_.*') && 
+                         isValidFileType() && 
+                         isValidFileSize();
+      
+      // Allow access for authenticated users
+      allow read, write: if isAuthenticated() && 
+                         isValidFileType() && 
+                         isValidFileSize() &&
+                         (request.auth.uid == userId || isAdmin());
+    }
+
+    // Admin uploads section
+    match /admin_uploads/{adminId}/{userId}/{fileName} {
+      allow read: if isAuthenticated() || userId.matches('user_.*');
+      allow write: if isAuthenticated() && 
+                    request.auth.uid == adminId && 
+                    isAdmin() &&
+                    isValidFileType() && 
+                    isValidFileSize();
+    }
+
+    // Public uploads section
+    match /public_uploads/{userId}/{allFiles=**} {
+      allow read: if true;
+      allow write: if (isAuthenticated() || userId.matches('user_.*')) &&
+                    isValidFileType() && 
+                    isValidFileSize();
+    }
+
+    // Default rules for all other paths
+    match /{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && 
+                    request.auth.uid == resource.data.userId &&
+                    isValidFileType() && 
+                    isValidFileSize();
+    }
+  }
+} 

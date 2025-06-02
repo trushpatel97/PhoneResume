@@ -1,0 +1,21 @@
+IMPORTANT: Configure Your Booking Link
+======================================
+
+The "Book Interview" button is currently set up to open a booking link when clicked.
+
+To make it functional, you need to:
+
+1. Update the link in script.js (around line 4115) in the startBottomRightTypewriter function:
+   - Replace 'https://calendly.com/your-link' with your actual booking system URL
+   - This could be Calendly, Cal.com, or any other booking service you use
+
+2. The QR code image (images/QRCode.png) should link to the same booking URL
+   - Make sure your QR code is generated to point to your booking link
+
+Example booking services:
+- Calendly: https://calendly.com/your-username
+- Cal.com: https://cal.com/your-username
+- Google Calendar appointment slots
+- Microsoft Bookings
+
+The QR code will appear automatically after the "Book Interview" text finishes typing. 

@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -263,6 +262,41 @@
             cursor: pointer;
             color: var(--primary-color);
             font-size: 16px;
+            padding: 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .chat-button:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        .chat-button i {
+            font-size: 16px;
+        }
+        
+        #rename-user-btn {
+            color: #007AFF;
+        }
+        
+        #rename-user-btn:hover {
+            background-color: rgba(0, 122, 255, 0.1);
+        }
+        
+        #delete-chat-btn {
+            color: #FF3B30;
+        }
+        
+        #delete-chat-btn:hover {
+            background-color: rgba(255, 59, 48, 0.1);
+        }
+        
+        #export-chat-btn {
+            color: #34C759;
+        }
+        
+        #export-chat-btn:hover {
+            background-color: rgba(52, 199, 89, 0.1);
         }
         
         .chat-messages {
@@ -558,6 +592,88 @@
         .preview-message-btn:hover {
             background-color: #0056b3;
         }
+        
+        .rename-user-btn {
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 2px 6px;
+            margin-left: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .delete-user-btn {
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            padding: 2px 6px;
+            margin-left: 4px;
+            border-radius: 4px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .user-item:hover .rename-user-btn,
+        .user-item:hover .delete-user-btn {
+            opacity: 1;
+        }
+        
+        .delete-user-btn:hover {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+        
+        .user-item.active .delete-user-btn {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .user-item.active .delete-user-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .user-item.active .rename-user-btn {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .user-item.active .rename-user-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        /* Add CSS for the location display */
+        .user-location {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .user-location i {
+            font-size: 11px;
+            color: #dc3545;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .refresh-location-btn:hover {
+            color: #007bff;
+        }
+        
+        .refresh-location-btn:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body>
@@ -621,6 +737,9 @@
                         <div class="current-user-id">Select a user</div>
                     </div>
                     <div class="chat-actions">
+                        <button class="chat-button" id="rename-user-btn" title="Rename User">
+                            <i class="fas fa-edit"></i>
+                        </button>
                         <button class="chat-button" id="delete-chat-btn">
                             <i class="fas fa-trash"></i>
                         </button>
@@ -682,6 +801,7 @@
             const adminStatusToggle = document.getElementById('admin-status-toggle');
             const deleteChatBtn = document.getElementById('delete-chat-btn');
             const exportChatBtn = document.getElementById('export-chat-btn');
+            const renameUserBtn = document.getElementById('rename-user-btn');
             
             let selectedUserId = null;
             let currentUnsubscribe = null;
@@ -900,7 +1020,18 @@
                 } else if (messageData.fileUrl) {
                     previewText = `File attachment: ${messageData.fileName || 'document'}`;
                 } else if (messageData.fileData) {
-                    previewText = 'File attachment';
+                    // More descriptive preview for fileData
+                    if (messageData.fileType && messageData.fileType.startsWith('image/')) {
+                        previewText = '📷 Image';
+                    } else if (messageData.fileType && messageData.fileType.startsWith('video/')) {
+                        previewText = '🎥 Video';
+                    } else if (messageData.fileType === 'application/pdf') {
+                        previewText = '📄 PDF document';
+                    } else if (messageData.fileType && messageData.fileType.includes('word')) {
+                        previewText = '📝 Word document';
+                    } else {
+                        previewText = `📎 ${messageData.fileName || 'File attachment'}`;
+                    }
                 }
                 
                 // Limit preview text
@@ -1051,9 +1182,11 @@
                                 .limit(1)
                                 .get({ source: 'server' }) // Force fetch from server instead of cache
                                 .then(msgSnapshot => {
-                                    // Get online status
-                                    const online = userData.online === true; // explicitly check for true
+                                    // Get online status and display name
+                                    const online = userData.online === true;
                                     const lastActive = userData.lastActive ? new Date(userData.lastActive.toDate()) : null;
+                                    const displayName = userData.displayName || userId; // Get display name from user data
+                                    const city = userData.city || 'Location unknown'; // Get city from user data
                                     
                                     // Format the online status for display
                                     let onlineStatus = online ? 'Online' : 'Offline';
@@ -1067,32 +1200,12 @@
                                     
                                     if (!msgSnapshot.empty) {
                                         const lastMessage = msgSnapshot.docs[0].data();
-                                        
-                                        // Format the preview text based on message type
-                                        if (lastMessage.imageUrl) {
-                                            lastMessageText = 'Image attachment';
-                                        } else if (lastMessage.fileUrl) {
-                                            lastMessageText = `File attachment: ${lastMessage.fileName || 'document'}`;
-                                        } else if (lastMessage.fileData) {
-                                            lastMessageText = 'File attachment';
-                                        } else {
-                                            lastMessageText = lastMessage.text || '';
-                                        }
-                                        
-                                        if (lastMessageText.length > 30) {
-                                            lastMessageText = lastMessageText.substring(0, 30) + '...';
-                                        }
-                                        
-                                        if (lastMessage.sender === 'admin') {
-                                            lastMessageText = 'You: ' + lastMessageText;
-                                        }
-                                        
+                                        lastMessageText = lastMessage.text || '';
                                         if (lastMessage.timestamp) {
-                                            lastMessageTime = new Date(lastMessage.timestamp.toDate ? lastMessage.timestamp.toDate() : lastMessage.timestamp);
+                                            lastMessageTime = new Date(lastMessage.timestamp.toDate());
                                         }
                                     }
                                     
-                                    // Format last active time
                                     let lastActiveDisplay = lastMessageTime ? formatTimeRelative(lastMessageTime) : 'Unknown';
                                     if (!lastMessageTime && lastActive) {
                                         lastActiveDisplay = formatTimeRelative(lastActive);
@@ -1100,6 +1213,8 @@
                                     
                                     return {
                                         userId,
+                                        displayName, // Include displayName in returned data
+                                        city, // Include city in returned data
                                         online,
                                         lastActive,
                                         lastMessageText,
@@ -1123,6 +1238,8 @@
                                     
                                     return {
                                         userId,
+                                        displayName: userData.displayName || userId, // Include displayName in error case too
+                                        city: userData.city || 'Location unknown', // Include city in error case
                                         online: userData.online,
                                         lastActive: lastActive,
                                         lastMessageText: 'Unable to load last message',
@@ -1157,20 +1274,56 @@
                             const userItem = document.createElement('div');
                             userItem.className = 'user-item';
                             userItem.dataset.userId = user.userId;
-                                    if (user.online) {
-                                        userItem.classList.add('online');
+                            if (user.online) {
+                                userItem.classList.add('online');
                             }
+                            
+                            // Get the display name from user data, fallback to userId if not set
+                            const displayName = user.displayName || user.userId;
                             
                             userItem.innerHTML = `
                                 <div class="user-info">
-                                            <div class="user-status-indicator ${user.online ? 'online' : 'offline'}" style="display: none;"></div>
-                                            <div class="user-id">${user.userId} ${user.online ? '<span class="user-online-badge">Online</span>' : ''}</div>
-                                            <div class="last-message">${user.lastMessageText}</div>
-                                            <div class="message-time">
-                                                ${user.online ? 'Active now' : `Last seen: ${user.lastActiveDisplay}`}
-                                            </div>
+                                    <div class="user-status-indicator ${user.online ? 'online' : 'offline'}" style="display: none;"></div>
+                                    <div class="user-id">
+                                        ${displayName} ${user.online ? '<span class="user-online-badge">Online</span>' : ''}
+                                        <button class="rename-user-btn" title="Rename User">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="delete-user-btn" title="Delete User">
+                                            <i class="fas fa-user-times"></i>
+                                        </button>
+                                    </div>
+                                    <div class="user-location">
+                                        <i class="fas fa-map-marker-alt"></i> ${user.city || 'Location unknown'}
+                                        <button class="refresh-location-btn" title="Refresh Location" style="background: none; border: none; color: #666; cursor: pointer; padding: 2px 6px;">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </button>
+                                    </div>
+                                    <div class="last-message">${user.lastMessageText}</div>
+                                    <div class="message-time">
+                                        ${user.online ? 'Active now' : `Last seen: ${user.lastActiveDisplay}`}
+                                    </div>
                                 </div>
                             `;
+                            
+                            // Add event listener for rename button
+                            const renameBtn = userItem.querySelector('.rename-user-btn');
+                            renameBtn.addEventListener('click', (e) => {
+                                e.stopPropagation(); // Prevent triggering the user selection
+                                const newName = prompt('Enter new name for user:', user.userId);
+                                if (newName && newName.trim() && newName !== user.userId) {
+                                    renameUser(user.userId, newName.trim());
+                                }
+                            });
+                            
+                            // Add event listener for delete button
+                            const deleteBtn = userItem.querySelector('.delete-user-btn');
+                            deleteBtn.addEventListener('click', (e) => {
+                                e.stopPropagation(); // Prevent triggering the user selection
+                                if (confirm(`Are you sure you want to completely delete user ${displayName}? This will permanently remove all their data and cannot be undone.`)) {
+                                    deleteUser(user.userId);
+                                }
+                            });
                             
                             userItem.addEventListener('click', () => {
                                 // Remove active class from all items
@@ -1186,11 +1339,12 @@
                                 noChatSelected.style.display = 'none';
                                 
                                 // Set selected user
-                                        selectedUserId = user.userId;
-                                        currentUserId.textContent = `User: ${user.userId.substring(0, 15)}...`;
+                                selectedUserId = user.userId;
+                                const displayName = user.displayName || user.userId;
+                                currentUserId.textContent = `User: ${displayName.substring(0, 15)}...`;
                                 
                                 // Load chat messages
-                                        loadChatMessages(user.userId);
+                                loadChatMessages(user.userId);
                             });
                             
                             userList.appendChild(userItem);
@@ -1360,6 +1514,35 @@
                         fileType: messageData.fileType || 'none',
                         sender: messageData.sender
                     });
+                    
+                    // Additional debug for file attachments
+                    if (messageData.fileData || messageData.fileUrl) {
+                        console.log(`Attachment details for ${messageId}:`, {
+                            fileName: messageData.fileName,
+                            fileType: messageData.fileType,
+                            isInlineFile: messageData.isInlineFile,
+                            hasFileData: !!messageData.fileData,
+                            fileDataLength: messageData.fileData ? messageData.fileData.length : 0,
+                            isWordDoc: messageData.fileType && (messageData.fileType.includes('word') || messageData.fileType.includes('officedocument'))
+                        });
+                        
+                        // Special debug for Word documents
+                        if (messageData.fileType && (
+                            messageData.fileType === 'application/msword' || 
+                            messageData.fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+                            messageData.fileType.includes('word')
+                        )) {
+                            console.log('WORD DOCUMENT DETECTED:', {
+                                messageId: messageId,
+                                fileName: messageData.fileName,
+                                fileType: messageData.fileType,
+                                hasFileData: !!messageData.fileData,
+                                hasFileUrl: !!messageData.fileUrl,
+                                fileDataStart: messageData.fileData ? messageData.fileData.substring(0, 100) : 'No fileData',
+                                isInlineFile: messageData.isInlineFile
+                            });
+                        }
+                    }
                     
                     // Skip if invalid message
                     if (!messageData || (!messageData.text && !messageData.imageUrl && !messageData.fileUrl && !messageData.fileData)) {
@@ -1544,7 +1727,7 @@
                         const icon = document.createElement('i');
                         if (messageData.fileType === 'application/pdf') {
                             icon.className = 'fas fa-file-pdf';
-                        } else if (messageData.fileType && messageData.fileType.includes('word')) {
+                        } else if (messageData.fileType && (messageData.fileType.includes('word') || messageData.fileType === 'application/msword' || messageData.fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
                             icon.className = 'fas fa-file-word';
                         } else if (messageData.fileType && messageData.fileType.includes('excel')) {
                             icon.className = 'fas fa-file-excel';
@@ -1582,15 +1765,211 @@
                         
                         fileActions.appendChild(previewButton);
                         
+                        // Add download button for fileData attachments
+                        if (messageData.fileData) {
+                            const downloadButton = document.createElement('button');
+                            downloadButton.className = 'admin-action-btn download-message-btn';
+                            downloadButton.innerHTML = '<i class="fas fa-download"></i>';
+                            downloadButton.title = 'Download document';
+                            
+                            downloadButton.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                
+                                // Create a download link
+                                const link = document.createElement('a');
+                                link.href = messageData.fileData;
+                                link.download = messageData.fileName || 'document';
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                            });
+                            
+                            fileActions.appendChild(downloadButton);
+                        }
+                        
+                        docContainer.appendChild(fileActions);
+                        
                         // Add click handler to the entire document container
-                        docContainer.style.cursor = 'pointer';
                         docContainer.addEventListener('click', (e) => {
                             e.stopPropagation();
                             showPreview(messageData, e);
                         });
                         
-                        docContainer.appendChild(fileActions);
                         messageContent.appendChild(docContainer);
+                    } else if (messageData.fileData && messageData.isInlineFile) {
+                        // Handle base64 encoded files from users
+                        if (messageData.fileType && messageData.fileType.startsWith('image/')) {
+                            // Handle inline images
+                            messageElement.className += ' image-message';
+                            const image = document.createElement('img');
+                            image.src = messageData.fileData;
+                            image.alt = 'Attached Image';
+                            image.style.maxWidth = '100%';
+                            image.style.borderRadius = '12px';
+                            image.style.cursor = 'pointer';
+                            
+                            // Add click handler for image preview
+                            image.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                const previewModal = document.createElement('div');
+                                previewModal.className = 'document-preview-modal';
+                                previewModal.style.position = 'fixed';
+                                previewModal.style.top = '0';
+                                previewModal.style.left = '0';
+                                previewModal.style.width = '100%';
+                                previewModal.style.height = '100%';
+                                previewModal.style.backgroundColor = 'rgba(0, 0, 0, 0.85)';
+                                previewModal.style.zIndex = '10000';
+                                previewModal.style.display = 'flex';
+                                previewModal.style.justifyContent = 'center';
+                                previewModal.style.alignItems = 'center';
+                                
+                                const modalContent = document.createElement('div');
+                                modalContent.style.position = 'relative';
+                                modalContent.style.maxWidth = '90%';
+                                modalContent.style.maxHeight = '90%';
+                                
+                                const previewImage = document.createElement('img');
+                                previewImage.src = messageData.fileData;
+                                previewImage.style.maxWidth = '100%';
+                                previewImage.style.maxHeight = '90vh';
+                                previewImage.style.borderRadius = '8px';
+                                previewImage.style.objectFit = 'contain';
+                                
+                                const closeButton = document.createElement('button');
+                                closeButton.innerHTML = '<i class="fas fa-times"></i>';
+                                closeButton.style.position = 'absolute';
+                                closeButton.style.top = '-40px';
+                                closeButton.style.right = '0';
+                                closeButton.style.background = 'none';
+                                closeButton.style.border = 'none';
+                                closeButton.style.color = 'white';
+                                closeButton.style.fontSize = '24px';
+                                closeButton.style.cursor = 'pointer';
+                                
+                                modalContent.appendChild(previewImage);
+                                modalContent.appendChild(closeButton);
+                                previewModal.appendChild(modalContent);
+                                document.body.appendChild(previewModal);
+                                
+                                // Close handlers
+                                closeButton.addEventListener('click', () => {
+                                    document.body.removeChild(previewModal);
+                                });
+                                
+                                previewModal.addEventListener('click', (event) => {
+                                    if (event.target === previewModal) {
+                                        document.body.removeChild(previewModal);
+                                    }
+                                });
+                            });
+                            
+                            messageContent.appendChild(image);
+                        } else if (messageData.fileType && messageData.fileType.startsWith('video/')) {
+                            // Handle video files
+                            messageElement.className += ' video-message';
+                            const video = document.createElement('video');
+                            video.src = messageData.fileData;
+                            video.controls = true;
+                            video.preload = 'metadata';
+                            video.style.maxWidth = '100%';
+                            video.style.maxHeight = '300px';
+                            video.style.borderRadius = '12px';
+                            video.style.backgroundColor = '#000';
+                            messageContent.appendChild(video);
+                        } else {
+                            // Handle document files (PDF, Word, etc.)
+                            messageElement.className += ' document-message';
+                            
+                            // Create document container
+                            const docContainer = document.createElement('div');
+                            docContainer.style.backgroundColor = '#f1f1f1';
+                            docContainer.style.padding = '15px';
+                            docContainer.style.borderRadius = '12px';
+                            docContainer.style.display = 'flex';
+                            docContainer.style.flexDirection = 'column';
+                            docContainer.style.gap = '10px';
+                            docContainer.style.cursor = 'pointer';
+                            
+                            // Add document icon and name
+                            const docInfo = document.createElement('div');
+                            docInfo.style.display = 'flex';
+                            docInfo.style.alignItems = 'center';
+                            docInfo.style.gap = '8px';
+                            
+                            const icon = document.createElement('i');
+                            if (messageData.fileType === 'application/pdf') {
+                                icon.className = 'fas fa-file-pdf';
+                            } else if (messageData.fileType && (messageData.fileType.includes('word') || messageData.fileType === 'application/msword' || messageData.fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
+                                icon.className = 'fas fa-file-word';
+                            } else if (messageData.fileType && messageData.fileType.includes('excel')) {
+                                icon.className = 'fas fa-file-excel';
+                            } else {
+                                icon.className = 'fas fa-file';
+                            }
+                            icon.style.fontSize = '24px';
+                            icon.style.color = '#007AFF';
+                            
+                            const fileName = document.createElement('span');
+                            fileName.textContent = messageData.fileName || 'Document';
+                            fileName.style.wordBreak = 'break-word';
+                            fileName.style.maxWidth = '150px';
+                            
+                            docInfo.appendChild(icon);
+                            docInfo.appendChild(fileName);
+                            docContainer.appendChild(docInfo);
+                            
+                            // Add file actions
+                            const fileActions = document.createElement('div');
+                            fileActions.style.display = 'flex';
+                            fileActions.style.gap = '10px';
+                            fileActions.style.marginTop = '8px';
+                            
+                            // Add preview button
+                            const previewButton = document.createElement('button');
+                            previewButton.className = 'admin-action-btn preview-message-btn';
+                            previewButton.innerHTML = '<i class="fas fa-eye"></i>';
+                            previewButton.title = 'Preview document';
+                            
+                            previewButton.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                showPreview(messageData, e);
+                            });
+                            
+                            fileActions.appendChild(previewButton);
+                            
+                            // Add download button for fileData attachments
+                            if (messageData.fileData) {
+                                const downloadButton = document.createElement('button');
+                                downloadButton.className = 'admin-action-btn download-message-btn';
+                                downloadButton.innerHTML = '<i class="fas fa-download"></i>';
+                                downloadButton.title = 'Download document';
+                                
+                                downloadButton.addEventListener('click', (e) => {
+                                    e.stopPropagation();
+                                    
+                                    // Create a download link
+                                    const link = document.createElement('a');
+                                    link.href = messageData.fileData;
+                                    link.download = messageData.fileName || 'document';
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                });
+                                
+                                fileActions.appendChild(downloadButton);
+                            }
+                            
+                            docContainer.appendChild(fileActions);
+                            
+                            // Add click handler to the entire document container
+                            docContainer.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                showPreview(messageData, e);
+                            });
+                            
+                            messageContent.appendChild(docContainer);
+                        }
                     } else {
                         messageContent.textContent = messageData.text;
                     }
@@ -1717,7 +2096,8 @@
                                 // Process document based on file type
                                     if (messageData.fileType && 
                                         (messageData.fileType.includes('word') || 
-                                         messageData.fileType.includes('application/vnd.openxmlformats-officedocument'))) {
+                                         messageData.fileType === 'application/msword' ||
+                                         messageData.fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
                                     
                                     if (messageData.fileData) {
                                         // Process Word document using mammoth.js
@@ -2128,7 +2508,17 @@
                     }
                 });
                 
-                
+                // Rename user
+                renameUserBtn.addEventListener('click', () => {
+                    if (!selectedUserId) return;
+                    
+                    const currentName = currentUserId.textContent.replace('User: ', '').replace('...', '');
+                    const newName = prompt('Enter new name for user:', currentName);
+                    
+                    if (newName && newName.trim() && newName !== currentName) {
+                        renameUser(selectedUserId, newName.trim());
+                    }
+                });
             }
             
             // Delete a chat
@@ -2240,6 +2630,530 @@
                             alert('Error exporting chat: ' + error.message);
                 });
             }
+
+            // Update the renameUser function
+            function renameUser(userId, newName) {
+                if (!userId || !newName) {
+                    console.error('Invalid userId or newName');
+                    return;
+                }
+
+                // Show loading state
+                const userItem = document.querySelector(`.user-item[data-user-id="${userId}"]`);
+                const originalContent = currentUserId.textContent;
+                currentUserId.textContent = 'Renaming...';
+
+                // Update in Firebase
+                const db = firebase.firestore();
+                const userRef = db.collection('users').doc(userId);
+                const chatRef = db.collection('chats').doc(userId);
+
+                // First, check if the chat document exists
+                chatRef.get().then((chatDoc) => {
+                    // Create a batch to update both collections atomically
+                    const batch = db.batch();
+
+                    // Update user document with displayName
+                    batch.set(userRef, {
+                        displayName: newName,
+                        userId: userId,
+                        lastActive: firebase.firestore.FieldValue.serverTimestamp(),
+                        nameUpdatedAt: firebase.firestore.FieldValue.serverTimestamp() // Add timestamp for name update
+                    }, { merge: true });
+
+                    if (chatDoc.exists) {
+                        // If chat document exists, update it
+                        batch.update(chatRef, {
+                            userName: newName,
+                            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    } else {
+                        // If chat document doesn't exist, create it
+                        batch.set(chatRef, {
+                            userName: newName,
+                            userId: userId,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+
+                    // Update any messages that might reference the old name
+                    return Promise.all([
+                        batch.commit(),
+                        updateMessageReferences(userId, newName)
+                    ]);
+                })
+                .then(() => {
+                    console.log(`Successfully renamed user ${userId} to ${newName}`);
+                    
+                    // Update UI
+                    if (userItem) {
+                        const userIdElement = userItem.querySelector('.user-id');
+                        userIdElement.innerHTML = `
+                            ${newName} ${userItem.classList.contains('online') ? '<span class="user-online-badge">Online</span>' : ''}
+                            <button class="rename-user-btn" title="Rename User">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        `;
+
+                        // Reattach rename button event listener
+                        const renameBtn = userIdElement.querySelector('.rename-user-btn');
+                        renameBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const currentName = newName;
+                            const updatedName = prompt('Enter new name for user:', currentName);
+                            if (updatedName && updatedName.trim() && updatedName !== currentName) {
+                                renameUser(userId, updatedName.trim());
+                            }
+                        });
+                    }
+
+                    // Update chat header
+                    currentUserId.textContent = `User: ${newName.substring(0, 15)}...`;
+
+                    // Force refresh the user list to ensure all instances are updated
+                    loadActiveUsers();
+                })
+                .catch(error => {
+                    console.error('Error renaming user:', error);
+                    alert('Error renaming user: ' + error.message);
+                    
+                    // Restore original UI state
+                    currentUserId.textContent = originalContent;
+                });
+            }
+
+            // Update the updateMessageReferences function
+            function updateMessageReferences(userId, newName) {
+                const db = firebase.firestore();
+                const messagesRef = db.collection('chats').doc(userId).collection('messages');
+                
+                // Get all messages that might reference the old name
+                return messagesRef.get()
+                    .then(snapshot => {
+                        const batch = db.batch();
+                        let hasUpdates = false;
+                        
+                        snapshot.forEach(doc => {
+                            const messageData = doc.data();
+                            // Update any messages that might contain the old name
+                            if (messageData.userName || messageData.senderName) {
+                                batch.update(doc.ref, {
+                                    userName: newName,
+                                    senderName: newName,
+                                    nameUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                                });
+                                hasUpdates = true;
+                            }
+                        });
+                        
+                        if (hasUpdates) {
+                            return batch.commit();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error updating message references:', error);
+                        // Don't throw the error, just log it
+                        // This way the rename operation can still succeed even if message updates fail
+                    });
+            }
+
+            // Add the deleteUser function
+            function deleteUser(userId) {
+                if (!userId) {
+                    console.error('Invalid userId');
+                    return;
+                }
+
+                // Show loading state
+                const userItem = document.querySelector(`.user-item[data-user-id="${userId}"]`);
+                if (userItem) {
+                    userItem.style.opacity = '0.5';
+                    userItem.style.pointerEvents = 'none';
+                }
+
+                const db = firebase.firestore();
+                const storage = firebase.storage();
+
+                // Create a batch for Firestore operations
+                const batch = db.batch();
+                const userRef = db.collection('users').doc(userId);
+                const chatRef = db.collection('chats').doc(userId);
+
+                // First, get all messages to delete any attachments
+                chatRef.collection('messages').get()
+                    .then(messagesSnapshot => {
+                        // Create an array of promises for storage deletions
+                        const storageDeletions = [];
+
+                        // Process each message
+                        messagesSnapshot.forEach(doc => {
+                            const messageData = doc.data();
+                            
+                            // Delete message from Firestore
+                            batch.delete(doc.ref);
+
+                            // If message has attachments, delete from storage
+                            if (messageData.imageUrl || messageData.fileUrl) {
+                                try {
+                                    const url = messageData.imageUrl || messageData.fileUrl;
+                                    const storageRef = storage.refFromURL(url);
+                                    storageDeletions.push(storageRef.delete());
+                                } catch (error) {
+                                    console.error('Error preparing storage deletion:', error);
+                                }
+                            }
+                        });
+
+                        // Delete the chat document
+                        batch.delete(chatRef);
+
+                        // Delete the user document
+                        batch.delete(userRef);
+
+                        // Execute all operations
+                        return Promise.all([
+                            batch.commit(),
+                            Promise.all(storageDeletions)
+                        ]);
+                    })
+                    .then(() => {
+                        console.log(`Successfully deleted user ${userId}`);
+                        
+                        // Remove user item from UI
+                        if (userItem) {
+                            userItem.remove();
+                        }
+
+                        // If this was the selected user, clear the chat view
+                        if (selectedUserId === userId) {
+                            selectedUserId = null;
+                            chatContainer.style.display = 'none';
+                            noChatSelected.style.display = 'flex';
+                            chatMessages.innerHTML = '';
+                            currentUserId.textContent = 'Select a user';
+                        }
+
+                        // Show success message
+                        alert('User successfully deleted');
+                    })
+                    .catch(error => {
+                        console.error('Error deleting user:', error);
+                        alert('Error deleting user: ' + error.message);
+                        
+                        // Restore UI state
+                        if (userItem) {
+                            userItem.style.opacity = '1';
+                            userItem.style.pointerEvents = 'auto';
+                        }
+                    });
+            }
+
+            // Add cache for geocoding results
+            const geocodingCache = new Map();
+
+            // Update the getCityFromCoordinates function with proper headers and caching
+            function getCityFromCoordinates(latitude, longitude) {
+                // Create cache key from coordinates (rounded to 3 decimal places for better caching)
+                const cacheKey = `${latitude.toFixed(3)},${longitude.toFixed(3)}`;
+                
+                // Check cache first
+                if (geocodingCache.has(cacheKey)) {
+                    console.log('Using cached city data');
+                    return Promise.resolve(geocodingCache.get(cacheKey));
+                }
+
+                // Add delay to respect rate limiting (1 request per second)
+                return new Promise(resolve => setTimeout(resolve, 1000))
+                    .then(() => {
+                        return fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`, {
+                            headers: {
+                                'User-Agent': 'TrushResume Chat Admin Panel/1.0',
+                                'Accept-Language': 'en-US,en;q=0.9'
+                            }
+                        });
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Extract city from address components
+                        const address = data.address;
+                        const city = address.city || address.town || address.village || address.county || 'Unknown Location';
+                        
+                        // Cache the result
+                        geocodingCache.set(cacheKey, city);
+                        
+                        // Clear old cache entries (keep only last 1000 entries)
+                        if (geocodingCache.size > 1000) {
+                            const keysToDelete = Array.from(geocodingCache.keys()).slice(0, geocodingCache.size - 1000);
+                            keysToDelete.forEach(key => geocodingCache.delete(key));
+                        }
+                        
+                        return city;
+                    })
+                    .catch(error => {
+                        console.error('Error getting city:', error);
+                        return 'Unknown Location';
+                    });
+            }
+
+            // Update the updateUserLocation function to handle Safari better
+            let lastGeocodingRequest = 0;
+            const MIN_REQUEST_INTERVAL = 1000; // 1 second minimum between requests
+
+            function updateUserLocation(userId) {
+                if (!navigator.geolocation) {
+                    console.log('Geolocation is not supported by this browser');
+                    return Promise.resolve();
+                }
+
+                console.log(`Starting location update for user ${userId}`);
+
+                return new Promise((resolve, reject) => {
+                    // Safari on iOS requires high accuracy and a timeout
+                    const options = {
+                        enableHighAccuracy: true,
+                        timeout: 10000, // Increased timeout for Safari
+                        maximumAge: 0
+                    };
+
+                    // First check if we have permission
+                    navigator.permissions.query({ name: 'geolocation' })
+                        .then(permissionStatus => {
+                            console.log('Geolocation permission status:', permissionStatus.state);
+                            
+                            if (permissionStatus.state === 'denied') {
+                                throw new Error('Geolocation permission denied');
+                            }
+
+                            // Get current position
+                            navigator.geolocation.getCurrentPosition(
+                                async (position) => {
+                                    console.log('Got position:', {
+                                        latitude: position.coords.latitude,
+                                        longitude: position.coords.longitude,
+                                        accuracy: position.coords.accuracy
+                                    });
+
+                                    try {
+                                        // Ensure we wait at least 1 second between requests
+                                        const now = Date.now();
+                                        const timeSinceLastRequest = now - lastGeocodingRequest;
+                                        if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
+                                            await new Promise(resolve => setTimeout(resolve, MIN_REQUEST_INTERVAL - timeSinceLastRequest));
+                                        }
+                                        lastGeocodingRequest = Date.now();
+
+                                        const city = await getCityFromCoordinates(
+                                            position.coords.latitude,
+                                            position.coords.longitude
+                                        );
+
+                                        console.log(`Retrieved city for coordinates: ${city}`);
+
+                                        // Update user document with location
+                                        const db = firebase.firestore();
+                                        const updateData = {
+                                            city: city,
+                                            locationUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                                            coordinates: {
+                                                latitude: position.coords.latitude,
+                                                longitude: position.coords.longitude,
+                                                accuracy: position.coords.accuracy
+                                            },
+                                            lastLocationUpdate: new Date().toISOString(),
+                                            locationSource: 'browser_geolocation'
+                                        };
+
+                                        console.log('Updating user document with:', updateData);
+
+                                        await db.collection('users').doc(userId).update(updateData);
+
+                                        console.log(`Successfully updated location for user ${userId}: ${city}`);
+                                        
+                                        // Update UI if this is the current user
+                                        const userItem = document.querySelector(`.user-item[data-user-id="${userId}"]`);
+                                        if (userItem) {
+                                            const locationElement = userItem.querySelector('.user-location');
+                                            if (locationElement) {
+                                                locationElement.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${city}`;
+                                            }
+                                        }
+
+                                        resolve(city);
+                                    } catch (error) {
+                                        console.error('Error in location update process:', error);
+                                        reject(error);
+                                    }
+                                },
+                                (error) => {
+                                    console.error('Geolocation error:', {
+                                        code: error.code,
+                                        message: error.message,
+                                        PERMISSION_DENIED: error.PERMISSION_DENIED,
+                                        POSITION_UNAVAILABLE: error.POSITION_UNAVAILABLE,
+                                        TIMEOUT: error.TIMEOUT
+                                    });
+
+                                    // Try to get a fallback location using IP geolocation
+                                    fetch('https://ipapi.co/json/')
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            console.log('Fallback IP geolocation data:', data);
+                                            const city = data.city || 'Unknown Location';
+                                            
+                                            // Update user document with fallback location
+                                            const db = firebase.firestore();
+                                            return db.collection('users').doc(userId).update({
+                                                city: city,
+                                                locationUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                                                coordinates: {
+                                                    latitude: data.latitude,
+                                                    longitude: data.longitude,
+                                                    accuracy: null,
+                                                    source: 'ip_geolocation'
+                                                },
+                                                lastLocationUpdate: new Date().toISOString(),
+                                                locationSource: 'ip_geolocation'
+                                            });
+                                        })
+                                        .then(() => {
+                                            console.log('Updated location using IP geolocation fallback');
+                                            resolve('Location from IP');
+                                        })
+                                        .catch(fallbackError => {
+                                            console.error('Fallback IP geolocation failed:', fallbackError);
+                                            reject(error); // Reject with original error
+                                        });
+                                },
+                                options
+                            );
+
+                            // Listen for permission changes
+                            permissionStatus.onchange = () => {
+                                console.log('Geolocation permission changed to:', permissionStatus.state);
+                            };
+                        })
+                        .catch(error => {
+                            console.error('Error checking geolocation permission:', error);
+                            reject(error);
+                        });
+                });
+            }
+
+            // Update the updateUserLocations function to handle Safari better
+            async function updateUserLocations() {
+                console.log('Starting periodic location update check');
+                
+                try {
+                    const snapshot = await firebase.firestore().collection('users').get();
+                    const users = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+
+                    console.log(`Found ${users.length} users to check for location updates`);
+
+                    // Process users sequentially to respect rate limits
+                    for (const userData of users) {
+                        const userId = userData.userId || userData.id;
+                        
+                        // Only update location if it's older than 24 hours or doesn't exist
+                        const locationUpdatedAt = userData.locationUpdatedAt ? 
+                            userData.locationUpdatedAt.toDate() : null;
+                        const now = new Date();
+                        const hoursSinceUpdate = locationUpdatedAt ? 
+                            (now - locationUpdatedAt) / (1000 * 60 * 60) : 24;
+                        
+                        console.log(`User ${userId} location status:`, {
+                            lastUpdate: locationUpdatedAt,
+                            hoursSinceUpdate: hoursSinceUpdate,
+                            needsUpdate: hoursSinceUpdate >= 24
+                        });
+                        
+                        if (hoursSinceUpdate >= 24) {
+                            try {
+                                console.log(`Updating location for user ${userId}`);
+                                await updateUserLocation(userId);
+                                // Wait 1 second between users to respect rate limits
+                                await new Promise(resolve => setTimeout(resolve, 1000));
+                            } catch (error) {
+                                console.error(`Error updating location for user ${userId}:`, error);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error in updateUserLocations:', error);
+                }
+            }
+
+            // Add a function to force location update for a specific user
+            function forceLocationUpdate(userId) {
+                console.log(`Forcing location update for user ${userId}`);
+                return updateUserLocation(userId)
+                    .then(city => {
+                        console.log(`Successfully forced location update for user ${userId}: ${city}`);
+                        return city;
+                    })
+                    .catch(error => {
+                        console.error(`Failed to force location update for user ${userId}:`, error);
+                        throw error;
+                    });
+            }
+
+            // Add a button to force location update in the user item
+            // Update the user item creation in loadActiveUsers:
+            userItem.innerHTML = `
+                <div class="user-info">
+                    <div class="user-status-indicator ${user.online ? 'online' : 'offline'}" style="display: none;"></div>
+                    <div class="user-id">
+                        ${displayName} ${user.online ? '<span class="user-online-badge">Online</span>' : ''}
+                        <button class="rename-user-btn" title="Rename User">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="delete-user-btn" title="Delete User">
+                            <i class="fas fa-user-times"></i>
+                        </button>
+                    </div>
+                    <div class="user-location">
+                        <i class="fas fa-map-marker-alt"></i> ${user.city || 'Location unknown'}
+                        <button class="refresh-location-btn" title="Refresh Location" style="background: none; border: none; color: #666; cursor: pointer; padding: 2px 6px;">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="last-message">${user.lastMessageText}</div>
+                    <div class="message-time">
+                        ${user.online ? 'Active now' : `Last seen: ${user.lastActiveDisplay}`}
+                    </div>
+                </div>
+            `;
+
+            // Add event listener for the refresh location button
+            const refreshLocationBtn = userItem.querySelector('.refresh-location-btn');
+            refreshLocationBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const userId = user.userId;
+                refreshLocationBtn.style.animation = 'spin 1s linear';
+                forceLocationUpdate(userId)
+                    .then(() => {
+                        console.log('Location updated successfully');
+                    })
+                    .catch(error => {
+                        console.error('Failed to update location:', error);
+                        alert('Failed to update location. Please check browser permissions.');
+                    })
+                    .finally(() => {
+                        refreshLocationBtn.style.animation = '';
+                    });
+            });
+
+            // Call updateUserLocations periodically
+            setInterval(updateUserLocations, 1000 * 60 * 60); // Update every hour
+            updateUserLocations(); // Initial update
         });
     </script>
 </body>

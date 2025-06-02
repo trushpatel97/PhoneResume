@@ -21,10 +21,14 @@
     <link rel="stylesheet" href="styles/2048.css">
     <!-- Responsive Styles -->
     <link rel="stylesheet" href="styles/responsive.css">
+    <!-- iOS Scrollbar Styles -->
+    <link rel="stylesheet" href="styles/scrollbars.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- EmailJS SDK -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <!-- Project Scripts -->
+    <script src="scripts/projects.js"></script>
     <!-- 2048 Game Script -->
     <script src="scripts/leaderboard.js"></script>
     <script src="scripts/2048.js"></script>
@@ -77,11 +81,83 @@
     
     <!-- Removed background dependencies -->
     <link rel="stylesheet" href="styles/project-details.css">
+    <style>
+      #lofi-volume-slider {
+        transition: opacity 0.3s;
+      }
+      .lofi-song-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2px;
+      }
+      .lofi-song-btn {
+        background: #111;
+        color: #fff;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 8px 0 0 8px;
+        cursor: pointer;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 40px;
+        min-width: 40px;
+      }
+      .lofi-song-btn.skip {
+        border-radius: 0 8px 8px 0;
+      }
+      #lofi-song-title {
+        background: #111;
+        color: #fff;
+        font-size: 15px;
+        text-align: left;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 180px;
+        padding: 0 16px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        border-radius: 0;
+        position: relative;
+      }
+      #lofi-song-title .marquee {
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+        will-change: transform;
+        animation: marquee 10s linear infinite;
+        animation-play-state: paused;
+      }
+      #lofi-song-title .marquee-text {
+        display: inline-block;
+        padding-right: 40px;
+      }
+      @keyframes marquee {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+      }
+      .lofi-song-row > *:not(:last-child) {
+        border-right: 1px solid #222;
+      }
+      .lofi-audio-row {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+      }
+      #lofi-volume-slider {
+        display: none;
+        background: #000000;
+        padding: 6px 5px;
+        border-radius: 8px;
+        min-width: 120px;
+        z-index: 100;
+      }
+    </style>
 </head>
 <body>
-    <!-- Vanta.js background div -->
-    <div id="vanta-background"></div>
-    
     <!-- Background shapes -->
     <div class="shape shape-1"></div>
     <div class="shape shape-2"></div>
@@ -253,7 +329,7 @@
                                     <div class="about-section" style="background: #F2F2F7; padding: 16px; border-radius: 16px;">
                                         <h2 style="font-size: 20px; font-weight: 600; color: #000; margin-bottom: 16px; text-align: center;">Current Focus</h2>
                                         <p style="font-size: 13px; line-height: 1.6; color: #333; margin: 0; text-indent: 25px;">
-                                            I'm seeking opportunities to leverage my AI and automation expertise in enterprise solutions. I'm particularly interested in roles that allow me to apply machine learning and deep learning to solve complex business challenges. In the meantime, I'm working on a mobile app to help supply homeless people with items they need.
+                                            I'm seeking opportunities preferably in AI to solve complex business challenges. In the meantime, I'm working on a mobile app to help supply homeless people with items they need.
                                         </p>
                                     </div>
                                 </div>
@@ -324,10 +400,6 @@
                     </div>
                     
                     <div class="app-screen" id="projects-app">
-                        <div class="app-header">
-                            <div class="back-button" id="back-button"><i class="fas fa-chevron-left"></i></div>
-                            <div class="app-title">Projects</div>
-                        </div>
                         <div class="app-content projects-folder">
                             <div class="folder-title">Projects</div>
                             <div class="folder-grid-container">
@@ -349,7 +421,7 @@
                                 <div class="folder-app" data-project="mousetrap">
                                     <div class="folder-app-icon" style="background-image: url('images/Mousetrap.JPEG'); background-size: cover; background-position: center;">
                                     </div>
-                                    <div class="folder-app-name">Moustrap</div>
+                                    <div class="folder-app-name">Mousetrap</div>
                                 </div>
                                 <div class="folder-app" data-project="celebrity">
                                     <div class="folder-app-icon" style="background-image: url('images/Celebrity.jpg'); background-size: cover; background-position: center;">
@@ -389,14 +461,22 @@
                         <div class="app-content project-content">
                             <div class="project-header">
                                 <h1 class="project-title">Veterinary Database System</h1>
-                                <p class="project-subtitle">A comprehensive database solution for veterinary clinics</p>
-                                <img src="images/VetDatabase.jpg" alt="Vet Database" class="project-image">
+                                <p class="project-subtitle">Developed a Java-integrated GUI for managing veterinary records</p>
+                                <div class="project-image-carousel">
+                                    <button class="carousel-arrow carousel-arrow-left" onclick="prevImage(this)">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <img src="images/VetDatabase.jpg" alt="Vet Database" class="project-image">
+                                    <button class="carousel-arrow carousel-arrow-right" onclick="nextImage(this)">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
                             </div>
                             
                             <div class="project-section">
                                 <h2 class="section-title">Overview</h2>
                                 <p class="project-description">
-                                    The Veterinary Database System is a comprehensive solution designed to help veterinary clinics manage patient records, appointments, treatments, and billing information efficiently.
+                                    A database solution designed to help veterinary clinics manage pet records, owner information, and appointments seamlessly through a GUI.
                                 </p>
                             </div>
                             
@@ -404,30 +484,32 @@
                                 <h2 class="section-title">Technologies</h2>
                                 <div class="technologies-list">
                                     <span class="technology-tag">Java</span>
-                                    <span class="technology-tag">SQL</span>
+                                    <span class="technology-tag">MySQL</span>
+                                    <span class="technology-tag">Swing GUI</span>
                                     <span class="technology-tag">JDBC</span>
-                                    <span class="technology-tag">JavaFX</span>
-                                    <span class="technology-tag">Git</span>
                                 </div>
                             </div>
                             
                             <div class="project-section">
                                 <h2 class="section-title">Features</h2>
-                                <ul class="features-list">
-                                    <li>Patient management with complete medical history</li>
-                                    <li>Appointment scheduling and reminders</li>
-                                    <li>Treatment tracking and documentation</li>
-                                    <li>Inventory management for medications and supplies</li>
-                                    <li>Billing and invoice generation</li>
-                                    <li>User roles and permissions</li>
+                                <ul class="project-description" style="padding-left: 20px; margin-top: 10px;">
+                                    <li>Pet and owner record management</li>
+                                    <li>Appointment scheduling system</li>
+                                    <li>Medical history tracking</li>
+                                    <li>Search and filter capabilities</li>
+                                    <li>Data validation and error handling</li>
                                 </ul>
                             </div>
                             
                             <div class="project-section">
                                 <h2 class="section-title">Development Process</h2>
-                                <p class="project-description">
-                                    This project was developed using an Agile methodology, with a focus on creating a maintainable and scalable database design. The system includes a normalized database schema to ensure data integrity and efficient queries.
-                                </p>
+                                <ol class="project-description" style="padding-left: 20px; margin-top: 10px;">
+                                    <li>Designed database schema with tables</li>
+                                    <li>Implemented primary/foreign key constraints</li>
+                                    <li>Created stored procedures for data entry</li>
+                                    <li>Established entity relationships</li>
+                                    <li>Developed scalable database structure</li>
+                                </ol>
                             </div>
                         </div>
                         <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
@@ -445,46 +527,81 @@
                         <div class="app-content project-content">
                             <div class="project-header">
                                 <h1 class="project-title">Chalkboard</h1>
-                                <p class="project-subtitle">An interactive learning platform for students and teachers</p>
-                                <img src="images/ChalkboardLogo.png" alt="Chalkboard" class="project-image">
+                                <p class="project-subtitle">Real-time remote collaboration with session-based canvases</p>
+                                <div class="project-image-carousel">
+                                    <button class="carousel-arrow carousel-arrow-left" onclick="prevImage(this)">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <img src="images/ChalkboardLogo.png" alt="Chalkboard" class="project-image">
+                                    <button class="carousel-arrow carousel-arrow-right" onclick="nextImage(this)">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
                             </div>
-                            
+                            <div style="display: flex; justify-content: center; margin: -40px 0 10px 0;">
+                                <a href="https://chalkboard-draw.onrender.com/" target="_blank"
+                                   style="background: #81d3e0; color: #fff; padding: 10px 28px; border-radius: 16px; font-weight: 600; font-size: 15px; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: background 0.2s; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-external-link-alt" style="font-size: 15px;"></i>
+                                    Visit Live Website
+                                </a>
+                            </div>
                             <div class="project-section">
                                 <h2 class="section-title">Overview</h2>
                                 <p class="project-description">
-                                    Chalkboard is an innovative educational platform that connects students with teachers, providing tools for real-time collaboration, assignment management, and progress tracking.
+                                    Chalkboard is an online interactive canvas for remote collaboration, where users can draw, add objects, and create session-based workspaces that instantly sync across web browsers and all devices. Each session has its own unique canvas, allowing multiple groups to collaborate simultaneously within their own dedicated spaces.
                                 </p>
                             </div>
                             
                             <div class="project-section">
                                 <h2 class="section-title">Technologies</h2>
                                 <div class="technologies-list">
-                                    <span class="technology-tag">React</span>
+                                    <span class="technology-tag">JavaScript</span>
+                                    <span class="technology-tag">HTML</span>
+                                    <span class="technology-tag">CSS</span>
                                     <span class="technology-tag">Node.js</span>
-                                    <span class="technology-tag">MongoDB</span>
-                                    <span class="technology-tag">WebSockets</span>
+                                    <span class="technology-tag">Socket.io</span>
                                     <span class="technology-tag">Express</span>
-                                    <span class="technology-tag">JWT</span>
+                                    <span class="technology-tag">GitHub</span>
+                                    <span class="technology-tag">Git</span>
+                                    <span class="technology-tag">Rally</span>
+                                    <span class="technology-tag">Firebase Storage</span>
+                                    <span class="technology-tag">Firebase Firestore</span>
+                                    <span class="technology-tag">Firebase Authentication</span>
                                 </div>
                             </div>
                             
                             <div class="project-section">
                                 <h2 class="section-title">Features</h2>
-                                <ul class="features-list">
-                                    <li>Virtual classrooms with video conferencing</li>
-                                    <li>Interactive whiteboard for teaching</li>
-                                    <li>Assignment creation and submission</li>
-                                    <li>Automated grading for certain question types</li>
-                                    <li>Progress tracking with visual analytics</li>
-                                    <li>Resource sharing and organization</li>
+                                <ul class="project-description" style="padding-left: 20px; margin-top: 10px;">
+                                    <li>Drawing features (pen, drag, eraser, color change, shapes, undo, etc.)</li>
+                                    <li>Real-time collaboration</li>
+                                    <li>Login/Signup using Google Auth</li>
+                                    <li>Load images or PDF</li>
+                                    <li>Create/Join sessions</li>
+                                    <li>Save updated canvases snapshots in real-time</li>
+                                    <li>Collaborate with multiple users via video/audio call or chatbox</li>
+                                    <li>Picture in picture (PiP) to view other applications while drawing</li>
+                                    <li>Save/Load canvases</li>
+                                    <li>Light/Dark mode</li>
+                                    <li>Cross-platform compatibility</li>
+
                                 </ul>
                             </div>
                             
                             <div class="project-section">
-                                <h2 class="section-title">Highlighted at Temple University Symposium</h2>
-                                <p class="project-description">
-                                    This project was selected and presented at the 2021 Temple University Symposium, receiving recognition for its innovative approach to distance learning and educational technology.
-                                </p>
+                                <h2 class="section-title">Development Process</h2>
+                                <ol class="project-description" style="padding-left: 20px; margin-top: 10px;">
+                                    <li>Documented requirement specification</li>
+                                    <li>Designed multiple diagrams (UML, Use Case, etc.)</li>
+                                    <li>Assigned work into multiple phases through Rally</li>
+                                    <li>Developed features on separate branches</li>
+                                    <li>Tested the application and fixed bugs</li>
+                                    <li>Integrated features to the main branch</li>
+                                    <li>Ensured the Rally had a proper burn-down chart each week</li>
+                                    <li>Deployed the application on Render</li>
+                                    <li>Documented the test procedures and test cases</li>
+                                    <li>Presented at Temple's Symposium after being selected</li>
+                                </ol>
                             </div>
                         </div>
                         <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
@@ -503,7 +620,15 @@
                             <div class="project-header">
                                 <h1 class="project-title">Story Spinner</h1>
                                 <p class="project-subtitle">AI-powered creative writing assistant</p>
-                                <img src="images/StorySpinner.jpg" alt="Story Spinner" class="project-image">
+                                <div class="project-image-carousel">
+                                    <button class="carousel-arrow carousel-arrow-left" onclick="prevImage(this)">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <img src="images/StorySpinner.jpg" alt="Story Spinner" class="project-image">
+                                    <button class="carousel-arrow carousel-arrow-right" onclick="nextImage(this)">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
                             </div>
                             
                             <div class="project-section">
@@ -517,31 +642,33 @@
                                 <h2 class="section-title">Technologies</h2>
                                 <div class="technologies-list">
                                     <span class="technology-tag">Python</span>
-                                    <span class="technology-tag">Flask</span>
+                                    <span class="technology-tag">TensorFlow</span>
                                     <span class="technology-tag">GPT-3</span>
-                                    <span class="technology-tag">NLP</span>
+                                    <span class="technology-tag">Flask</span>
                                     <span class="technology-tag">React</span>
-                                    <span class="technology-tag">PostgreSQL</span>
                                 </div>
                             </div>
                             
                             <div class="project-section">
                                 <h2 class="section-title">Features</h2>
-                                <ul class="features-list">
-                                    <li>AI-generated story prompts and plot ideas</li>
-                                    <li>Character development tools with personality traits</li>
-                                    <li>Scene setting and description generator</li>
-                                    <li>Plot hole detection and suggestions</li>
-                                    <li>Genre-specific writing assistance</li>
-                                    <li>Story structure templates (Hero's Journey, Three-Act, etc.)</li>
+                                <ul class="project-description" style="padding-left: 20px; margin-top: 10px;">
+                                    <li>AI-powered story generation</li>
+                                    <li>Character profile creation</li>
+                                    <li>Plot development assistance</li>
+                                    <li>Creative writing prompts</li>
+                                    <li>User feedback integration</li>
                                 </ul>
                             </div>
                             
                             <div class="project-section">
-                                <h2 class="section-title">Impact</h2>
-                                <p class="project-description">
-                                    Story Spinner has helped over 500 writers complete their creative projects, with many users reporting significant improvements in productivity and creativity when facing writer's block.
-                                </p>
+                                <h2 class="section-title">Development Process</h2>
+                                <ol class="project-description" style="padding-left: 20px; margin-top: 10px;">
+                                    <li>Helped over 500 writers complete their creative projects</li>
+                                    <li>Improved productivity for users facing writer's block</li>
+                                    <li>Enhanced creativity through AI-generated suggestions</li>
+                                    <li>Received positive feedback on plot development assistance</li>
+                                    <li>Created community of writers sharing generated content</li>
+                                </ol>
                             </div>
                         </div>
                         <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
@@ -560,7 +687,15 @@
                             <div class="project-header">
                                 <h1 class="project-title">Mousetrap</h1>
                                 <p class="project-subtitle">Advanced user behavior analytics platform</p>
-                                <img src="images/Mousetrap.JPEG" alt="Mousetrap" class="project-image">
+                                <div class="project-image-carousel">
+                                    <button class="carousel-arrow carousel-arrow-left" onclick="prevImage(this)">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <img src="images/Mousetrap.JPEG" alt="Mousetrap" class="project-image">
+                                    <button class="carousel-arrow carousel-arrow-right" onclick="nextImage(this)">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
                             </div>
                             
                             <div class="project-section">
@@ -574,31 +709,34 @@
                                 <h2 class="section-title">Technologies</h2>
                                 <div class="technologies-list">
                                     <span class="technology-tag">JavaScript</span>
+                                    <span class="technology-tag">Python</span>
                                     <span class="technology-tag">D3.js</span>
-                                    <span class="technology-tag">Node.js</span>
                                     <span class="technology-tag">MongoDB</span>
-                                    <span class="technology-tag">WebSockets</span>
                                     <span class="technology-tag">AWS</span>
                                 </div>
                             </div>
                             
                             <div class="project-section">
                                 <h2 class="section-title">Features</h2>
-                                <ul class="features-list">
-                                    <li>Mouse movement heatmaps and tracking</li>
-                                    <li>Click and scroll depth analysis</li>
-                                    <li>Form interaction and abandonment analytics</li>
-                                    <li>Session recording and playback</li>
-                                    <li>Real-time user behavior monitoring</li>
-                                    <li>A/B testing integration</li>
+                                <ul class="project-description" style="padding-left: 20px; margin-top: 10px;">
+                                    <li>User behavior tracking</li>
+                                    <li>Heatmap visualization</li>
+                                    <li>Conversion funnel analysis</li>
+                                    <li>Real-time analytics dashboard</li>
+                                    <li>Custom event tracking</li>
                                 </ul>
                             </div>
                             
                             <div class="project-section">
-                                <h2 class="section-title">Results</h2>
-                                <p class="project-description">
-                                    Implementation of Mousetrap has led to an average 23% increase in user engagement and a 15% improvement in conversion rates for client websites through targeted UX improvements based on the collected data.
-                                </p>
+                                <h2 class="section-title">Development Process</h2>
+                                <ol class="project-description" style="padding-left: 20px; margin-top: 10px;">
+                                    <li>Achieved 23% increase in user engagement</li>
+                                    <li>Improved conversion rates by 15% for client websites</li>
+                                    <li>Implemented targeted UX improvements based on collected data</li>
+                                    <li>Identified critical user drop-off points</li>
+                                    <li>Optimized form completion processes</li>
+                                    <li>Enhanced overall website usability</li>
+                                </ol>
                             </div>
                         </div>
                         <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
@@ -617,7 +755,15 @@
                             <div class="project-header">
                                 <h1 class="project-title">Celebrity Look-alike Detector</h1>
                                 <p class="project-subtitle">AI-powered facial recognition app</p>
-                                <img src="images/Celebrity.jpg" alt="Celebrity Look-alike" class="project-image">
+                                <div class="project-image-carousel">
+                                    <button class="carousel-arrow carousel-arrow-left" onclick="prevImage(this)">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <img src="images/Celebrity.jpg" alt="Celebrity Look-alike" class="project-image">
+                                    <button class="carousel-arrow carousel-arrow-right" onclick="nextImage(this)">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
                             </div>
                             
                             <div class="project-section">
@@ -633,29 +779,32 @@
                                     <span class="technology-tag">Python</span>
                                     <span class="technology-tag">TensorFlow</span>
                                     <span class="technology-tag">OpenCV</span>
-                                    <span class="technology-tag">React Native</span>
-                                    <span class="technology-tag">Google Cloud</span>
-                                    <span class="technology-tag">Firebase</span>
+                                    <span class="technology-tag">Flask</span>
+                                    <span class="technology-tag">React</span>
                                 </div>
                             </div>
                             
                             <div class="project-section">
                                 <h2 class="section-title">Features</h2>
-                                <ul class="features-list">
-                                    <li>Real-time facial recognition and analysis</li>
-                                    <li>Database of over 10,000 celebrity faces</li>
-                                    <li>Similarity scoring system with detailed facial feature mapping</li>
-                                    <li>Social media sharing of results</li>
-                                    <li>Historical look-alike trends and statistics</li>
-                                    <li>Celebrity facts and information</li>
+                                <ul class="project-description" style="padding-left: 20px; margin-top: 10px;">
+                                    <li>Facial recognition matching</li>
+                                    <li>Similarity scoring system</li>
+                                    <li>Celebrity database integration</li>
+                                    <li>Image preprocessing</li>
+                                    <li>Real-time results display</li>
                                 </ul>
                             </div>
                             
                             <div class="project-section">
-                                <h2 class="section-title">Technical Highlights</h2>
-                                <p class="project-description">
-                                    The application leverages a custom-trained convolutional neural network with 85% accuracy in facial recognition, preprocessing images to normalize lighting and angles for improved matching results.
-                                </p>
+                                <h2 class="section-title">Development Process</h2>
+                                <ol class="project-description" style="padding-left: 20px; margin-top: 10px;">
+                                    <li>Developed custom-trained convolutional neural network</li>
+                                    <li>Achieved 85% accuracy in facial recognition</li>
+                                    <li>Implemented image preprocessing for normalized lighting</li>
+                                    <li>Optimized angle detection for improved matching</li>
+                                    <li>Created efficient facial feature mapping algorithms</li>
+                                    <li>Developed scalable similarity scoring system</li>
+                                </ol>
                             </div>
                         </div>
                         <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
@@ -674,7 +823,15 @@
                             <div class="project-header">
                                 <h1 class="project-title">Eye Disease Detection</h1>
                                 <p class="project-subtitle">AI-based medical diagnostic tool</p>
-                                <img src="images/Eyes.jpg" alt="Eye Disease Detection" class="project-image">
+                                <div class="project-image-carousel">
+                                    <button class="carousel-arrow carousel-arrow-left" onclick="prevImage(this)">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <img src="images/Eyes.jpg" alt="Eye Disease Detection" class="project-image">
+                                    <button class="carousel-arrow carousel-arrow-right" onclick="nextImage(this)">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
                             </div>
                             
                             <div class="project-section">
@@ -689,29 +846,33 @@
                                 <div class="technologies-list">
                                     <span class="technology-tag">Python</span>
                                     <span class="technology-tag">TensorFlow</span>
-                                    <span class="technology-tag">Keras</span>
                                     <span class="technology-tag">OpenCV</span>
-                                    <span class="technology-tag">Scikit-learn</span>
-                                    <span class="technology-tag">Matplotlib</span>
+                                    <span class="technology-tag">Keras</span>
+                                    <span class="technology-tag">NumPy</span>
                                 </div>
                             </div>
                             
                             <div class="project-section">
-                                <h2 class="section-title">Achievements</h2>
-                                <ul class="features-list">
-                                    <li>Achieved 97.9% accuracy in identifying retinal diseases</li>
-                                    <li>Improved model performance by 3.8% through hyperparameter tuning</li>
-                                    <li>Tested across 4 different datasets for robustness</li>
-                                    <li>Created an explainable AI component for diagnosis transparency</li>
-                                    <li>Developed in collaboration with ophthalmologists</li>
+                                <h2 class="section-title">Features</h2>
+                                <ul class="project-description" style="padding-left: 20px; margin-top: 10px;">
+                                    <li>Disease classification system</li>
+                                    <li>Image preprocessing pipeline</li>
+                                    <li>High-accuracy detection</li>
+                                    <li>Medical report generation</li>
+                                    <li>Batch processing capability</li>
                                 </ul>
                             </div>
                             
                             <div class="project-section">
-                                <h2 class="section-title">Research Impact</h2>
-                                <p class="project-description">
-                                    This research contributes to improving early diagnosis of eye diseases such as diabetic retinopathy, glaucoma, and age-related macular degeneration, potentially helping to prevent vision loss through timely treatment.
-                                </p>
+                                <h2 class="section-title">Development Process</h2>
+                                <ol class="project-description" style="padding-left: 20px; margin-top: 10px;">
+                                    <li>Contributed to improving early diagnosis of eye diseases</li>
+                                    <li>Enhanced detection of diabetic retinopathy</li>
+                                    <li>Improved identification of glaucoma</li>
+                                    <li>Advanced detection of age-related macular degeneration</li>
+                                    <li>Potentially helped prevent vision loss through timely treatment</li>
+                                    <li>Created foundation for future medical AI applications</li>
+                                </ol>
                             </div>
                         </div>
                         <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
@@ -730,7 +891,15 @@
                             <div class="project-header">
                                 <h1 class="project-title">Package Tracking System</h1>
                                 <p class="project-subtitle">Real-time logistics management solution</p>
-                                <img src="images/UPS.jpg" alt="Package Tracking" class="project-image">
+                                <div class="project-image-carousel">
+                                    <button class="carousel-arrow carousel-arrow-left" onclick="prevImage(this)">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <img src="images/UPS.jpg" alt="Package Tracking" class="project-image">
+                                    <button class="carousel-arrow carousel-arrow-right" onclick="nextImage(this)">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
                             </div>
                             
                             <div class="project-section">
@@ -743,32 +912,35 @@
                             <div class="project-section">
                                 <h2 class="section-title">Technologies</h2>
                                 <div class="technologies-list">
-                                    <span class="technology-tag">Python</span>
                                     <span class="technology-tag">Java</span>
-                                    <span class="technology-tag">RESTful APIs</span>
-                                    <span class="technology-tag">PostgreSQL</span>
-                                    <span class="technology-tag">Google Maps API</span>
+                                    <span class="technology-tag">Spring Boot</span>
+                                    <span class="technology-tag">Oracle</span>
                                     <span class="technology-tag">React</span>
+                                    <span class="technology-tag">AWS</span>
                                 </div>
                             </div>
                             
                             <div class="project-section">
                                 <h2 class="section-title">Features</h2>
-                                <ul class="features-list">
-                                    <li>Real-time package location tracking</li>
-                                    <li>Automated status updates and notifications</li>
-                                    <li>Delivery time predictions using machine learning</li>
-                                    <li>Route optimization for delivery efficiency</li>
-                                    <li>Customer communication portal</li>
-                                    <li>Delivery exception handling</li>
+                                <ul class="project-description" style="padding-left: 20px; margin-top: 10px;">
+                                    <li>Real-time package tracking</li>
+                                    <li>Status update notifications</li>
+                                    <li>Delivery estimation system</li>
+                                    <li>Route optimization</li>
+                                    <li>Exception handling</li>
                                 </ul>
                             </div>
                             
                             <div class="project-section">
-                                <h2 class="section-title">Business Impact</h2>
-                                <p class="project-description">
-                                    The implementation of this system resulted in a 28% reduction in customer service inquiries about package status and a 15% improvement in on-time delivery rates through better route planning and exception handling.
-                                </p>
+                                <h2 class="section-title">Development Process</h2>
+                                <ol class="project-description" style="padding-left: 20px; margin-top: 10px;">
+                                    <li>Reduced customer service inquiries about package status by 28%</li>
+                                    <li>Improved on-time delivery rates by 15%</li>
+                                    <li>Enhanced route planning capabilities</li>
+                                    <li>Implemented efficient exception handling procedures</li>
+                                    <li>Increased customer satisfaction through better visibility</li>
+                                    <li>Decreased operational costs through optimized routing</li>
+                                </ol>
                             </div>
                         </div>
                         <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
@@ -787,7 +959,15 @@
                             <div class="project-header">
                                 <h1 class="project-title">BigData Migration & Analysis</h1>
                                 <p class="project-subtitle">Enterprise data pipeline infrastructure</p>
-                                <img src="images/GCP.jpg" alt="BigData" class="project-image">
+                                <div class="project-image-carousel">
+                                    <button class="carousel-arrow carousel-arrow-left" onclick="prevImage(this)">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <img src="images/GCP.jpg" alt="BigData" class="project-image">
+                                    <button class="carousel-arrow carousel-arrow-right" onclick="nextImage(this)">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
                             </div>
                             
                             <div class="project-section">
@@ -800,32 +980,35 @@
                             <div class="project-section">
                                 <h2 class="section-title">Technologies</h2>
                                 <div class="technologies-list">
-                                    <span class="technology-tag">Google Cloud Platform</span>
-                                    <span class="technology-tag">BigQuery</span>
-                                    <span class="technology-tag">Striim</span>
+                                    <span class="technology-tag">Google BigQuery</span>
                                     <span class="technology-tag">Python</span>
+                                    <span class="technology-tag">Apache Beam</span>
+                                    <span class="technology-tag">Dataflow</span>
                                     <span class="technology-tag">Oracle</span>
-                                    <span class="technology-tag">TQL</span>
                                 </div>
                             </div>
                             
                             <div class="project-section">
-                                <h2 class="section-title">Achievements</h2>
-                                <ul class="features-list">
-                                    <li>Designed a Python script to compare 250+ tables between Oracle and BigQuery</li>
-                                    <li>Modified TQL scripts for efficient data migration</li>
-                                    <li>Achieved over 99.9% data integrity during migration</li>
-                                    <li>Reduced query processing time by 75%</li>
-                                    <li>Implemented data validation frameworks</li>
-                                    <li>Set up PEP8 compliance for code structure</li>
+                                <h2 class="section-title">Features</h2>
+                                <ul class="project-description" style="padding-left: 20px; margin-top: 10px;">
+                                    <li>Data migration pipeline</li>
+                                    <li>ETL process automation</li>
+                                    <li>Data quality validation</li>
+                                    <li>Analytics dashboard</li>
+                                    <li>Performance optimization</li>
                                 </ul>
                             </div>
                             
                             <div class="project-section">
-                                <h2 class="section-title">Technical Challenge</h2>
-                                <p class="project-description">
-                                    One of the key challenges was ensuring zero data loss during the migration of critical business data. We developed a custom validation framework that compared record counts, checksums, and sample data points to verify complete and accurate data transfer.
-                                </p>
+                                <h2 class="section-title">Development Process</h2>
+                                <ol class="project-description" style="padding-left: 20px; margin-top: 10px;">
+                                    <li>Migrated billions of records successfully</li>
+                                    <li>Reduced query time by 60%</li>
+                                    <li>Implemented efficient data pipelines</li>
+                                    <li>Created automated monitoring systems</li>
+                                    <li>Developed comprehensive documentation</li>
+                                    <li>Established data governance protocols</li>
+                                </ol>
                             </div>
                         </div>
                         <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
@@ -861,7 +1044,7 @@
                                     <div class="experience-header">
                                         <span class="date">May 2020 - Jan 2021</span>
                                     </div>
-                                    <h3>Eye Disease Detection Research</h3>
+                                    <h3>Eye Disease Detection</h3>
                                     <h4>Temple University, Philadelphia, PA</h4>
                                     <p>Utilized Machine Learning to classify the presence of eye diseases in images using Python</p>
                                     <ul>
@@ -1038,7 +1221,7 @@
                         <div class="app-content mail-content">
                             <div class="mail-compose">
                                 <div class="mail-field">
-                                    <div class="mail-label"><span style="font-size: 12px; color: #0000007d;">To</span><span style="color: #000000; font-size: 12px; padding-left: 10px;">trushpatel097@gmail.com</span></div>
+                                    <div class="mail-label"><span style="font-size: 12px; color: #0000007d;">To</span><span style="color: #000000; font-size: 12px; padding-left: 10px;">trushp097@gmail.com</span></div>
                                 </div>
                                 <hr style="height: 1px; background-color: rgba(0, 0, 0, 0.15); width: 100%; position: relative; border: none; margin: 15px 0;">
                                 <div class="mail-field">
@@ -1171,22 +1354,6 @@
                                         <div class="grid-cell"></div>
                                     </div>
                                 </div>
-
-                                <!-- Touch Controls -->
-                                <div class="touch-controls">
-                                    <div class="touch-button touch-up" id="touch-up">
-                                        <i class="fas fa-chevron-up"></i>
-                                    </div>
-                                    <div class="touch-button touch-left" id="touch-left">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </div>
-                                    <div class="touch-button touch-right" id="touch-right">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </div>
-                                    <div class="touch-button touch-down" id="touch-down">
-                                        <i class="fas fa-chevron-down"></i>
-                                    </div>
-                                </div>
                             </div>
 
                             <!-- Name Entry Dialog -->
@@ -1214,12 +1381,27 @@
         
         <!-- Content outside iPhone -->
         <div class="content-outside">
+            <div class="typewriter-bg-text">
+                <span id="typewriter-line1"></span><br>
+                <span id="typewriter-line2"></span><br>
+                <span id="typewriter-line3"></span>
+            </div>
+            <div class="typewriter-bg-text-right">
+                <span id="typewriter-line-right1"></span><br>
+                <span id="typewriter-line-right2"></span><br>
+                <span id="typewriter-line-right3"></span>
+            </div>
+            <div class="typewriter-bg-text-bottom-right">
+                <span id="typewriter-line-bottom-right"></span>
+                <div id="qr-code-container">
+                    <img src="images/QRCode.png" alt="Book Interview QR Code" id="qr-code-image">
+                </div>
+            </div>
         </div>
     </div>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="script.js"></script>
-    <script src="scripts/projects.js"></script>
     <script>
     function testEmailJS() {
         console.log('Sending email...');
@@ -1228,12 +1410,9 @@
             const isMailApp = document.querySelector('#mail-app.active') !== null;
             console.log('Is mail app active:', isMailApp);
 
-            // Get email send count from localStorage
-            let emailSendCount = parseInt(localStorage.getItem('emailSendCount') || '0');
-            
-            // Check if user has reached the send limit (2 emails)
-            if (emailSendCount >= 2) {
-                alert('You have reached the limit of 2 emails. Please try again later.');
+            // Check rate limit using the new RateLimiter
+            if (window.RateLimiter && !window.RateLimiter.canPerformAction('emails')) {
+                window.RateLimiter.showRateLimitError('emails', 'You have reached your daily email limit.');
                 return;
             }
             
@@ -1296,9 +1475,10 @@
                 .then(function(response) {
                     console.log('SUCCESS!', response.status, response.text);
                     
-                    // Increment and save the email count
-                    emailSendCount++;
-                    localStorage.setItem('emailSendCount', emailSendCount.toString());
+                    // Record rate limit usage
+                    if (window.RateLimiter) {
+                        window.RateLimiter.recordAction('emails');
+                    }
                     
                     // Clear draft
                     localStorage.removeItem('mailAppDraft');
@@ -1320,7 +1500,7 @@
                             <p><strong>To:</strong> trushp097@gmail.com</p>
                             <p><strong>Subject:</strong> ${subject || '(No subject)'}</p>
                         </div>
-                        <p class="mail-limit-info">You have sent ${emailSendCount} of 2 allowed emails.</p>
+                        <p class="mail-limit-info">You have ${window.RateLimiter ? window.RateLimiter.getRemainingAllowance('emails') : 0} email(s) remaining today.</p>
                     `;
                     
                     // Replace mail compose with success message
@@ -1456,6 +1636,39 @@
                 <embed src="https://undergradstudies.temple.edu/sites/undergradstudies/files/2021%20Symposium%20Program.pdf" type="application/pdf">
             </div>
         </div>
+    </div>
+
+    <!-- Image Popup -->
+    <div class="image-popup-overlay" id="image-popup-overlay">
+        <div class="image-popup-container">
+            <button class="image-popup-close">
+                <i class="fas fa-times"></i>
+            </button>
+            <img class="image-popup-img" src="" alt="Project Image">
+        </div>
+    </div>
+
+    <!-- Floating Lofi Music Player Button -->
+    <div id="lofi-player" class="floating-audio-player">
+      <div id="lofi-toggle-wrapper" style="position:relative;display:inline-block;">
+        <div class="lofi-song-row">
+          <button id="lofi-back" title="Previous" class="lofi-song-btn" style="border-radius:8px 0 0 8px;"><i class="fas fa-backward"></i></button>
+          <div id="lofi-song-title"><span class="marquee"><span class="marquee-text"></span><span class="marquee-text"></span></span></div>
+          <button id="lofi-skip" title="Next" class="lofi-song-btn skip" style="border-radius:0 8px 8px 0;"><i class="fas fa-forward"></i></button>
+        </div>
+        <div class="lofi-audio-row">
+          <button id="lofi-toggle" style="background:#111;color:#fff;border:none;padding:8px 10px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.18);cursor:pointer;display:flex;align-items:center;justify-content:center;">
+            <span id="lofi-icon" style="font-size:30px;display:flex;align-items:center;justify-content:center;width:22px;height:22px;">
+              <!-- Modern volume icon (FontAwesome or SVG) -->
+              <svg id="icon-volume" xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="#fff" viewBox="-1 0 20 20"><path d="M3 10v4h4l5 5V5l-5 5H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.74 2.5-2.26 2.5-4.02z"/></svg>
+            </span>
+          </button>
+          <div id="lofi-volume-slider">
+            <input type="range" id="lofi-slider" min="0" max="1" step="0.01" value="0.7" style="width:204px;height:14px;left: 0px;">
+          </div>
+        </div>
+      </div>
+      <audio id="lofi-audio" src="sounds/playlist.mp3"></audio>
     </div>
 </body>
 </html> 

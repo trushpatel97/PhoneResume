@@ -11,21 +11,6 @@
     box-sizing: border-box;
 }
 
-/* Hide scrollbar completely */
-.experience-list::-webkit-scrollbar {
-    width: 0 !important;
-    height: 0 !important;
-    display: none !important;
-}
-
-.experience-list::-webkit-scrollbar-thumb {
-    display: none !important;
-}
-
-.experience-list::-webkit-scrollbar-track {
-    display: none !important;
-}
-
 /* Additional style to hide scrollbars for Firefox */
 .experience-list {
     scrollbar-width: none;

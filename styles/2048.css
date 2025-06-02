@@ -237,20 +237,56 @@
     list-style: none;
     padding: 0;
     margin: 0;
-    max-height: 180px;
+    max-height: 120px; /* Height for 3 items plus a peek at the 4th */
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .leaderboard-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 4px 8px;
+    padding: 6px 8px;
     background-color: #eee4da;
     margin-bottom: 4px;
     border-radius: 3px;
     color: #776e65;
     font-size: 13px;
+    height: 36px; /* Fixed height for consistent sizing */
+    box-sizing: border-box;
+}
+
+/* Top 3 Styling */
+.leaderboard-item:nth-child(-n+3) {
+    background-color: #f5e6d3;
+    border: 1px solid #e8c697;
+}
+
+.leaderboard-item:first-child {
+    background-color: #ffd700;
+    border: 1px solid #e5c100;
+    color: #776e65;
+}
+
+.leaderboard-item:nth-child(2) {
+    background-color: #c0c0c0;
+    border: 1px solid #a7a7a7;
+    color: #776e65;
+}
+
+.leaderboard-item:nth-child(3) {
+    background-color: #cd7f32;
+    border: 1px solid #b46a1e;
+    margin-bottom: 8px; /* Extra space after top 3 */
+    color: #776e65;
+}
+
+/* Show a peek of the 4th item to indicate scrolling */
+.leaderboard-list::after {
+    content: '';
+    display: block;
+    height: 4px;
+    background: transparent;
 }
 
 .leaderboard-rank {
@@ -336,135 +372,17 @@
     z-index: 999;
 }
 
-/* Mobile Specific Styles */
-@media (max-width: 480px) {
-    .app-content {
-        height: 100vh;
-        padding: 5px;
-        justify-content: flex-start;
-    }
-
-    .game-container {
-        padding: 8px;
-        margin-top: 10px;
-    }
-
-    .grid-container {
-        padding: 6px;
-    }
-
-    .grid-cell {
-        font-size: 20px; /* Slightly smaller font for mobile */
-    }
-
-    .grid-cell[data-value="128"],
-    .grid-cell[data-value="256"],
-    .grid-cell[data-value="512"] {
-        font-size: 18px;
-    }
-
-    .grid-cell[data-value="1024"],
-    .grid-cell[data-value="2048"] {
-        font-size: 16px;
-    }
-
-    .score-box {
-        padding: 4px 8px;
-        min-width: 50px;
-    }
-
-    .score-label {
-        font-size: 10px;
-    }
-
-    .score {
-        font-size: 14px;
-    }
-
-    .new-game-button {
-        padding: 4px 8px;
-        font-size: 12px;
-    }
-
-    .leaderboard-container {
-        margin-bottom: 5px;
-        padding: 5px;
-    }
-
-    .leaderboard-title {
-        font-size: 14px;
-        margin-bottom: 5px;
-    }
-
-    .leaderboard-list {
-        max-height: 120px;
-    }
-
-    .leaderboard-item {
-        padding: 3px 6px;
-        font-size: 12px;
-    }
-}
-
 /* Touch Feedback Styles */
 .grid-container.touch-active {
     opacity: 0.9;
     transition: opacity 0.2s ease;
 }
 
-/* Hide home indicator on mobile browsers */
-@media (max-width: 480px) {
-    .app-home-indicator {
-        display: none;
-    }
-}
-
-/* Touch Controls */
-.touch-controls {
-    display: none;
-    grid-template-areas:
-        ". up ."
-        "left . right"
-        ". down .";
-    gap: 4px;
-    width: 100%;
-    max-width: 120px;
-    margin: 0 auto;
-    padding: 5px;
-    position: relative;
-    z-index: 1;
-}
-
-.touch-button {
-    width: 28px;
-    height: 28px;
-    background-color: rgba(187, 173, 160, 0.9);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #f9f6f2;
-    font-size: 14px;
-    cursor: pointer;
-    border: none;
-    outline: none;
-    -webkit-tap-highlight-color: transparent;
-}
-
-.touch-button:active {
-    background-color: #8f7a66;
-}
-
-.touch-up { grid-area: up; }
-.touch-down { grid-area: down; }
-.touch-left { grid-area: left; }
-.touch-right { grid-area: right; }
-
 @media (max-width: 480px) {
     .app-content {
         height: auto;
         min-height: 100vh;
-        padding: 5px 5px 40px 5px;
+        padding: 5px 5px 60px 5px; /* Increased bottom padding from 40px to 60px */
         display: flex;
         flex-direction: column;
     }
@@ -475,12 +393,11 @@
         margin-bottom: 5px;
     }
 
-    .touch-controls {
-        display: grid;
-        margin-top: 5px;
-    }
-
     .leaderboard-container {
-        margin-bottom: 20px;
+        margin-bottom: 10px; /* Reduced from 20px to 10px */
+    }
+    
+    .grid-container {
+        margin-bottom: 5px; /* Reduced from 10px to 5px to save space */
     }
 } 

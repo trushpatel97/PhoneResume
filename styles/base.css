@@ -20,86 +20,225 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
     color: var(--text-color);
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow-x: hidden;
-    position: relative;
-    background-color: transparent;
-}
-
-/* Consistent scrollbar styles for all app content */
-.app-content, .about-container, .skills-container, .education-list, .projects-folder, .courses-section, .topics-list {
-    scrollbar-width: thin; /* For Firefox */
-    -ms-overflow-style: thin; /* For IE and Edge */
-}
-
-.app-content::-webkit-scrollbar, 
-.about-container::-webkit-scrollbar, 
-.skills-container::-webkit-scrollbar, 
-.education-list::-webkit-scrollbar, 
-.projects-folder::-webkit-scrollbar, 
-.courses-section::-webkit-scrollbar, 
-.topics-list::-webkit-scrollbar {
-    width: 6px;
-}
-
-.app-content::-webkit-scrollbar-track, 
-.about-container::-webkit-scrollbar-track, 
-.skills-container::-webkit-scrollbar-track, 
-.education-list::-webkit-scrollbar-track, 
-.projects-folder::-webkit-scrollbar-track, 
-.courses-section::-webkit-scrollbar-track, 
-.topics-list::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-.app-content::-webkit-scrollbar-thumb, 
-.about-container::-webkit-scrollbar-thumb, 
-.skills-container::-webkit-scrollbar-thumb, 
-.education-list::-webkit-scrollbar-thumb, 
-.projects-folder::-webkit-scrollbar-thumb, 
-.courses-section::-webkit-scrollbar-thumb, 
-.topics-list::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 3px;
-}
-
-.app-content::-webkit-scrollbar-thumb:hover, 
-.about-container::-webkit-scrollbar-thumb:hover, 
-.skills-container::-webkit-scrollbar-thumb:hover, 
-.education-list::-webkit-scrollbar-thumb:hover, 
-.projects-folder::-webkit-scrollbar-thumb:hover, 
-.courses-section::-webkit-scrollbar-thumb:hover, 
-.topics-list::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
-
-/* Vanta background styles */
-#vanta-background {
+    overflow: hidden;
     position: fixed;
-    top: 0;
-    left: 0;
+    background: #f7f8fa; /* Soft off-white background */
     width: 100%;
-    height: 100%;
+}
+
+/* Decorative shapes */
+.shape {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(40px);
+    opacity: 0.18;
     z-index: -1;
+    animation: float 15s infinite ease-in-out;
+}
+
+.shape-1 {
+    width: 300px;
+    height: 300px;
+    background: linear-gradient(45deg, #ffe0e9, #e0f7fa);
+    top: 10%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.shape-2 {
+    width: 400px;
+    height: 400px;
+    background: linear-gradient(45deg, #e0ffe0, #fffde0);
+    top: 60%;
+    right: 10%;
+    animation-delay: -5s;
+}
+
+.shape-3 {
+    width: 250px;
+    height: 250px;
+    background: linear-gradient(45deg, #e0e7ff, #f3e0ff);
+    bottom: 10%;
+    left: 20%;
+    animation-delay: -10s;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    25% {
+        transform: translate(50px, 50px) rotate(90deg);
+    }
+    50% {
+        transform: translate(0, 100px) rotate(180deg);
+    }
+    75% {
+        transform: translate(-50px, 50px) rotate(270deg);
+    }
 }
 
 .container {
     width: 100%;
     max-width: 1400px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+    height: 100vh;
     padding: 20px;
     position: relative;
     z-index: 1;
     gap: 50px;
+    backdrop-filter: blur(5px);
+    overflow: hidden;
 }
 
-/* Decorative shapes */
-.shape {
-    display: none;
+.typewriter-bg-text {
+    position: fixed;
+    top: 32px;
+    left: 32px;
+    z-index: 1;
+    pointer-events: auto;
+}
+
+.typewriter-bg-text-right {
+    position: fixed;
+    top: 32px;
+    right: 32px;
+    z-index: 1;
+    pointer-events: auto;
+    text-align: right;
+}
+
+#typewriter-line1, #typewriter-line2, #typewriter-line3 {
+    display: inline-block;
+    font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+    font-size: 0.95rem;
+    color: #fff;
+    background: #111;
+    padding: 6px 18px 6px 18px;
+    border-radius: 2px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    letter-spacing: 1px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    margin-top: 0;
+    width: 0;
+    overflow: hidden;
+    transition: width 0.12s cubic-bezier(0.4, 0.2, 0.2, 1);
+    white-space: pre;
+}
+
+#typewriter-line1, #typewriter-line2 {
+    pointer-events: none;
+}
+
+#typewriter-line3 {
+    cursor: pointer;
+    text-decoration: none;
+    visibility: hidden;
+    pointer-events: auto;
+}
+
+#typewriter-line3:hover {
+    background: #333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#typewriter-line-right1, #typewriter-line-right2, #typewriter-line-right3 {
+    display: inline-block;
+    font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+    font-size: 0.95rem;
+    color: #fff;
+    background: #111;
+    padding: 6px 18px 6px 18px;
+    border-radius: 2px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    letter-spacing: 1px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    margin-top: 0;
+    width: 0;
+    overflow: hidden;
+    transition: width 0.12s cubic-bezier(0.4, 0.2, 0.2, 1);
+    white-space: pre;
+    cursor: pointer;
+    text-decoration: none;
+    visibility: hidden;
+}
+
+#typewriter-line-right1:hover, #typewriter-line-right2:hover, #typewriter-line-right3:hover {
+    background: #333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#typewriter-line2, #typewriter-line3 {
+    margin-top: 8px;
+}
+
+#typewriter-line-right2, #typewriter-line-right3 {
+    margin-top: 8px;
+}
+
+.floating-audio-player {
+    position: fixed;
+    bottom: 32px;
+    left: 32px;
+    z-index: 20;
+    padding-left: 60px;
+}
+
+/* Tablet view adjustments for audio player */
+@media (min-width: 481px) and (max-width: 992px) {
+    .floating-audio-player {
+        left: 0;
+        padding-left: 20px;
+    }
+}
+
+.typewriter-bg-text-bottom-right {
+    display: inline-block;
+    font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+    font-size: 0.95rem;
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    z-index: 1;
+    pointer-events: auto;
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 16px;
+}
+
+#qr-code-container {
+    background: #111;
+    padding: 4px;
+    border-radius: 2px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    visibility: hidden;
+}
+
+#qr-code-container.visible {
+    opacity: 1;
+    transform: scale(1);
+    visibility: visible;
+}
+
+#qr-code-image {
+    width: 120px;
+    height: 120px;
+    display: block;
 } 

@@ -475,4 +475,34 @@
 .message-text {
     margin-top: 8px;
     word-break: break-word;
+}
+
+@media (max-width: 480px) {
+  .messages-input-field {
+    padding: 6px 8px;
+    gap: 6px;
+  }
+  .messages-send-btn {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
+    font-size: 13px;
+    flex-shrink: 0;
+    margin-left: 0;
+  }
+  .messages-input {
+    font-size: 14px;
+  }
+}
+
+/* Always keep status bar transparent when projects folder is open */
+#projects-app.active ~ .status-bar,
+.app-screen#projects-app ~ .status-bar,
+.status-bar {
+    background-color: transparent !important;
+}
+
+#projects-app.active ~ .status-bar {
+    background-color: transparent !important;
 } 

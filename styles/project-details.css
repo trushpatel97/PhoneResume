@@ -56,6 +56,11 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
+/* Specific styling for Chalkboard project images */
+#chalkboard-project .project-image {
+    height: 180px;  /* 10% smaller than the default 200px */
+}
+
 .project-section {
     margin-bottom: 20px;
     background-color: #ffffff;
@@ -67,8 +72,12 @@
 .section-title {
     font-size: 18px;
     font-weight: 600;
-    color: #333;
+    color: #000;
     margin-bottom: 12px;
+    margin-top: 15px;
+    text-align: center;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .project-description {
