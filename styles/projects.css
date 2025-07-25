@@ -1,10 +1,14 @@
 /* Projects App Styles */
 .project-item {
-    background-color: #f9f9f9;
-    border-radius: 8px;
+    /* Glassmorphism card */
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 12px;
     padding: 15px;
     margin-bottom: 15px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
 }
 
 .project-item h3 {
@@ -26,11 +30,17 @@
 }
 
 .tech-stack span {
-    background-color: var(--primary-color);
-    color: white;
+    /* Glass pill */
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #000;
     font-size: 11px;
-    padding: 3px 8px;
-    border-radius: 12px;
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-weight: 600;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
 /* Projects Folder Styles */

@@ -68,7 +68,7 @@
 
 /* App-specific gradients */
 .app[data-app="education"] .app-icon {
-    background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+    background: linear-gradient(135deg, #9E1B34, #B31B1B);
 }
 
 .app[data-app="projects"] .app-icon {
@@ -78,11 +78,11 @@
 }
 
 .app[data-app="experience"] .app-icon {
-    background: linear-gradient(135deg, #FFD93D, #FF6B6B);
+    background: linear-gradient(135deg, #064E3B, #065F46);
 }
 
 .app[data-app="skills"] .app-icon {
-    background: linear-gradient(135deg, #6C63FF, #FF6584);
+    background: linear-gradient(135deg, #2E1065, #4C1D95);
     background-size: 100% 100%;
     position: relative;
     z-index: 0;
@@ -110,7 +110,7 @@
 }
 
 .dock .app[data-app="messages"] .app-icon {
-    background: linear-gradient(135deg, #34D399, #059669, #10B981);
+    background: linear-gradient(135deg, #15803D, #16A34A);
 }
 
 .dock .app[data-app="mail"] .app-icon {

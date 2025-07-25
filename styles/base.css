@@ -30,42 +30,6 @@ body {
     width: 100%;
 }
 
-/* Decorative shapes */
-.shape {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(40px);
-    opacity: 0.18;
-    z-index: -1;
-    animation: float 15s infinite ease-in-out;
-}
-
-.shape-1 {
-    width: 300px;
-    height: 300px;
-    background: linear-gradient(45deg, #ffe0e9, #e0f7fa);
-    top: 10%;
-    left: 10%;
-    animation-delay: 0s;
-}
-
-.shape-2 {
-    width: 400px;
-    height: 400px;
-    background: linear-gradient(45deg, #e0ffe0, #fffde0);
-    top: 60%;
-    right: 10%;
-    animation-delay: -5s;
-}
-
-.shape-3 {
-    width: 250px;
-    height: 250px;
-    background: linear-gradient(45deg, #e0e7ff, #f3e0ff);
-    bottom: 10%;
-    left: 20%;
-    animation-delay: -10s;
-}
 
 @keyframes float {
     0%, 100% {
@@ -151,6 +115,74 @@ body {
     transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+/* Download container and options */
+.download-container {
+    position: relative;
+    display: inline-block;
+}
+
+.download-options {
+    position: absolute;
+    top: 0;
+    left: calc(100% + 10px);
+    display: none;
+    gap: 10px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.download-options.typing-complete {
+    display: flex;
+}
+
+.download-container:hover .download-options {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+.download-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    background: #333;
+    color: white;
+    border-radius: 0px;
+    cursor: pointer;
+    font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+    font-size: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.download-option:hover {
+    background: #555;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.download-option i {
+    font-size: 16px;
+    margin-bottom: 2px;
+}
+
+.download-option[data-format="pdf"] i {
+    color: #FF5722;
+}
+
+.download-option[data-format="word"] i {
+    color: #2196F3;
+}
+
 #typewriter-line-right1, #typewriter-line-right2, #typewriter-line-right3 {
     display: inline-block;
     font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
@@ -192,8 +224,7 @@ body {
     position: fixed;
     bottom: 32px;
     left: 32px;
-    z-index: 20;
-    padding-left: 60px;
+    z-index: 1;
 }
 
 /* Tablet view adjustments for audio player */
@@ -241,4 +272,4 @@ body {
     width: 120px;
     height: 120px;
     display: block;
-} 
+}

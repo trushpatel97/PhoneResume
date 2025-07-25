@@ -1,4 +1,145 @@
 /* Responsive Styles */
+
+/* Hide Resume app by default (desktop/tablet) */
+.mobile-only-app {
+    display: none;
+}
+
+/* Resume Download Popup Styles */
+.resume-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 9999;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.resume-popup-overlay.active {
+    display: flex;
+}
+
+.resume-popup {
+    background: rgba(41, 39, 39, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 24px;
+    max-width: 300px;
+    width: 85%;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    animation: popupSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popupSlideIn {
+    from {
+        transform: translateY(60px) scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.resume-popup-content {
+    padding: 32px 28px;
+    background-color: rgb(35, 31, 31);
+    text-align: center;
+}
+
+.resume-popup-content p {
+    margin: 0 0 24px 0;
+    color: white;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+.resume-format-options {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.resume-format-btn {
+    background: rgb(19, 17, 17);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 18px 20px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 75px;
+    text-decoration: none;
+    color: white;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
+.resume-format-btn[data-format="pdf"] i {
+    color: #FF3B30;
+}
+
+.resume-format-btn[data-format="docx"] i {
+    color: #007AFF;
+}
+
+.resume-format-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.resume-format-btn:hover::before {
+    opacity: 1;
+}
+
+.resume-format-btn:hover {
+    background: rgba(28, 28, 30, 1);
+    color: white;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.resume-format-btn:active {
+    transform: translateY(-1px) scale(1.02);
+}
+
+.resume-format-btn i {
+    font-size: 22px;
+    position: relative;
+    z-index: 1;
+}
+
+.resume-format-btn span {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    position: relative;
+    z-index: 1;
+}
+
 @media (max-width: 992px) {
     /* Tablet and smaller devices */
     .container {
@@ -57,14 +198,10 @@
     .typewriter-bg-text,
     .typewriter-bg-text-right,
     .typewriter-bg-text-bottom-right,
-    #qr-code-container {
-        display: none !important;
-    }
-    
-    /* Hide lofi player */
     .floating-audio-player,
     #lofi-toggle-wrapper,
-    #lofi-player {
+    #lofi-player,
+    #qr-code-container {
         display: none !important;
     }
 }
@@ -119,6 +256,11 @@
         padding: 0 3px;
     }
     
+    /* Show Resume app only on mobile */
+    .mobile-only-app {
+        display: flex !important;
+    }
+    
     /* Hide all background content on mobile */
     .content-outside {
         display: none !important;
@@ -128,14 +270,10 @@
     .typewriter-bg-text,
     .typewriter-bg-text-right,
     .typewriter-bg-text-bottom-right,
-    #qr-code-container {
-        display: none !important;
-    }
-    
-    /* Hide lofi player on mobile */
     .floating-audio-player,
     #lofi-toggle-wrapper,
-    #lofi-player {
+    #lofi-player,
+    #qr-code-container {
         display: none !important;
     }
 }
@@ -157,6 +295,11 @@
         height: 38px;
     }
     
+    /* Show Resume app only on mobile */
+    .mobile-only-app {
+        display: flex !important;
+    }
+    
     /* Also hide background content on very small devices */
     .content-outside {
         display: none !important;
@@ -166,14 +309,91 @@
     .typewriter-bg-text,
     .typewriter-bg-text-right,
     .typewriter-bg-text-bottom-right,
+    .floating-audio-player,
+    #lofi-toggle-wrapper,
+    #lofi-player,
     #qr-code-container {
         display: none !important;
     }
-    
-    /* Hide lofi player */
-    .floating-audio-player,
-    #lofi-toggle-wrapper,
-    #lofi-player {
-        display: none !important;
+}
+
+.projects-folder {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 5px;
+    padding: 8px 0;
+    overflow-y: auto; /* Enable vertical scrolling */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling for mobile */
+    height: 100%; /* Ensure it takes full height */
+}
+
+.folder-grid-container {
+    height: 100%; /* Ensure it takes full height */
+    overflow-y: auto; /* Enable vertical scrolling */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling for mobile */
+}
+
+.app-content {
+    height: calc(100%); /* Adjust height to fit within the screen */
+    overflow-y: auto; /* Enable vertical scrolling */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling for mobile */
+}
+
+.app-screen {
+    height: 100%; /* Ensure full height for scrollable content */
+    overflow-y: auto; /* Enable vertical scrolling */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Customize scrollbar appearance */
+.app-screen::-webkit-scrollbar {
+    width: 5px; /* Thin scrollbar width */
+    height: 5px; /* Thin scrollbar height */
+}
+
+.app-screen::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.5); /* Dark thumb for visibility */
+    border-radius: 10px; /* Rounded edges */
+}
+
+.app-screen::-webkit-scrollbar-track {
+    background-color: rgba(0, 0, 0, 0.1); /* Light track */
+}
+
+.app-screen {
+    scrollbar-width: none; /* Thin scrollbar for Firefox */
+}
+
+.about-section p {
+    text-align: left;
+    hyphens: none;
+    word-spacing: normal;
+    line-height: 1.4;
+    font-size: 13px;
+    color: #333;
+    margin: 0 0 8px 0;
+}
+
+.about-section p:last-child {
+    margin-bottom: 0;
+}
+
+/* Mobile adjustments */
+@media (max-width: 576px) {
+    .about-section p,
+    .about-section li span,
+    .about-section li i {
+        line-height: 1.5; /* Slightly increased line height for mobile */
+        word-spacing: normal;
+        text-align: left; /* Left align on mobile for better readability */
+        font-size: 14px; /* Slightly larger font for mobile */
     }
-} 
+    
+    .about-section p {
+        margin: 0 0 10px 0; /* Increased spacing between paragraphs */
+    }
+    
+    .about-section li i {
+        margin-top: 4px; /* Adjust icon alignment for larger font */
+    }
+}

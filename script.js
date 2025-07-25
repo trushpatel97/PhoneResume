@@ -352,6 +352,13 @@ document.addEventListener('DOMContentLoaded', () => {
     apps.forEach(app => {
         app.addEventListener('click', () => {
             const appName = app.getAttribute('data-app');
+            
+            // Special handling for resume app - open popup instead
+            if (appName === 'resume') {
+                openResumePopup();
+                return;
+            }
+            
             const appScreen = document.getElementById(`${appName}-app`);
             
             if (appScreen) {
@@ -1435,29 +1442,8 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeMailAppDraftSaving();
     });
 
-    // Messages-specific logic
-    const messagesApp = document.getElementById('messages-app');
-    if (messagesApp) {
-        // Update the timestamp with current time
-        const timestamp = document.getElementById('messages-timestamp');
-        if (timestamp) {
-            const now = new Date();
-            const hours = now.getHours();
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            const displayHours = hours % 12 || 12; // Convert to 12-hour format
-            timestamp.textContent = `Today, ${displayHours}:${minutes} ${ampm}`;
-        }
-        
-        // Initialize Firebase chat
-        initializeChat();
-        
-        // Set up export button
-        const exportBtn = document.getElementById('export-chat-btn');
-        if (exportBtn) {
-            exportBtn.addEventListener('click', exportChatAsText);
-        }
-    }
+    // Messages-specific logic - this is handled in updateContentDisplay now
+    // The main initialization happens when the app is opened through updateContentDisplay
 
     // Add these styles dynamically to avoid modifying external files
     const styleElement = document.createElement('style');
@@ -1658,6 +1644,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function sendMessage() {
             const text = messagesInput.value.trim();
+            // >>> ADDED: intercept SignOut command to log the user out and show sign-in prompt <<<
+            if (text.toLowerCase() === 'signout') {
+                // Clear the input box so the command isn't sent as a regular message
+                messagesInput.value = '';
+                // Clean up any active chat listener
+                if (window.chatUnsubscribe) {
+                    try { window.chatUnsubscribe(); } catch (e) { console.error(e); }
+                }
+                window.chatInitialized = false;
+                // Sign the user out (if currently authenticated)
+                if (window.firebase && firebase.auth && firebase.auth().currentUser) {
+                    firebase.auth().signOut().catch(err => console.error('Sign-out error:', err));
+                }
+                // Re-prompt the user to sign in
+                const messagesAppElem = document.getElementById('messages-app');
+                if (messagesAppElem) {
+                    showGoogleSignInPrompt(messagesAppElem, initializeChat);
+                }
+                return; // Do not send the command as a message
+            }
             const attachmentPreview = messagesInputField.querySelector('.attachment-preview');
             
             if (!text && !attachmentPreview) return;
@@ -2230,8 +2236,8 @@ function updateContentDisplay(appName) {
                 timestamp.textContent = `Today, ${displayHours}:${minutes} ${ampm}`;
             }
             
-            // Initialize Firebase chat
-            initializeChat();
+            // Always check authentication status and show sign-in if needed
+            checkAuthAndInitializeChat(messagesApp);
             
             // Set up export button
             const exportBtn = document.getElementById('export-chat-btn');
@@ -2274,12 +2280,26 @@ function goToHomeScreen() {
 
 // Function to generate or retrieve a user ID for chat
 function getChatUserId() {
+    // If the visitor is authenticated with Google, use their Firebase UID
+    if (window.firebase && firebase.auth && firebase.auth().currentUser) {
+        return firebase.auth().currentUser.uid;
+    }
+    // Fallback to anonymous session id stored in localStorage
     let userId = localStorage.getItem('chat_user_id');
     if (!userId) {
         userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
         localStorage.setItem('chat_user_id', userId);
     }
     return userId;
+}
+
+// Function to get display name for admin preview
+function getChatDisplayName() {
+    if (window.firebase && firebase.auth && firebase.auth().currentUser) {
+        const user = firebase.auth().currentUser;
+        return user.displayName || user.email || user.uid;
+    }
+    return getChatUserId();
 }
 
 // Function to save chat history
@@ -2320,6 +2340,76 @@ function bounce(element) {
     }
     
     requestAnimationFrame(bounceStep);
+}
+
+// Function to check authentication and initialize chat
+function checkAuthAndInitializeChat(messagesApp) {
+    // Initialize Firebase if not already done
+    if (!window.firebase) {
+        if (typeof firebase !== 'undefined') {
+            const firebaseConfig = {
+                apiKey: "AIzaSyDiptAEF_Y6ptGYkiAf1jeEkyy5J72w22g",
+                authDomain: "trushresume.firebaseapp.com",
+                projectId: "trushresume",
+                storageBucket: "trushresume.firebasestorage.app",
+                messagingSenderId: "504357252195",
+                appId: "1:504357252195:web:9519b10c4efc88185cdc56",
+                measurementId: "G-9VL9JPE4KW"
+            };
+            
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            window.firebase = firebase;
+        } else {
+            console.error("Firebase SDK not loaded");
+            showChatError("Chat system unavailable. Please refresh the page.");
+            return;
+        }
+    }
+    
+    // Check current auth state immediately
+    const currentUser = firebase.auth().currentUser;
+    if (currentUser) {
+        // User is already signed in, initialize chat immediately
+        console.log('User already authenticated:', currentUser.displayName || currentUser.email);
+        initializeChat();
+    } else {
+        // User is not signed in, show sign-in prompt
+        console.log('User not authenticated, showing sign-in prompt');
+        showGoogleSignInPrompt(messagesApp, () => {
+            initializeChat();
+        });
+    }
+    
+    // Also listen for auth state changes (but only once)
+    if (!window.authStateListenerAttached) {
+        window.authStateListenerAttached = true;
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user && !window.chatInitialized) {
+                // User signed in and chat not yet initialized
+                console.log('Auth state changed - user signed in:', user.displayName || user.email);
+                initializeChat();
+            } else if (!user && window.chatInitialized) {
+                // User signed out and chat was initialized
+                console.log('Auth state changed - user signed out');
+                if (window.chatUnsubscribe) {
+                    window.chatUnsubscribe();
+                }
+                window.chatInitialized = false;
+                window.authStateListenerAttached = false;
+                
+                // Clear messages content and show sign-in prompt again
+                const messagesContent = document.querySelector('.messages-content');
+                if (messagesContent) {
+                    messagesContent.innerHTML = '';
+                }
+                showGoogleSignInPrompt(messagesApp, () => {
+                    initializeChat();
+                });
+            }
+        });
+    }
 }
 
 // Function to initialize the chat system with Firebase
@@ -2488,10 +2578,17 @@ function showChatError(errorMessage) {
 
 // Update user online status
 function updateUserStatus(userStatusRef, isOnline) {
+    const currentUser = (window.firebase && firebase.auth) ? firebase.auth().currentUser : null;
+    const displayName = getChatDisplayName();
+    
     userStatusRef.set({
         online: isOnline,
         lastActive: firebase.firestore.FieldValue.serverTimestamp(),
-        userId: getChatUserId()
+        userId: getChatUserId(),
+        displayName: currentUser ? currentUser.displayName : null,
+        email: currentUser ? currentUser.email : null,
+        sessionName: displayName, // This is what the admin will see as the session identifier
+        isAuthenticated: !!currentUser
     }, { merge: true });
 }
 
@@ -2599,6 +2696,9 @@ function setupChatListener(chatRef, messagesContent) {
     
     // Listen for new messages
     const messagesUnsubscribe = chatRef.orderBy('timestamp', 'asc').onSnapshot(snapshot => {
+        // Check if this is the initial load (no messages displayed yet)
+        const isInitialLoad = messagesContent.children.length <= 1; // Only welcome message
+        
         // Process all messages to ensure proper ordering
         const allMessages = [];
         let userMessages = [];
@@ -2749,6 +2849,34 @@ function updateMessageStatuses(messagesContent, latestReadMessage, latestDeliver
             }
         }
     }
+}
+
+// Function to extract YouTube video ID from URL
+function extractYouTubeVideoId(url) {
+    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[7].length === 11) ? match[7] : null;
+}
+
+// Function to detect YouTube URLs in text
+function detectYouTubeUrls(text) {
+    const youtubeRegex = /(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/)|youtu\.be\/|m\.youtube\.com\/watch\?v=)([a-zA-Z0-9_-]{11})/g;
+    const urls = [];
+    let match;
+    
+    while ((match = youtubeRegex.exec(text)) !== null) {
+        const fullUrl = match[0];
+        const videoId = extractYouTubeVideoId(fullUrl);
+        if (videoId) {
+            urls.push({
+                url: fullUrl,
+                videoId: videoId,
+                thumbnailUrl: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
+            });
+        }
+    }
+    
+    return urls;
 }
 
 // Display a message in the chat
@@ -3451,6 +3579,29 @@ function setupMessageSending(messageInput, sendButton, chatRef, userId) {
     // Function to send a message
     const sendMessage = async () => {
         const text = messageInput.value.trim();
+        // >>> ADDED: SignOut command support <<<
+        if (text.toLowerCase() === 'signout') {
+            // Clear the text field
+            messageInput.value = '';
+
+            // Unsubscribe any active chat listeners
+            if (window.chatUnsubscribe) {
+                try { window.chatUnsubscribe(); } catch (e) { console.error(e); }
+            }
+            window.chatInitialized = false;
+
+            // Perform Firebase sign-out if a user is currently signed in
+            if (window.firebase && firebase.auth && firebase.auth().currentUser) {
+                try { await firebase.auth().signOut(); } catch (err) { console.error('Sign-out error:', err); }
+            }
+
+            // Show Google sign-in prompt again
+            const messagesAppElem = document.getElementById('messages-app');
+            if (messagesAppElem) {
+                showGoogleSignInPrompt(messagesAppElem, initializeChat);
+            }
+            return; // Do not send the SignOut text as a normal message
+        }
         const imagePreview = document.querySelector('.image-preview');
         
         if (!text && !imagePreview) return;
@@ -3530,8 +3681,11 @@ function setupMessageSending(messageInput, sendButton, chatRef, userId) {
                 sender: 'user',
                 timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                 clientMessageId: clientMessageId,
-                delivered: false,
-                seen: false
+                delivered: true,
+                seen: false,
+                senderDisplayName: firebase.auth && firebase.auth().currentUser ? firebase.auth().currentUser.displayName : null,
+                senderEmail: firebase.auth && firebase.auth().currentUser ? firebase.auth().currentUser.email : null,
+                senderSessionName: getChatDisplayName() // For admin preview
             };
             
             // If there's an image, upload it first
@@ -3558,7 +3712,10 @@ function setupMessageSending(messageInput, sendButton, chatRef, userId) {
             }
             
             // Add message to Firestore
-            await chatRef.add(messageData);
+            const docRef = await chatRef.add(messageData);
+
+            // Mark as delivered for the sender
+            await docRef.update({ delivered: true });
             
             // Record rate limit usage
             window.RateLimiter.recordAction('messages');
@@ -3775,12 +3932,15 @@ function handleAttachmentClick() {
                         const messageData = {
                             sender: 'user',
                             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                            delivered: false,
+                            delivered: true,
                             seen: false,
                             fileName: file.name,
                             fileType: file.type,
                             fileUrl: downloadURL,
-                            fileSize: file.size
+                            fileSize: file.size,
+                            senderDisplayName: firebase.auth && firebase.auth().currentUser ? firebase.auth().currentUser.displayName : null,
+                            senderEmail: firebase.auth && firebase.auth().currentUser ? firebase.auth().currentUser.email : null,
+                            senderSessionName: getChatDisplayName() // For admin preview
                         };
                         
                         console.log("Saving file reference to Firestore");
@@ -3800,12 +3960,15 @@ function handleAttachmentClick() {
                         const messageData = {
                             sender: 'user',
                             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                            delivered: false,
+                            delivered: true,
                             seen: false,
                             fileName: file.name,
                             fileType: file.type,
                             fileData: base64Data,
-                            isInlineFile: true
+                            isInlineFile: true,
+                            senderDisplayName: firebase.auth && firebase.auth().currentUser ? firebase.auth().currentUser.displayName : null,
+                            senderEmail: firebase.auth && firebase.auth().currentUser ? firebase.auth().currentUser.email : null,
+                            senderSessionName: getChatDisplayName() // For admin preview
                         };
                         
                         console.log("Saving message to Firestore");
@@ -4023,17 +4186,47 @@ async function handleSendMessage() {
             el3.style.width = el3.scrollWidth + 'px';
             setTimeout(typeLine3, delay);
         } else {
+            // Enable hover functionality for download options after typing is complete
+            const downloadOptionsContainer = document.getElementById('download-options');
+            if (downloadOptionsContainer) {
+                downloadOptionsContainer.classList.add('typing-complete');
+            }
+
             // Add click functionality for Download Resume
             el3.addEventListener('click', () => {
                 // Create a temporary link element to download the resume
                 const link = document.createElement('a');
-                link.href = 'files/TrushPatel_Resume.pdf';
+                link.href = 'documents/TrushPatel_Resume.pdf';
                 link.download = 'TrushPatel_Resume.pdf';
                 link.style.display = 'none';
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
             });
+
+            // Add click functionality for download options
+            const downloadOptions = document.querySelectorAll('.download-option');
+            downloadOptions.forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent triggering the main button
+                    const format = option.getAttribute('data-format');
+                    const link = document.createElement('a');
+                    
+                    if (format === 'pdf') {
+                        link.href = 'documents/TrushPatel_Resume.pdf';
+                        link.download = 'TrushPatel_Resume.pdf';
+                    } else if (format === 'word') {
+                        link.href = 'documents/TrushPatel_Resume.docx';
+                        link.download = 'TrushPatel_Resume.docx';
+                    }
+                    
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                });
+            });
+
             // Left-side typewriter is complete, now start the right-side typewriter
             setTimeout(() => {
                 startRightTypewriter();
@@ -4390,3 +4583,747 @@ document.addEventListener('DOMContentLoaded', function() {
     })();
 });
 // ... existing code ...
+
+/* ======================= GOOGLE SIGN-IN PROMPT ======================= */
+function showGoogleSignInPrompt(messagesApp, onSuccess) {
+    // Clear any existing messages content first
+    const messagesContent = messagesApp.querySelector('.messages-content');
+    if (messagesContent) {
+        messagesContent.innerHTML = '';
+    }
+    
+    // Ensure Firebase is initialised for auth
+    if (typeof firebase === 'undefined' || !firebase.apps || !firebase.apps.length) {
+        const firebaseConfig = {
+            apiKey: "AIzaSyDiptAEF_Y6ptGYkiAf1jeEkyy5J72w22g",
+            authDomain: "trushresume.firebaseapp.com",
+            projectId: "trushresume",
+            storageBucket: "trushresume.firebasestorage.app",
+            messagingSenderId: "504357252195",
+            appId: "1:504357252195:web:9519b10c4efc88185cdc56",
+            measurementId: "G-9VL9JPE4KW"
+        };
+        firebase.initializeApp(firebaseConfig);
+    }
+
+    // Already authenticated? nothing to do
+    if (firebase.auth().currentUser) {
+        if (onSuccess) onSuccess();
+        return;
+    }
+
+    // Remove any existing overlays
+    const existingOverlays = messagesApp.querySelectorAll('.google-signin-overlay');
+    existingOverlays.forEach(overlay => overlay.remove());
+
+    const overlay = document.createElement('div');
+    overlay.className = 'google-signin-overlay';
+    overlay.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 5000;
+        backdrop-filter: blur(1px);
+        -webkit-backdrop-filter: blur(1px);
+    `;
+
+    const signInContainer = document.createElement('div');
+    signInContainer.style.cssText = `
+        text-align: center;
+        padding: 25px 20px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        max-width: 90%;
+        width: 300px;
+        margin: 20px;
+    `;
+
+    const title = document.createElement('h2');
+    title.textContent = 'Sign in Required';
+    title.style.cssText = `
+        margin: 0 0 8px 0;
+        color: #333;
+        font-size: 20px;
+        font-weight: 600;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        white-space: nowrap;
+    `;
+
+    const subtitle = document.createElement('p');
+    subtitle.textContent = 'Sign in with Google to start chatting';
+    subtitle.style.cssText = `
+        margin: 0 0 20px 0;
+        color: #666;
+        font-size: 14px;
+        line-height: 1.3;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    `;
+
+    const btn = document.createElement('button');
+                    btn.innerHTML = `
+                    <svg width="18" height="18" viewBox="0 0 20 20" style="margin-right: 8px; flex-shrink: 0;">
+                        <path fill="#4285F4" d="M19.6 10.23c0-.82-.1-1.42-.25-2.05H10v3.72h5.5c-.15 1.13-.8 2.2-1.68 2.87v2.34h2.68c1.6-1.47 2.5-3.65 2.5-6.88z"/>
+                        <path fill="#34A853" d="M10 20c2.7 0 4.87-.9 6.5-2.39l-2.68-2.34c-.9.6-2.16.96-3.82.96-2.9 0-5.35-1.96-6.25-4.59H.9v2.42C2.6 17.53 6.1 20 10 20z"/>
+                        <path fill="#FBBC05" d="M3.75 11.64A5.9 5.9 0 0 1 3.75 8.36V5.94H.9a10.02 10.02 0 0 0 0 8.12l2.85-2.42z"/>
+                        <path fill="#EA4335" d="M10 3.98c1.54 0 2.89.53 3.96 1.53L16.62 2.8C14.87 1.19 12.7.2 10 .2 6.1.2 2.6 2.67.9 5.94L3.75 8.36C4.65 5.73 7.1 3.98 10 3.98z"/>
+                    </svg>
+                    <span style="font-weight: 500; white-space: nowrap; color: #3c4043;">Sign in with Google</span>
+                `;
+    btn.style.cssText = `
+        padding: 12px 16px;
+        background: #f8f9fa;
+        color: #3c4043;
+        border: 1px solid #dadce0;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        transition: all 0.2s ease;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        box-shadow: 0 1px 3px rgba(60, 64, 67, 0.15);
+        white-space: nowrap;
+    `;
+    
+    btn.addEventListener('mouseenter', () => {
+        btn.style.backgroundColor = '#f1f3f4';
+        btn.style.boxShadow = '0 2px 8px rgba(60, 64, 67, 0.2)';
+    });
+    
+    btn.addEventListener('mouseleave', () => {
+        btn.style.backgroundColor = '#f8f9fa';
+        btn.style.boxShadow = '0 1px 3px rgba(60, 64, 67, 0.15)';
+    });
+
+    signInContainer.appendChild(title);
+    signInContainer.appendChild(subtitle);
+    signInContainer.appendChild(btn);
+    overlay.appendChild(signInContainer);
+    messagesApp.appendChild(overlay);
+
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.addScope('profile');
+    provider.addScope('email');
+    
+    btn.addEventListener('click', () => {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: 8px; color: #3c4043;"></i><span style="white-space: nowrap; color: #3c4043;">Signing in...</span>';
+        
+        firebase.auth().signInWithPopup(provider)
+            .then((result) => {
+                console.log('Sign-in successful:', result.user.displayName || result.user.email);
+                overlay.remove();
+                if (onSuccess) onSuccess();
+            })
+            .catch(err => {
+                console.error('Sign-in error:', err);
+                btn.disabled = false;
+                btn.innerHTML = `
+                    <svg width="18" height="18" viewBox="0 0 20 20" style="margin-right: 8px; flex-shrink: 0;">
+                        <path fill="#4285F4" d="M19.6 10.23c0-.82-.1-1.42-.25-2.05H10v3.72h5.5c-.15 1.13-.8 2.2-1.68 2.87v2.34h2.68c1.6-1.47 2.5-3.65 2.5-6.88z"/>
+                        <path fill="#34A853" d="M10 20c2.7 0 4.87-.9 6.5-2.39l-2.68-2.34c-.9.6-2.16.96-3.82.96-2.9 0-5.35-1.96-6.25-4.59H.9v2.42C2.6 17.53 6.1 20 10 20z"/>
+                        <path fill="#FBBC05" d="M3.75 11.64A5.9 5.9 0 0 1 3.75 8.36V5.94H.9a10.02 10.02 0 0 0 0 8.12l2.85-2.42z"/>
+                        <path fill="#EA4335" d="M10 3.98c1.54 0 2.89.53 3.96 1.53L16.62 2.8C14.87 1.19 12.7.2 10 .2 6.1.2 2.6 2.67.9 5.94L3.75 8.36C4.65 5.73 7.1 3.98 10 3.98z"/>
+                    </svg>
+                    <span style="font-weight: 500; white-space: nowrap;">Sign in with Google</span>
+                `;
+                alert('Google sign-in failed: ' + (err.message || err));
+            });
+    });
+}
+// ... existing code ...
+
+// Export chat as text function
+function exportChatAsText() {
+    const messagesContent = document.querySelector('.messages-content');
+    if (!messagesContent) return;
+    
+    const messages = messagesContent.querySelectorAll('.message');
+    let chatText = 'Chat Export\n';
+    chatText += '================\n\n';
+    
+    messages.forEach(message => {
+        const isReceived = message.classList.contains('message-received');
+        const isWelcome = message.classList.contains('welcome-message');
+        const sender = isReceived ? (isWelcome ? 'System' : 'Trush Patel') : 'You';
+        const text = message.textContent || message.innerText;
+        chatText += `${sender}: ${text}\n`;
+    });
+    
+    // Create download link
+    const blob = new Blob([chatText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `chat_export_${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// If not yet signed-in (silent login still pending) start chat as soon as auth state becomes ready
+if (window.firebase && firebase.auth && !window.chatInitialized) {
+    firebase.auth().onAuthStateChanged(user => {
+        if (user && !window.chatInitialized) {
+            initializeChat();
+        }
+    });
+}
+
+    // ================= Skill Projects Popup =================
+    (function initSkillProjectsPopup() {
+        const skillMapping = {
+            'Python': [
+                {
+                    id: 'story',
+                    title: 'Story Spinner',
+                    description: "Web application that generates stories from various categories using NLP",
+                    skillUsage: "Summarized generated text and handled backend development using Django",
+                    icon: 'images/Story.jpeg'
+                },
+                {
+                    id: 'eye',
+                    title: 'Eye Disease Detection',
+                    description: 'Classifying the presence of eye diseases in images with Deep Learning',
+                    skillUsage: "Utilized Python for model training, validation, testing, and fine-tuning",
+                    icon: 'images/Eye.jpeg'
+                },
+                {
+                    id: 'tracking',
+                    title: 'Package Tracking System',
+                    description: 'AI-driven email responder for package inquiries using OpenAI and historical data',
+                    skillUsage: "Automated inquiries using OpenAI API, enforced PEP8 standards with Pylint, and developed APIs using Python",
+                    icon: 'images/Package.jpeg'
+                },
+                {
+                    id: 'bigdata',
+                    title: 'BigData',
+                    description: 'Managing billions of data through GCP',
+                    skillUsage: "Retrieved records from BigQuery and Oracle; validated data using Python with visual indicators for mismatches",
+                    icon: 'images/GCP.jpg'
+                }
+
+            ],
+            'JavaScript': [
+                {
+                    id: 'chalkboard',
+                    title: 'Chalkboard',
+                    description: 'Web-based collaboration platform that enables users to draw and have video calls simultaneously',
+                    skillUsage: "Used JavaScript to change shape/pen colors via the Color Pickr API, enabled Picture-in-Picture (PiP) mode to monitor other tabs/apps while drawing, and implemented a light/dark theme toggle",
+                    icon: 'images/ChalkboardLogo.png'
+                },
+                {
+                    id: 'celebrity',
+                    title: 'Celebrity Look-alike',
+                    description: 'Full stack web app that matches celebrity look-alikes via image URL submissions',
+                    skillUsage: "Used JavaScript with React to implement sign-in and registration functionality, tracked user URL submissions to monitor API usage",
+                    icon: 'images/Celeb.jpeg'
+                },
+                {
+                    id: 'story',
+                    title: 'Story Spinner',
+                    description: 'Web application that generates stories from various categories using NLP',
+                    skillUsage: "Built frontend interactivity with JavaScript to trigger Django-based Python scripts for automated story generation",
+                    icon: 'images/Story.jpeg'
+                }
+            ],
+            'Java': [
+                {
+                    id: 'vet',
+                    title: 'Vet Database',
+                    description: 'Java-integrated GUI for managing veterinary records',
+                    skillUsage:  "Developed a Java GUI that communicated with an SQL database to add, update, and delete individual records",
+                    icon: 'images/vet.png'
+                },
+                {
+                    id: 'colors',
+                    title: 'Colors',
+                    description: 'Analyze color proportions in a image or video frames',
+                    skillUsage: "Used Java with the RXTX library to communicate with Arduino and identify the dominant color; implemented a GUI to visualize color proportions using various graph types",
+                    icon: 'images/colors.avif'
+                },
+            ],
+            'C/C++': [
+                {
+                    id: 'mousetrap',
+                    title: 'Mousetrap',
+                    description: 'Trapping mice in a box without harming them',
+                    skillUsage: "Controlled Arduino to operate a servo and detect mouse movement using sensors",
+                    icon: 'images/Mouse.jpeg'
+                },
+                {
+                    id: 'colors',
+                    title: 'Colors',
+                    description: 'Analyze color proportions in a image or video frames',
+                    skillUsage: "Rotated a servo to point toward the dominant color in an image or video frame, based on analysis",
+                    icon: 'images/colors.avif'
+                }
+            ],
+            'MATLAB': [
+                {
+                    id: 'colors',
+                    title: 'Colors',
+                    description: 'Analyze color proportions in a image or video frames',
+                    skillUsage: "MATLAB was used to extract frames from a video and plotting the color proportions of the frames or image",
+                    icon: 'images/colors.avif'
+                }
+            ],
+            'HTML/CSS': [
+                {
+                    id: 'chalkboard',
+                    title: 'Chalkboard',
+                    description: 'Web-based collaboration platform that enables users to draw and have video calls simultaneously',
+                    skillUsage: "Used HTML and CSS to support drawing functionality via the canvas element, including adding images and text. Implemented a theme toggle between light and dark modes using CSS",
+                    icon: 'images/ChalkboardLogo.png'
+                },
+                {
+                    id: 'story',
+                    title: 'Story Spinner',
+                    description: 'Web application that generates stories from various categories using NLP',
+                    skillUsage: "Created cards with HTML and styled them using CSS for layout and responsiveness; added interactive backgrounds for enhanced user experience",
+                    icon: 'images/Story.jpeg'
+                },
+                {
+                    id: 'celebrity',
+                    title: 'Celebrity Look-alike',
+                    description: 'Full stack web app that matches celebrity look-alikes via image URL submissions',
+                    skillUsage: "Built using React, with HTML (via JSX) to enable URL input, sign-in, and registration features; styled the site using CSS to ensure responsiveness and design",
+                    icon: 'images/Celeb.jpeg'
+                }
+            ],
+            'TensorFlow': [
+                {
+                    id: 'story',
+                    title: 'Story Spinner',
+                    description: 'Web application that generates stories from various categories using NLP',
+                    skillUsage: "TensorFlow (via Keras) is used to load and run pre-trained models for story generation",
+                    icon: 'images/Story.jpeg'
+                },
+                {
+                    id: 'eye',
+                    title: 'Eye Disease Detection',
+                    description: 'Classifying the presence of eye diseases in images with Deep Learning',
+                    skillUsage: "Extensively used TensorFlow for model development, training, saving/loading models, and data processing; incorporated Keras layers to enhance classification accuracy",
+                    icon: 'images/Eye.jpeg'
+                }
+            ],
+            'NumPy': [
+                {
+                    id: 'story',
+                    title: 'Story Spinner',
+                    description: 'platform that enables users to draw and have video calls simultaneously',
+                    skillUsage: "NumPy is used for array operations and data manipulation",
+                    icon: 'images/Story.jpeg'
+                },
+                {
+                    id: 'eye',
+                    title: 'Eye Disease Detection',
+                    description: 'Classifying the presence of eye diseases in images with Deep Learning',
+                    skillUsage: "NumPy is used for array operations and data manipulation",
+                    icon: 'images/Eye.jpeg'
+                }
+            ],
+            'Matplotlib': [
+                {
+                    id: 'eye',
+                    title: 'Eye Disease Detection',
+                    description: 'Classifying the presence of eye diseases in images with Deep Learning ',
+                    skillUsage: "Displayed model performance using data visualization techniques such as ROC curves",
+                    icon: 'images/Eye.jpeg'
+                }
+            ],
+            'Pandas': [
+                {
+                    id: 'eye',
+                    title: 'Eye Disease Detection',
+                    description: 'Classifying the presence of eye diseases in images with Deep Learning ',
+                    skillUsage: "Grouped data by categories and analyze potential indicators of heart attacks during early-stage research",
+                    icon: 'images/Eye.jpeg'
+                }
+            ],
+            'Scikit-learn': [
+                {
+                    id: 'eye',
+                    title: 'Eye Disease Detection',
+                    description: 'Classifying the presence of eye diseases in images with Deep Learning ',
+                    skillUsage: "Evaluated model performance using accuracy metrics and confusion matrix visualizations",
+                    icon: 'images/Eye.jpeg'
+                }
+            ],
+            'OpenAI': [
+                {
+                    id: 'tracking',
+                    title: 'Package Tracking System',
+                    description: 'AI-driven email responder for package inquiries using OpenAI and historical data',
+                    skillUsage: "GPT-3.5 and GPT-4 to automate email responses; developed prompt logic based on five categories—tracking, shipping, delivery, general, and delays",
+                    icon: 'images/Package.jpeg'
+                }
+            ],
+            'SQL': [
+                {
+                    id: 'vet',
+                    title: 'Vet Database',
+                    description: 'Java-integrated GUI for managing veterinary records',
+                    skillUsage: "Microsoft SQL Server to store vet, owner, pet, and appointment records; implemented one-to-many and one-to-one relationships",
+                    icon: 'images/vet.png'
+                },
+                {
+                    id: 'chalkboard',
+                    title: 'Chalkboard',
+                    description: 'Web-based collaboration platform that enables users to draw and have video calls simultaneously',
+                    skillUsage: "SQL is used to store user credentials, Cloud Datastore is used to store user session, and Cloud Storage is used to store images and canvases. This project uses both relational and NoSQL in one project",
+                    icon: 'images/ChalkboardLogo.png'
+                },
+                {
+                    id: 'celebrity',
+                    title: 'Celebrity Look-alike',
+                    description: 'Full stack web app that matches celebrity look-alikes via image URL submissions',
+                    skillUsage: "Stored user credentials and tracked API usage per user using PostgreSQL",
+                    icon: 'images/Celeb.jpeg'
+                }
+            ],
+            'React': [
+                {
+                    id: 'celebrity',
+                    title: 'Celebrity Look-alike',
+                    description: 'Full stack web app that matches celebrity look-alikes via image URL submissions',
+                    skillUsage: "Used React for the entire frontend: UI layout, form inputs, routing, authentication, state management, and rendering image recognition results",
+                    icon: 'images/Celeb.jpeg'
+                }
+            ],'Knex.js': [
+                {
+                    id: 'celebrity',
+                    title: 'Celebrity Look-alike',
+                    description: 'Full stack web app that matches celebrity look-alikes via image URL submissions',
+                    skillUsage: "Knex.js is used to connect to the PostgreSQL database and perform all queries and transactions, including user authentication, registration, and incrementing image submission counts",
+                    icon: 'images/Celeb.jpeg'
+                }
+            ],
+            'Django': [
+                {
+                    id: 'story',
+                    title: 'Story Spinner',
+                    description: 'Web application that generates stories from various categories using NLP',
+                    skillUsage: "Used for the backend to receive user input and call Python NLP models for story generation",
+                    icon: 'images/Story.jpeg'
+                }
+            ]
+            // Add more skills and their projects here as needed
+        };
+
+        // Inject minimal CSS for the popup
+        const skillPopupStyles = document.createElement('style');
+        skillPopupStyles.textContent = `
+            .skill-popup-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.45);
+                backdrop-filter: blur(4px);
+                -webkit-backdrop-filter: blur(4px);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+            }
+            .skill-popup {
+                background: white;
+                border-radius: 14px;
+                width: 90%;
+                max-width: 400px;
+                padding: 20px 18px 24px 18px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+                position: relative;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            }
+            .skill-popup h2 {
+                text-align: center;
+                font-size: 20px;
+                font-weight: 600;
+                margin: 0 0 18px 0;
+                color: #000;
+            }
+            .skill-project-card {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                border: 1px solid #e0e0e0;
+                border-radius: 12px;
+                padding: 12px 14px;
+                margin-bottom: 14px;
+                cursor: pointer;
+                transition: background 0.25s ease, transform 0.1s ease;
+            }
+            .skill-project-card:active {
+                transform: scale(0.98);
+            }
+            .skill-project-icon {
+                width: 46px;
+                height: 46px;
+                border-radius: 50%;
+                background-size: cover;
+                background-position: center;
+                flex-shrink: 0;
+            }
+            .skill-project-info {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+            }
+            .skill-project-title {
+                font-size: 15px;
+                font-weight: 600;
+                color: #333;
+                margin-bottom: 4px;
+            }
+            .skill-project-desc {
+                font-size: 12px;
+                color: #666;
+                line-height: 1.3;
+                margin-bottom: 4px;
+            }
+            .skill-project-usage {
+                font-size: 12px;
+                color: #666;
+                line-height: 1.3;
+            }
+            .skill-project-usage-label {
+                font-weight: 600;
+            }
+            /* Shift popup slightly left on larger screens */
+            @media (min-width: 768px) {
+                .skill-popup {
+                    margin-left: -40px; /* move ~40px to the left */
+                }
+            }
+            .skill-project-list {
+                max-height: 260px; /* ~3 cards visible before scrolling */
+                overflow-y: auto;
+                padding-right: 4px;
+            }
+            .skill-project-list::-webkit-scrollbar {
+                width: 6px;
+            }
+            .skill-project-list::-webkit-scrollbar-thumb {
+                background-color: rgba(0,0,0,0.2);
+                border-radius: 3px;
+            }
+        `;
+        document.head.appendChild(skillPopupStyles);
+
+        // Helper to open project app
+        function launchProjectApp(projectId) {
+            // Close any open popup first
+            const existing = document.querySelector('.skill-popup-overlay');
+            if (existing) existing.remove();
+
+            // Open Projects folder then the project screen
+            const projectsApp = document.getElementById('projects-app');
+            if (projectsApp) projectsApp.classList.add('active');
+            if (typeof openProject === 'function') {
+                openProject(projectId);
+            }
+        }
+
+        function createPopup(skillName) {
+            const projects = skillMapping[skillName];
+            if (!projects || projects.length === 0) return;
+
+            const overlay = document.createElement('div');
+            overlay.className = 'skill-popup-overlay';
+
+            const popup = document.createElement('div');
+            popup.className = 'skill-popup';
+
+            const closeBtn = document.createElement('div');
+            closeBtn.className = 'skill-popup-close';
+            closeBtn.onclick = () => overlay.remove();
+
+            const headerWrap = document.createElement('div');
+            headerWrap.style.display = 'flex';
+            headerWrap.style.alignItems = 'center';
+            headerWrap.style.justifyContent = 'center';
+            headerWrap.style.position = 'relative';
+
+            const header = document.createElement('h2');
+            header.textContent = `${skillName} Projects`;
+            header.style.flex = '1';
+            header.style.textAlign = 'center';
+
+            headerWrap.appendChild(header);
+            headerWrap.appendChild(closeBtn);
+            popup.appendChild(headerWrap);
+
+            const list = document.createElement('div');
+            list.className = 'skill-project-list';
+
+            projects.forEach(proj => {
+                const card = document.createElement('div');
+                card.className = 'skill-project-card';
+                card.onclick = () => launchProjectApp(proj.id);
+
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'skill-project-icon';
+                iconDiv.style.backgroundImage = `url('${proj.icon}')`;
+
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'skill-project-info';
+
+                const titleEl = document.createElement('div');
+                titleEl.className = 'skill-project-title';
+                titleEl.textContent = proj.title;
+
+                const descEl = document.createElement('div');
+                descEl.className = 'skill-project-desc';
+                descEl.textContent = proj.description;
+
+                const usageEl = document.createElement('div');
+                usageEl.className = 'skill-project-usage';
+                usageEl.innerHTML = `<span class="skill-project-usage-label">How it's used:</span> ${proj.skillUsage}`;
+
+                infoDiv.appendChild(titleEl);
+                infoDiv.appendChild(descEl);
+                infoDiv.appendChild(usageEl);
+
+                card.appendChild(iconDiv);
+                card.appendChild(infoDiv);
+
+                list.appendChild(card);
+            });
+
+            popup.appendChild(list);
+
+            overlay.appendChild(popup);
+            document.body.appendChild(overlay);
+
+            // Close when clicking outside the popup
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) overlay.remove();
+            });
+
+            // Prevent overlay click when clicking inside the popup
+            popup.addEventListener('click', (e) => e.stopPropagation());
+
+            overlay.appendChild(popup);
+            document.body.appendChild(overlay);
+        }
+
+        // INSERT: mapping from skill names to logo paths
+        const skillLogos = {
+            'Python': 'skillimages/Python.png',
+            'JavaScript': 'skillimages/JavaScript.png',
+            'Java': 'skillimages/Java.png',
+            'C/C++': 'skillimages/CProgramming.png',
+            'MATLAB': 'skillimages/MATLAB.png',
+            'HTML/CSS': 'skillimages/HTMLCSS.png',
+            'TensorFlow': 'skillimages/Tensorflow.png',
+            'NumPy': 'skillimages/NumPy.png',
+            'Matplotlib': 'skillimages/Matplotlib.png',
+            'Pandas': 'skillimages/Pandas.png',
+            'Scikit-learn': 'skillimages/scikit-learn.png',
+            'OpenAI': 'skillimages/OpenAi.png',
+            'SQL': 'skillimages/SQL.png',
+            'React': 'skillimages/React.png',
+            'Knex.js': 'skillimages/Knex.js.png',
+            'Django': 'skillimages/django.png'
+        };
+
+        // ... existing code ...
+        // REPLACE the existing skill-item foreach block
+        // Attach click listeners to skill items and inject logos
+
+        // ... existing code ...
+        document.querySelectorAll('#skills-app .skill-item').forEach(item => {
+            const skillName = item.textContent.trim();
+
+            // Add logo to the right if available
+            const logoPath = skillLogos[skillName];
+            if (logoPath) {
+                const img = document.createElement('img');
+                img.src = logoPath;
+                img.alt = `${skillName} logo`;
+                img.className = 'skill-logo';
+                item.appendChild(img);
+            }
+
+            // Open projects popup on click
+            item.addEventListener('click', () => {
+                createPopup(skillName);
+            });
+        });
+        // ... existing code ...
+    })();
+    // ================= End Skill Projects Popup =================
+
+    // ================= Resume Download Popup =================
+    function openResumePopup() {
+        const popup = document.getElementById('resume-popup-overlay');
+        if (popup) {
+            popup.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+    }
+
+    function closeResumePopup() {
+        const popup = document.getElementById('resume-popup-overlay');
+        if (popup) {
+            popup.classList.remove('active');
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+    }
+
+    function downloadResume(format) {
+        const fileName = format === 'pdf' ? 'TrushPatel_Resume.pdf' : 'TrushPatel_Resume.docx';
+        const filePath = `documents/${fileName}`;
+        
+        // Create a temporary link element
+        const link = document.createElement('a');
+        link.href = filePath;
+        link.download = fileName;
+        link.target = '_blank';
+        
+        // Trigger the download
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Close the popup after download
+        closeResumePopup();
+    }
+
+    // Resume popup event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        // Download format buttons
+        const formatBtns = document.querySelectorAll('.resume-format-btn');
+        formatBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const format = this.getAttribute('data-format');
+                downloadResume(format);
+            });
+        });
+
+        // Close popup when clicking outside
+        const popupOverlay = document.getElementById('resume-popup-overlay');
+        if (popupOverlay) {
+            popupOverlay.addEventListener('click', function(event) {
+                // Only close if clicking on the overlay, not the popup content
+                if (event.target === popupOverlay) {
+                    closeResumePopup();
+                }
+            });
+        }
+    });
+    // ================= End Resume Download Popup =================

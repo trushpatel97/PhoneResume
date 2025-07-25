@@ -97,13 +97,23 @@
     height: 100%;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: center; /* keep name left, logo right */
+    text-align: center;
 }
 
 .skill-item:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1));
+    cursor: pointer;
+}
+
+/* Logo inside each skill item */
+.skill-logo {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    margin-left: 10px;
 }
 
 /* Ensure the home indicator doesn't block content */

@@ -12,6 +12,7 @@
     flex-direction: column;
     width: 100%;
     overflow-x: hidden;
+    flex: 1;
 }
 
 /* Google Search Container */
@@ -54,7 +55,8 @@
     outline: none;
     font-size: 16px;
     background: transparent;
-    padding-left: 12px;
+    padding-left: 0px;
+    text-align: center;
 }
 
 .search-submit-btn {
@@ -205,23 +207,58 @@
     100% { transform: rotate(360deg); }
 }
 
+/* Large screen adjustments */
+@media (min-width: 768px) {
+    .safari-search {
+        max-width: 584px;
+        width: 60%;
+    }
+}
+
 /* Mobile view adjustments */
 @media (max-width: 480px) {
     .google-search-container {
-        justify-content: flex-start;
-        padding-top: 25vh; /* Push content down to center vertically */
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
     }
 
     .google-logo {
-        margin-bottom: 20px; /* Reduced margin for mobile */
+        margin-bottom: 25px;
+        text-align: center;
     }
 
     .google-logo img {
-        width: 160px; /* Slightly smaller logo for mobile */
+        width: 200px;
+        height: auto;
+        max-width: 90vw;
     }
 
     .safari-search {
-        width: 90%; /* Slightly narrower search box on mobile */
-        max-width: none;
+        width: 85%;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+}
+
+/* iPhone XR specific adjustments */
+@media (max-width: 414px) and (max-height: 896px) {
+    .google-search-container {
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 60px);
+        padding: 30px 20px;
+    }
+
+    .google-logo img {
+        width: 220px;
+    }
+
+    .safari-search {
+        width: 90%;
+        max-width: 350px;
     }
 } 

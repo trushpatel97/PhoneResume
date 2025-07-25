@@ -1,6 +1,8 @@
 /* Project Details App Styles */
 .project-details-app {
-    background-color: #f5f5f7;
+    /* Subtle pastel gradient background */
+    background: #f5f5f7; /* fallback */
+    background: linear-gradient(135deg, #e9ecff 0%, #fefbff 100%);
     height: 100%;
     width: 100%;
     overflow: hidden;
@@ -15,7 +17,7 @@
     max-height: 100%;
     height: 100%;
     box-sizing: border-box;
-    background-color: #f5f5f7;
+    background: transparent; /* allow gradient from parent to show */
     scrollbar-width: none; /* Firefox */
 }
 
@@ -39,12 +41,14 @@
     font-weight: 600;
     color: #333;
     margin-bottom: 5px;
+    text-align: center;
 }
 
 .project-subtitle {
     font-size: 16px;
     color: #666;
     margin-bottom: 15px;
+    text-align: center;
 }
 
 .project-image {
@@ -60,13 +64,28 @@
 #chalkboard-project .project-image {
     height: 180px;  /* 10% smaller than the default 200px */
 }
-
+/* Specific styling for Chalkboard project images */
+#colors-project .project-image {
+    height: 180px;  /* 10% smaller than the default 200px */
+}
 .project-section {
     margin-bottom: 20px;
-    background-color: #ffffff;
+    /* Glassmorphism card */
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-radius: 12px;
     padding: 16px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    transform: translateY(20px);
+    opacity: 0;
+    transition: transform 0.6s ease, opacity 0.6s ease;
+}
+
+.project-section.visible {
+    transform: translateY(0);
+    opacity: 1;
 }
 
 .section-title {
@@ -95,12 +114,17 @@
 }
 
 .technology-tag {
-    background-color: #e9ecef;
-    padding: 6px 12px;
-    border-radius: 100px;
+    /* Glass pill */
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 6px 14px;
+    border-radius: 50px;
     font-size: 12px;
-    color: #495057;
-    font-weight: 500;
+    color: #000;
+    font-weight: 600;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
 .features-list {
@@ -144,4 +168,27 @@
     height: 120px;
     object-fit: cover;
     border-radius: 8px;
+}
+
+/* ===== Vibrant blurred background blobs ===== */
+.project-details-app::before {
+    content: "";
+    position: fixed;
+    top: -20%;
+    left: -20%;
+    width: 140%;
+    height: 140%;
+    background:
+        radial-gradient(at 20% 20%, rgba(0, 123, 255, 0.4) 0%, transparent 60%),
+        radial-gradient(at 80% 30%, rgba(255, 0, 150, 0.35) 0%, transparent 60%),
+        radial-gradient(at 50% 80%, rgba(255, 255, 0, 0.3) 0%, transparent 60%);
+    filter: blur(120px) saturate(120%);
+    z-index: -1;
+    pointer-events: none;
+    animation: backgroundMove 30s ease-in-out infinite alternate;
+}
+
+@keyframes backgroundMove {
+    0% { transform: translate(0px, 0px) scale(1); }
+    100% { transform: translate(-50px, -30px) scale(1.05); }
 } 

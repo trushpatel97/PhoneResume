@@ -47,7 +47,9 @@
 
     /* Ensure proper padding for scrollable content */
     .app-content {
-        padding-bottom: 60px !important; /* Space for home indicator */
+        height: auto !important;
+        padding-bottom: 5px !important; /* Space for home indicator */
+        overflow: visible !important;
     }
 
     /* Specific adjustments for different apps */
@@ -56,24 +58,55 @@
     .education-list,
     .experience-list,
     .project-content {
-        padding-bottom: 80px !important; /* Extra space for longer content */
+        padding-bottom: 5px !important; /* Extra space for longer content */
     }
 
     /* Projects folder specific adjustments */
     .projects-folder {
-        padding-bottom: 70px !important;
-        overflow-y: auto !important;
-        height: 100% !important;
+        height: auto !important;
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+        overflow: hidden !important;
     }
 
     .folder-grid-container {
-        padding-bottom: 20px !important;
+        padding-bottom: 5px !important;
         overflow-y: auto !important;
     }
 
     /* Messages app specific adjustments */
     .messages-content {
         padding-bottom: 70px !important; /* Space for input area */
+    }
+}
+
+@media (max-width: 576px) {
+    .app-content {
+        height: auto !important;
+        padding-bottom: 5px !important;
+        overflow: visible !important;
+    }
+
+    .projects-folder {
+        height: auto !important;
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+        overflow: hidden !important;
+    }
+}
+
+@media (max-width: 350px) {
+    .app-content {
+        height: auto !important;
+        padding-bottom: 5px !important;
+        overflow: visible !important;
+    }
+
+    .projects-folder {
+        height: auto !important;
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+        overflow: hidden !important;
     }
 }
 
@@ -109,4 +142,4 @@
 &::-webkit-scrollbar-track,
 &::-webkit-scrollbar-thumb {
     display: none;
-} 
+}

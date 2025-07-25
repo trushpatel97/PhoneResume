@@ -25,6 +25,10 @@
     <link rel="stylesheet" href="styles/scrollbars.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts - Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <!-- EmailJS SDK -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <!-- Project Scripts -->
@@ -155,14 +159,37 @@
         min-width: 120px;
         z-index: 100;
       }
+      .center-google {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center; /* vertically center */
+        width: 100%;
+        flex: 1; /* allow to take remaining height */
+      }
+      .center-google .google-search-bar {
+        display: flex;
+        justify-content: center;
+      }
+      
+      /* Expand clickable area for home indicator */
+      .app-home-indicator {
+        position: relative;
+      }
+      
+      .app-home-indicator::before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: -20px;
+        right: -20px;
+        bottom: -10px;
+        cursor: pointer;
+        z-index: 1;
+      }
     </style>
 </head>
 <body>
-    <!-- Background shapes -->
-    <div class="shape shape-1"></div>
-    <div class="shape shape-2"></div>
-    <div class="shape shape-3"></div>
-    
     <div class="container">
         <div class="iphone-container">
             <div class="iphone">
@@ -180,68 +207,64 @@
                     <div class="home-screen" id="home-screen">
                         <div class="app-grid">
                             <div class="app" data-app="about">
-                                <div class="app-icon" style="background-color: #5D9CEC;">
+                                <div class="app-icon" style="background-color: #111827;">
                                     <i class="fas fa-user"></i>
                                 </div>
                                 <div class="app-name">About Me</div>
                             </div>
                             
                             <div class="app" data-app="skills">
-                                <div class="app-icon" style="background: linear-gradient(135deg, #4ECDC4, #1A535C); display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                                <div class="app-icon" style="background: linear-gradient(135deg, #2E1065, #4C1D95); display: flex; flex-direction: column; justify-content: center; align-items: center;">
                                     <i class="fas fa-code" style="font-size: 16px; margin-bottom: 0px;"></i>
                                     <div style="font-size: 8px; letter-spacing: 1px; margin-top: 0px; font-weight: bold;"></div>
                                 </div>
                                 <div class="app-name">Skills</div>
                             </div>
                             
-                            <div class="app folder-app" data-app="projects">
+                            <div class="app" data-app="projects">
                                 <div class="app-icon folder-icon">
                                     <div class="folder-grid">
-                                        <div class="mini-app" style="background-image: url('images/VetDatabase.jpg'); background-size: cover; background-position: center;"></div>
+                                        <div class="mini-app" style="background-image: url('images/vet.png'); background-size: cover; background-position: center;"></div>
                                         <div class="mini-app" style="background-image: url('images/ChalkboardLogo.png'); background-size: cover; background-position: center;"></div>
-                                        <div class="mini-app" style="background-image: url('images/StorySpinner.jpg'); background-size: cover; background-position: center;"></div>
-                                        <div class="mini-app" style="background-image: url('images/Mousetrap.JPEG'); background-size: cover; background-position: center;"></div>
-                                        <div class="mini-app" style="background-image: url('images/Celebrity.jpg'); background-size: cover; background-position: center;"></div>
-                                        <div class="mini-app" style="background-image: url('images/Eyes.jpg'); background-size: cover; background-position: center;"></div>
-                                        <div class="mini-app" style="background-image: url('images/UPS.jpg'); background-size: cover; background-position: center;"></div>
+                                        <div class="mini-app" style="background-image: url('images/Story.jpeg'); background-size: cover; background-position: center;"></div>
+                                        <div class="mini-app" style="background-image: url('images/Mouse.jpeg'); background-size: cover; background-position: center;"></div>
+                                        <div class="mini-app" style="background-image: url('images/Celeb.jpeg'); background-size: cover; background-position: center;"></div>
+                                        <div class="mini-app" style="background-image: url('images/Eye.jpeg'); background-size: cover; background-position: center;"></div>
+                                        <div class="mini-app" style="background-image: url('images/colors.avif'); background-size: cover; background-position: center;"></div>
+                                        <div class="mini-app" style="background-image: url('images/Package.jpeg'); background-size: cover; background-position: center;"></div>
                                         <div class="mini-app" style="background-image: url('images/GCP.jpg'); background-size: cover; background-position: center;"></div>
-                                        <div class="mini-app" style="background-color: transparent;"></div>
                                     </div>
                                 </div>
                                 <div class="app-name">Projects</div>
                             </div>
                             
                             <div class="app" data-app="experience">
-                                <div class="app-icon" style="background-color: #FFCE54;">
+                                <div class="app-icon" style="background-color: #064E3B;">
                                     <i class="fas fa-briefcase"></i>
                                 </div>
                                 <div class="app-name">Experience</div>
                             </div>
                             
                             <div class="app" data-app="education">
-                                <div class="app-icon" style="background-color: #FC6E51;">
+                                <div class="app-icon" style="background-color: #9E1B34;">
                                     <i class="fas fa-graduation-cap"></i>
                                 </div>
                                 <div class="app-name">Education</div>
+                            </div>
+                            
+                            <!-- Resume Download App - Mobile Only -->
+                            <div class="app mobile-only-app" data-app="resume">
+                                <div class="app-icon" style="background: linear-gradient(135deg, #faf5ee, #f5e6d3);">
+                                    <i class="fas fa-download" style="color: #666666;"></i>
+                                </div>
+                                <div class="app-name">Resume</div>
                             </div>
                         </div>
                         
                         <div class="dock">
                             <div class="app" data-app="game2048">
-                                <div class="app-icon" style="background-color: #FF9500;">
-                                    <i class="fas fa-gamepad"></i>
-                                </div>
-                            </div>
-                            
-                            <div class="app" data-app="messages">
-                                <div class="app-icon" style="background-color: #5BC236;">
-                                    <i class="fas fa-comment-dots" style="color: white; font-size: 22px;"></i>
-                                </div>
-                            </div>
-                            
-                            <div class="app" data-app="mail">
-                                <div class="app-icon" style="background-color: #D44638;">
-                                    <i class="fas fa-envelope" style="color: white; font-size: 22px;"></i>
+                                <div class="app-icon" style="background: linear-gradient(135deg, #1e3a8a, #1e40af);">
+                                    <i class="fas fa-dice" style="font-size: 22px;"></i>
                                 </div>
                             </div>
                             
@@ -250,92 +273,66 @@
                                     <i class="fas fa-compass" style="color: white; font-size: 22px;"></i>
                                 </div>
                             </div>
+                            
+                            <div class="app" data-app="mail">
+                                <div class="app-icon" style="background: linear-gradient(135deg, #991b1b, #b91c1c);">
+                                    <i class="fas fa-envelope" style="color: white; font-size: 22px;"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="app" data-app="messages">
+                                <div class="app-icon" style="background: linear-gradient(135deg, #15803D, #16A34A);">
+                                    <i class="fas fa-comments" style="color: white; font-size: 22px;"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
                     <!-- App Screens -->
+                                        
                     <div class="app-screen" id="about-app">
                         <div class="app-header">
-                            <div class="back-button" id="back-button"><i class="fas fa-chevron-left"></i></div>
+                            <div class="back-button"><i class="fas fa-chevron-left"></i></div>
                             <div class="app-title">About Me</div>
                         </div>
-                        <div class="app-content" style="padding: 0; height: calc(100% - 44px);">
-                            <div class="about-container">
-                                <!-- Profile Header -->
-                                <div class="profile-header" style="width: 100%; text-align: center; margin-bottom: 16px;">
-                                    <h1 class="about-name" style="font-size: 32px; font-weight: 600; margin-bottom: 8px; color: #000;">Trush Patel</h1>
-                                    <div class="about-title" style="font-size: 20px; color: #007AFF; margin-bottom: 8px;">Software Engineer</div>
-                                    <div class="about-location" style="color: #666; display: flex; align-items: center; justify-content: center; gap: 4px;">
-                                        <i class="fas fa-map-marker-alt" style="font-size: 15px;"></i>
-                                        <span style="font-size: 15px;">Hatfield, PA</span>
-                                    </div>
+                        <div class="about-container">
+                            <div class="about-content">
+                                <div class="about-name">Trush Patel</div>
+                                <div class="about-title">Software Engineer</div>
+                                <div class="about-links">
+                                    <a href="https://github.com/trushpatel97" class="social-link github-link" target="_blank">
+                                        <i class="fab fa-github"></i>
+                                    </a>
+                                    <a href="https://www.linkedin.com/in/trush-patel-163813128/" class="social-link linkedin-link" target="_blank">
+                                        <i class="fab fa-linkedin"></i>
+                                    </a>
+                                    <a href="mailto:trushp097@gmail.com" class="social-link email-link">
+                                        <i class="fas fa-envelope"></i>
+                                    </a>
+                                    <a href="https://calendly.com/trushp097/30min" class="social-link phone-link" target="_blank">
+                                        <i class="fas fa-phone"></i>
+                                    </a>
                                 </div>
                                 
-                                <!-- Quick Stats -->
-                                <div class="stats-container" style="width: 100%; display: flex; justify-content: center; margin-bottom: 16px; background: #F2F2F7; padding: 12px; border-radius: 16px;">
-                                    <div class="stat-item" style="flex: 1; text-align: center;">
-                                        <div class="stat-value" style="font-size: 17px; font-weight: 600; color: #007AFF;">3+ Years</div>
-                                        <div class="stat-label" style="font-size: 13px; color: #666; margin-top: 2px;">Experience</div>
-                                    </div>
-                                    <div class="stat-item" style="flex: 1; text-align: center; border-left: 1px solid #E5E5EA; border-right: 1px solid #E5E5EA;">
-                                        <div class="stat-value" style="font-size: 17px; font-weight: 600; color: #007AFF;">GCP</div>
-                                        <div class="stat-label" style="font-size: 13px; color: #666; margin-top: 2px;">Certified</div>
-                                    </div>
-                                    <div class="stat-item" style="flex: 1; text-align: center;">
-                                        <div class="stat-value" style="font-size: 17px; font-weight: 600; color: #007AFF;">8+</div>
-                                        <div class="stat-label" style="font-size: 13px; color: #666; margin-top: 2px;">Projects</div>
-                                    </div>
+                                <div class="about-section">
+                                    <div class="section-title">About Me</div>
+                                    <p style="text-indent: 35px;">AI and Cloud Data Engineer with 3+ years of experience building AI solutions and managing data pipelines on Google Cloud Platform. Proven track record of reducing manual effort by 98%, improving system efficiency, and solving complex problems.</p>
+                                    <p style="padding-top:10px; text-indent: 35px;">Building on these achievements, I am now leveraging modern AI tools to reduce development time while maintaining project security.</p>
                                 </div>
-
-                                <!-- About Section -->
-                                <div class="about-section" style="background: #F2F2F7; padding: 16px; border-radius: 16px; margin-bottom: 16px;">
-                                    <h2 style="font-size: 20px; font-weight: 600; color: #000; margin-bottom: 16px; text-align: center;">About Me</h2>
-                                    <p style="font-size: 13.5px; line-height: 1.2; color: #333; margin: 0 0 4px 0;text-indent: 25px;">
-                                        Passionate about AI since 2019, I have built projects in machine learning, deep learning, and natural language processing. While working as a consultant for UPS through TCS, I developed an AI-based system to automate email responses, streamlining communication and increasing efficiency. 
-                                    </p>
-                                    <p style="font-size: 13.5px; line-height: 1.2; color: #333; margin: 0;text-indent: 25px;">
-                                        I also have experience working with large-scale business data on cloud platforms, and validated billions of data through automation. My work combines technical expertise with real-world applications to drive meaningful results across industries.
-                                    </p> 
-                                </div>
-
-                                <!-- Additional Content (scrollable) -->
-                                <div class="additional-content" style="margin-top: 16px;">
-                                    <!-- Expertise Section -->
-                                    <div class="about-section" style="background: #F2F2F7; padding: 16px; border-radius: 16px; margin-bottom: 16px;">
-                                        <h2 style="font-size: 20px; font-weight: 600; color: #000; margin-bottom: 16px; text-align: center;">Core Expertise</h2>
-                                        <ul style="list-style: none; padding: 0; margin: 0;">
-                                            <li style="display: flex; align-items: flex-start; margin-bottom: 12px;">
-                                                <i class="fas fa-brain" style="color: #007AFF; width: 20px; font-size: 15px; margin-top: 4px;"></i>
-                                                <div style="margin-left: 8px;">
-                                                    <span style="font-size: 15px; color: #000;"><strong>AI & ML:</strong> Deep Learning, NLP, Email Automation</span>
-                                                </div>
-                                            </li>
-                                            <li style="display: flex; align-items: flex-start; margin-bottom: 12px;">
-                                                <i class="fas fa-cloud" style="color: #007AFF; width: 20px; font-size: 15px; margin-top: 4px;"></i>
-                                                <div style="margin-left: 8px;">
-                                                    <span style="font-size: 15px; color: #000;"><strong>Cloud & Data:</strong> GCP Certified, SQL, Large-scale Data Validation</span>
-                                                </div>
-                                            </li>
-                                            <li style="display: flex; align-items: flex-start;">
-                                                <i class="fas fa-code" style="color: #007AFF; width: 20px; font-size: 15px; margin-top: 4px;"></i>
-                                                <div style="margin-left: 8px;">
-                                                    <span style="font-size: 15px; color: #000;"><strong>Development:</strong> Python, JavaScript, Java, C, C++</span>
-                                                </div>
-                                            </li>
-                                        </ul>
-                                    </div>
-
-                                    <!-- Current Focus -->
-                                    <div class="about-section" style="background: #F2F2F7; padding: 16px; border-radius: 16px;">
-                                        <h2 style="font-size: 20px; font-weight: 600; color: #000; margin-bottom: 16px; text-align: center;">Current Focus</h2>
-                                        <p style="font-size: 13px; line-height: 1.6; color: #333; margin: 0; text-indent: 25px;">
-                                            I'm seeking opportunities preferably in AI to solve complex business challenges. In the meantime, I'm working on a mobile app to help supply homeless people with items they need.
-                                        </p>
-                                    </div>
+                                
+                                <div class="about-section">
+                                    <div class="section-title">Interests</div>
+                                    <ul class="about-list">
+                                        <li>Learning new technologies</li>
+                                        <li>Creating projects</li>
+                                        <li>Traveling</li>
+                                        <li>Chess</li>
+                                        <li>NBA</li>
+                                        <li>NFL</li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
-                        <!-- Home indicator bar -->
                         <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
                         onmouseover="this.style.opacity='0.8'; bounce(this);" 
                         onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
@@ -347,7 +344,7 @@
                             <div class="back-button" id="back-button"><i class="fas fa-chevron-left"></i></div>
                             <div class="app-title">Skills</div>
                         </div>
-                        <div class="app-content">
+                        <div class="">
                             <div class="skills-container">
                                 <div class="skill-category">
                                     <h3>Programming Languages</h3>
@@ -357,8 +354,7 @@
                                         <div class="skill-item">Java</div>
                                         <div class="skill-item">C/C++</div>
                                         <div class="skill-item">MATLAB</div>
-                                        <div class="skill-item">HTML</div>
-                                        <div class="skill-item">CSS</div>
+                                        <div class="skill-item">HTML/CSS</div>
                                     </div>
                                 </div>
 
@@ -377,7 +373,7 @@
                                 <div class="skill-category">
                                     <h3>Databases</h3>
                                     <div class="skills-grid">
-                                        <div class="skill-item">PostgreSQL</div>
+                                        <div class="skill-item">SQL</div>
                                     </div>
                                 </div>
 
@@ -386,7 +382,6 @@
                                     <div class="skills-grid">
                                         <div class="skill-item">React</div>
                                         <div class="skill-item">Knex.js</div>
-                                        <div class="skill-item">Flask</div>
                                         <div class="skill-item">Django</div>
                                     </div>
                                 </div>
@@ -400,11 +395,11 @@
                     </div>
                     
                     <div class="app-screen" id="projects-app">
-                        <div class="app-content projects-folder">
+                        <div class="projects-folder">
                             <div class="folder-title">Projects</div>
                             <div class="folder-grid-container">
                                 <div class="folder-app" data-project="vet">
-                                    <div class="folder-app-icon" style="background-image: url('images/VetDatabase.jpg'); background-size: cover; background-position: center;">
+                                    <div class="folder-app-icon" style="background-image: url('images/vet.png'); background-size: cover; background-position: center;">
                                     </div>
                                     <div class="folder-app-name">Vet Database</div>
                                 </div>
@@ -414,27 +409,32 @@
                                     <div class="folder-app-name">Chalkboard</div>
                                 </div>
                                 <div class="folder-app" data-project="story">
-                                    <div class="folder-app-icon" style="background-image: url('images/StorySpinner.jpg'); background-size: cover; background-position: center;">
+                                    <div class="folder-app-icon" style="background-image: url('images/Story.jpeg'); background-size: cover; background-position: center;">
                                     </div>
                                     <div class="folder-app-name">Story Spinner</div>
                                 </div>
                                 <div class="folder-app" data-project="mousetrap">
-                                    <div class="folder-app-icon" style="background-image: url('images/Mousetrap.JPEG'); background-size: cover; background-position: center;">
+                                    <div class="folder-app-icon" style="background-image: url('images/Mouse.jpeg'); background-size: cover; background-position: center;">
                                     </div>
                                     <div class="folder-app-name">Mousetrap</div>
                                 </div>
                                 <div class="folder-app" data-project="celebrity">
-                                    <div class="folder-app-icon" style="background-image: url('images/Celebrity.jpg'); background-size: cover; background-position: center;">
+                                    <div class="folder-app-icon" style="background-image: url('images/Celeb.jpeg'); background-size: cover; background-position: center;">
                                     </div>
                                     <div class="folder-app-name">Celebrity Look-alike</div>
                                 </div>
                                 <div class="folder-app" data-project="eye">
-                                    <div class="folder-app-icon" style="background-image: url('images/Eyes.jpg'); background-size: cover; background-position: center;">
+                                    <div class="folder-app-icon" style="background-image: url('images/Eye.jpeg'); background-size: cover; background-position: center;">
                                     </div>
                                     <div class="folder-app-name">Eye Disease</div>
                                 </div>
+                                <div class="folder-app" data-project="colors">
+                                    <div class="folder-app-icon" style="background-image: url('images/colors.avif'); background-size: cover; background-position: center;">
+                                    </div>
+                                    <div class="folder-app-name">Color Proportions</div>
+                                </div>
                                 <div class="folder-app" data-project="tracking">
-                                    <div class="folder-app-icon" style="background-image: url('images/UPS.jpg'); background-size: cover; background-position: center;">
+                                    <div class="folder-app-icon" style="background-image: url('images/Package.jpeg'); background-size: cover; background-position: center;">
                                     </div>
                                     <div class="folder-app-name">Package Tracking</div>
                                 </div>
@@ -457,16 +457,16 @@
                         <div class="app-header">
                             <div class="back-button"><i class="fas fa-chevron-left"></i></div>
                             <div class="app-title">Vet Database</div>
-                        </div>
-                        <div class="app-content project-content">
+                         </div>
+                        <div class="project-content">
                             <div class="project-header">
                                 <h1 class="project-title">Veterinary Database System</h1>
-                                <p class="project-subtitle">Developed a Java-integrated GUI for managing veterinary records</p>
+                                <p class="project-subtitle"></p>
                                 <div class="project-image-carousel">
                                     <button class="carousel-arrow carousel-arrow-left" onclick="prevImage(this)">
                                         <i class="fas fa-chevron-left"></i>
                                     </button>
-                                    <img src="images/VetDatabase.jpg" alt="Vet Database" class="project-image">
+                                    <img src="images/vet.png" alt="Vet Database" class="project-image">
                                     <button class="carousel-arrow carousel-arrow-right" onclick="nextImage(this)">
                                         <i class="fas fa-chevron-right"></i>
                                     </button>
@@ -524,10 +524,10 @@
                             <div class="back-button"><i class="fas fa-chevron-left"></i></div>
                             <div class="app-title">Chalkboard</div>
                         </div>
-                        <div class="app-content project-content">
+                        <div class="project-content">
                             <div class="project-header">
                                 <h1 class="project-title">Chalkboard</h1>
-                                <p class="project-subtitle">Real-time remote collaboration with session-based canvases</p>
+                                <p class="project-subtitle"></p>
                                 <div class="project-image-carousel">
                                     <button class="carousel-arrow carousel-arrow-left" onclick="prevImage(this)">
                                         <i class="fas fa-chevron-left"></i>
@@ -538,7 +538,7 @@
                                     </button>
                                 </div>
                             </div>
-                            <div style="display: flex; justify-content: center; margin: -40px 0 10px 0;">
+                            <div style="display: flex; justify-content: center; margin: -30px 0 10px 0;">
                                 <a href="https://chalkboard-draw.onrender.com/" target="_blank"
                                    style="background: #81d3e0; color: #fff; padding: 10px 28px; border-radius: 16px; font-weight: 600; font-size: 15px; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: background 0.2s; display: flex; align-items: center; gap: 8px;">
                                     <i class="fas fa-external-link-alt" style="font-size: 15px;"></i>
@@ -616,15 +616,15 @@
                             <div class="back-button"><i class="fas fa-chevron-left"></i></div>
                             <div class="app-title">Story Spinner</div>
                         </div>
-                        <div class="app-content project-content">
+                        <div class="project-content">
                             <div class="project-header">
                                 <h1 class="project-title">Story Spinner</h1>
-                                <p class="project-subtitle">AI-powered creative writing assistant</p>
+                                <p class="project-subtitle"></p>
                                 <div class="project-image-carousel">
                                     <button class="carousel-arrow carousel-arrow-left" onclick="prevImage(this)">
                                         <i class="fas fa-chevron-left"></i>
                                     </button>
-                                    <img src="images/StorySpinner.jpg" alt="Story Spinner" class="project-image">
+                                    <img src="images/Story.jpeg" alt="Story Spinner" class="project-image">
                                     <button class="carousel-arrow carousel-arrow-right" onclick="nextImage(this)">
                                         <i class="fas fa-chevron-right"></i>
                                     </button>
@@ -634,7 +634,7 @@
                             <div class="project-section">
                                 <h2 class="section-title">Overview</h2>
                                 <p class="project-description">
-                                    Story Spinner is an AI-powered tool designed to help writers overcome creative blocks by generating story prompts, plot ideas, character profiles, and even complete paragraphs based on user input.
+                                    Story Spinner is a website that allows you to generate a story given some text or using a random seed. It uses NLP and Word2Vec to generate and summarize the text to create a story
                                 </p>
                             </div>
                             
@@ -642,32 +642,32 @@
                                 <h2 class="section-title">Technologies</h2>
                                 <div class="technologies-list">
                                     <span class="technology-tag">Python</span>
-                                    <span class="technology-tag">TensorFlow</span>
-                                    <span class="technology-tag">GPT-3</span>
-                                    <span class="technology-tag">Flask</span>
-                                    <span class="technology-tag">React</span>
+                                    <span class="technology-tag">JavaScript</span>
+                                    <span class="technology-tag">HTML</span>
+                                    <span class="technology-tag">CSS</span>
+                                    <span class="technology-tag">Word2Vec</span>
+                                    <span class="technology-tag">NLP</span>
+                                    <span class="technology-tag">Django</span>
                                 </div>
                             </div>
                             
                             <div class="project-section">
                                 <h2 class="section-title">Features</h2>
                                 <ul class="project-description" style="padding-left: 20px; margin-top: 10px;">
-                                    <li>AI-powered story generation</li>
-                                    <li>Character profile creation</li>
-                                    <li>Plot development assistance</li>
-                                    <li>Creative writing prompts</li>
-                                    <li>User feedback integration</li>
+                                    <li>Trained on 9 different datasets</li>
+                                    <li>Generate a story given text or use a randomized seed</li>
+                                    <li>Word2Vec for text summarization</li>
                                 </ul>
                             </div>
                             
                             <div class="project-section">
                                 <h2 class="section-title">Development Process</h2>
                                 <ol class="project-description" style="padding-left: 20px; margin-top: 10px;">
-                                    <li>Helped over 500 writers complete their creative projects</li>
-                                    <li>Improved productivity for users facing writer's block</li>
-                                    <li>Enhanced creativity through AI-generated suggestions</li>
-                                    <li>Received positive feedback on plot development assistance</li>
-                                    <li>Created community of writers sharing generated content</li>
+                                    <li>Created rough drafts using Use Cases and UML diagrams</li>
+                                    <li>Divided the work among 3 members</li>
+                                    <li>Gathered datasets of various topics</li>
+                                    <li>Trained the datasets and saved the models</li>
+                                    <li>Implemented Word2Vec to generate text and summarize</li>
                                 </ol>
                             </div>
                         </div>
@@ -683,15 +683,15 @@
                             <div class="back-button"><i class="fas fa-chevron-left"></i></div>
                             <div class="app-title">Mousetrap</div>
                         </div>
-                        <div class="app-content project-content">
+                        <div class="project-content">
                             <div class="project-header">
                                 <h1 class="project-title">Mousetrap</h1>
-                                <p class="project-subtitle">Advanced user behavior analytics platform</p>
+                                <p class="project-subtitle"></p>
                                 <div class="project-image-carousel">
                                     <button class="carousel-arrow carousel-arrow-left" onclick="prevImage(this)">
                                         <i class="fas fa-chevron-left"></i>
                                     </button>
-                                    <img src="images/Mousetrap.JPEG" alt="Mousetrap" class="project-image">
+                                    <img src="images/Mouse.jpeg" alt="Mousetrap" class="project-image">
                                     <button class="carousel-arrow carousel-arrow-right" onclick="nextImage(this)">
                                         <i class="fas fa-chevron-right"></i>
                                     </button>
@@ -701,41 +701,37 @@
                             <div class="project-section">
                                 <h2 class="section-title">Overview</h2>
                                 <p class="project-description">
-                                    Mousetrap is a sophisticated analytics platform that tracks and analyzes user behavior on websites and applications, providing actionable insights to improve user experience and conversion rates.
+                                    This project was made to address a infestation problem that was happening at a classmates job. Instead of having mice harmed and trapped, we designed a solution to bait and trap them so they can be released later on. 
                                 </p>
                             </div>
                             
                             <div class="project-section">
                                 <h2 class="section-title">Technologies</h2>
                                 <div class="technologies-list">
-                                    <span class="technology-tag">JavaScript</span>
-                                    <span class="technology-tag">Python</span>
-                                    <span class="technology-tag">D3.js</span>
-                                    <span class="technology-tag">MongoDB</span>
-                                    <span class="technology-tag">AWS</span>
+                                    <span class="technology-tag">C/C++</span>
+                                    <span class="technology-tag">Bread boarding</span>
+                                    <span class="technology-tag">Arduino</span>
+                                    <span class="technology-tag">Sensors</span>
+                                    <span class="technology-tag">Servos</span>
                                 </div>
                             </div>
                             
                             <div class="project-section">
                                 <h2 class="section-title">Features</h2>
                                 <ul class="project-description" style="padding-left: 20px; margin-top: 10px;">
-                                    <li>User behavior tracking</li>
-                                    <li>Heatmap visualization</li>
-                                    <li>Conversion funnel analysis</li>
-                                    <li>Real-time analytics dashboard</li>
-                                    <li>Custom event tracking</li>
+                                    <li>Sensors to detect mice proximity</li>
+                                    <li>Servo to open and close the door</li>
+                                    <li>Room for improvement such as detecting box temperature</li>
                                 </ul>
                             </div>
                             
                             <div class="project-section">
                                 <h2 class="section-title">Development Process</h2>
                                 <ol class="project-description" style="padding-left: 20px; margin-top: 10px;">
-                                    <li>Achieved 23% increase in user engagement</li>
-                                    <li>Improved conversion rates by 15% for client websites</li>
-                                    <li>Implemented targeted UX improvements based on collected data</li>
-                                    <li>Identified critical user drop-off points</li>
-                                    <li>Optimized form completion processes</li>
-                                    <li>Enhanced overall website usability</li>
+                                    <li>Learn how to breadboard</li>
+                                    <li>Setting up the breadboard to use sensor and servo</li>
+                                    <li>Implement the code to trigger the servo when mouse is detected</li>
+                                    <li>Fine tuning the sensor to detect how close the mice needs to be to trigger the servo</li>
                                 </ol>
                             </div>
                         </div>
@@ -751,59 +747,73 @@
                             <div class="back-button"><i class="fas fa-chevron-left"></i></div>
                             <div class="app-title">Celebrity Look-alike</div>
                         </div>
-                        <div class="app-content project-content">
+                        <div class="project-content">
                             <div class="project-header">
-                                <h1 class="project-title">Celebrity Look-alike Detector</h1>
-                                <p class="project-subtitle">AI-powered facial recognition app</p>
+                                <h1 class="project-title">Celebrity Look-alike</h1>
+                                <p class="project-subtitle"></p>
                                 <div class="project-image-carousel">
                                     <button class="carousel-arrow carousel-arrow-left" onclick="prevImage(this)">
                                         <i class="fas fa-chevron-left"></i>
                                     </button>
-                                    <img src="images/Celebrity.jpg" alt="Celebrity Look-alike" class="project-image">
+                                    <img src="images/Celeb.jpeg" alt="Celebrity Look-alike" class="project-image">
                                     <button class="carousel-arrow carousel-arrow-right" onclick="nextImage(this)">
                                         <i class="fas fa-chevron-right"></i>
                                     </button>
                                 </div>
                             </div>
-                            
+                            <div style="display: flex; justify-content: center; margin: -30px 0 10px 0;">
+                                <a href="https://celebrity-lookalike.onrender.com/" target="_blank"
+                                   style="background: #143c8b; color: #fff; padding: 10px 28px; border-radius: 16px; font-weight: 600; font-size: 15px; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: background 0.2s; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fas fa-external-link-alt" style="font-size: 15px;"></i>
+                                    Visit Live Website
+                                </a>
+                            </div>
                             <div class="project-section">
                                 <h2 class="section-title">Overview</h2>
                                 <p class="project-description">
-                                    The Celebrity Look-alike Detector is a fun and engaging application that uses advanced facial recognition algorithms to find celebrity matches for user-uploaded photos, providing similarity scores and interesting facts.
+                                    Celebrity Look-alike is a fun and engaging web app that uses Clarifai's pretrained celebrities model to detect who you most likely resemble based on facial features. It was trained on over 10,000 celebrities across various categories, including actors, athletes, musicians, and more. Users upload an image url link, and the app detects the closest match among the preloaded celebrity dataset.
                                 </p>
                             </div>
                             
                             <div class="project-section">
                                 <h2 class="section-title">Technologies</h2>
                                 <div class="technologies-list">
-                                    <span class="technology-tag">Python</span>
-                                    <span class="technology-tag">TensorFlow</span>
-                                    <span class="technology-tag">OpenCV</span>
-                                    <span class="technology-tag">Flask</span>
+                                    <span class="technology-tag">JavaScript</span>
+                                    <span class="technology-tag">HTML</span>
+                                    <span class="technology-tag">CSS</span>
                                     <span class="technology-tag">React</span>
+                                    <span class="technology-tag">Knex.js</span>
+                                    <span class="technology-tag">Node.js</span>
+                                    <span class="technology-tag">PostgreSQL</span>
+                                    <span class="technology-tag">Render</span>
+                                    <span class="technology-tag">Clarifai API</span>
+                                    <span class="technology-tag">GitHub</span>
                                 </div>
-                            </div>
+                            </div> 
                             
                             <div class="project-section">
                                 <h2 class="section-title">Features</h2>
                                 <ul class="project-description" style="padding-left: 20px; margin-top: 10px;">
-                                    <li>Facial recognition matching</li>
-                                    <li>Similarity scoring system</li>
-                                    <li>Celebrity database integration</li>
-                                    <li>Image preprocessing</li>
-                                    <li>Real-time results display</li>
+                                    <li>Login and Registration</li>
+                                    <li>Face detection</li>
+                                    <li>Facial comparison</li>
+                                    <li>10,000+ celebrity database</li>
+                                    <li>Handling users via database</li>
+                                    <li>Hosting backend and frontend on Render</li>
                                 </ul>
                             </div>
                             
                             <div class="project-section">
                                 <h2 class="section-title">Development Process</h2>
                                 <ol class="project-description" style="padding-left: 20px; margin-top: 10px;">
-                                    <li>Developed custom-trained convolutional neural network</li>
-                                    <li>Achieved 85% accuracy in facial recognition</li>
-                                    <li>Implemented image preprocessing for normalized lighting</li>
-                                    <li>Optimized angle detection for improved matching</li>
-                                    <li>Created efficient facial feature mapping algorithms</li>
-                                    <li>Developed scalable similarity scoring system</li>
+                                    <li>Found a pre-trained model that was trained on as many celebrities as possible</li>
+                                    <li>Tested by passing an image through an url link</li>
+                                    <li>Created a sign/signout feature to have some sort of rate limit</li>
+                                    <li>Created a database to store user information</li>
+                                    <li>Implemented the website to allow users to pass in a link after creating an account</li>
+                                    <li>Display the top result</li>
+                                    <li>Tested on a few celebrities to assure accuracy (example: Bill Gates)</li>
+                                    <li>Hosted both backend and frontend on render</li>
                                 </ol>
                             </div>
                         </div>
@@ -819,15 +829,15 @@
                             <div class="back-button"><i class="fas fa-chevron-left"></i></div>
                             <div class="app-title">Eye Disease Detection</div>
                         </div>
-                        <div class="app-content project-content">
+                        <div class="project-content">
                             <div class="project-header">
                                 <h1 class="project-title">Eye Disease Detection</h1>
-                                <p class="project-subtitle">AI-based medical diagnostic tool</p>
+                                <p class="project-subtitle"></p>
                                 <div class="project-image-carousel">
                                     <button class="carousel-arrow carousel-arrow-left" onclick="prevImage(this)">
                                         <i class="fas fa-chevron-left"></i>
                                     </button>
-                                    <img src="images/Eyes.jpg" alt="Eye Disease Detection" class="project-image">
+                                    <img src="images/Eye.jpeg" alt="Eye Disease Detection" class="project-image">
                                     <button class="carousel-arrow carousel-arrow-right" onclick="nextImage(this)">
                                         <i class="fas fa-chevron-right"></i>
                                     </button>
@@ -855,23 +865,25 @@
                             <div class="project-section">
                                 <h2 class="section-title">Features</h2>
                                 <ul class="project-description" style="padding-left: 20px; margin-top: 10px;">
-                                    <li>Disease classification system</li>
-                                    <li>Image preprocessing pipeline</li>
+                                    <li>3 eye diseases and normal</li>
+                                    <li>Trained on 80000+ images</li>
                                     <li>High-accuracy detection</li>
-                                    <li>Medical report generation</li>
-                                    <li>Batch processing capability</li>
+                                    <li>Different angles of each disease</li>
                                 </ul>
                             </div>
                             
                             <div class="project-section">
                                 <h2 class="section-title">Development Process</h2>
                                 <ol class="project-description" style="padding-left: 20px; margin-top: 10px;">
-                                    <li>Contributed to improving early diagnosis of eye diseases</li>
-                                    <li>Enhanced detection of diabetic retinopathy</li>
-                                    <li>Improved identification of glaucoma</li>
-                                    <li>Advanced detection of age-related macular degeneration</li>
-                                    <li>Potentially helped prevent vision loss through timely treatment</li>
-                                    <li>Created foundation for future medical AI applications</li>
+                                    <li>Import common libraries</li>
+                                    <li>Used Google Colab for faster GPU</li>
+                                    <li>Setup GPU</li>
+                                    <li>Getting the data from my Professor</li>
+                                    <li>Build/Train a CNN</li>
+                                    <li>Improve the model using pre-trained models such as VGG16, Xception, and MobileNet</li>
+                                    <li>Improved model further with hyperparameter tuning</li>
+                                    <li>Save the model</li>
+                                    <li>Present the results visually</li>
                                 </ol>
                             </div>
                         </div>
@@ -880,22 +892,21 @@
                         onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
                         onclick="goToHomeScreen()"></div>
                     </div>
-                    
-                    <!-- Package Tracking Project Screen -->
-                    <div class="app-screen project-screen" id="tracking-project">
+                                        <!-- Package Tracking Project Screen -->
+                    <div class="app-screen project-screen" id="colors-project">
                         <div class="app-header">
                             <div class="back-button"><i class="fas fa-chevron-left"></i></div>
-                            <div class="app-title">Package Tracking</div>
+                            <div class="app-title">Color Proportions</div>
                         </div>
-                        <div class="app-content project-content">
+                        <div class="project-content">
                             <div class="project-header">
-                                <h1 class="project-title">Package Tracking System</h1>
-                                <p class="project-subtitle">Real-time logistics management solution</p>
+                                <h1 class="project-title">Color Proportions</h1>
+                                <p class="project-subtitle"></p>
                                 <div class="project-image-carousel">
                                     <button class="carousel-arrow carousel-arrow-left" onclick="prevImage(this)">
                                         <i class="fas fa-chevron-left"></i>
                                     </button>
-                                    <img src="images/UPS.jpg" alt="Package Tracking" class="project-image">
+                                    <img src="images/colors.avif" alt="Color Proportions" class="project-image">
                                     <button class="carousel-arrow carousel-arrow-right" onclick="nextImage(this)">
                                         <i class="fas fa-chevron-right"></i>
                                     </button>
@@ -905,7 +916,7 @@
                             <div class="project-section">
                                 <h2 class="section-title">Overview</h2>
                                 <p class="project-description">
-                                    Developed for UPS through TCS, this package tracking system provides real-time visibility into package locations, status updates, and delivery estimates, enhancing the customer experience and operational efficiency.
+                                    The Color-Proportions project is designed to analyze color proportions in video or image frames and plotting it multiple types of data graphs
                                 </p>
                             </div>
                             
@@ -913,33 +924,36 @@
                                 <h2 class="section-title">Technologies</h2>
                                 <div class="technologies-list">
                                     <span class="technology-tag">Java</span>
-                                    <span class="technology-tag">Spring Boot</span>
-                                    <span class="technology-tag">Oracle</span>
-                                    <span class="technology-tag">React</span>
-                                    <span class="technology-tag">AWS</span>
+                                    <span class="technology-tag">MATLAB</span>
+                                    <span class="technology-tag">Arduino</span>
+                                    <span class="technology-tag">RXTX</span>
                                 </div>
                             </div>
                             
                             <div class="project-section">
                                 <h2 class="section-title">Features</h2>
                                 <ul class="project-description" style="padding-left: 20px; margin-top: 10px;">
-                                    <li>Real-time package tracking</li>
-                                    <li>Status update notifications</li>
-                                    <li>Delivery estimation system</li>
-                                    <li>Route optimization</li>
-                                    <li>Exception handling</li>
+                                    <li>Video/Image processing</li>
+                                    <li>Extracting frames from videos</li>
+                                    <li>Sending color analysis from MATLAB to Java</li>
+                                    <li>Plotting different types of graphs</li>
+                                    <li>Java GUI to display the results</li>
+                                    <li>Java and Arduino communication  (using RXTX library) to point to most dominant color</li>
                                 </ul>
                             </div>
                             
                             <div class="project-section">
                                 <h2 class="section-title">Development Process</h2>
                                 <ol class="project-description" style="padding-left: 20px; margin-top: 10px;">
-                                    <li>Reduced customer service inquiries about package status by 28%</li>
-                                    <li>Improved on-time delivery rates by 15%</li>
-                                    <li>Enhanced route planning capabilities</li>
-                                    <li>Implemented efficient exception handling procedures</li>
-                                    <li>Increased customer satisfaction through better visibility</li>
-                                    <li>Decreased operational costs through optimized routing</li>
+                                    <li>Defined project goal, assigned team roles, and planned the workflow</li>
+                                    <li>Developed MATLAB scripts to analyze color proportions in image and video frames</li>
+                                    <li>Exported MATLAB analysis results as figures and text files</li>
+                                    <li>Built a Java GUI to display results and handle user file selection</li>
+                                    <li>Implemented file transfer and data sharing between MATLAB and Java</li>
+                                    <li>Programmed Arduino to control a servo motor based on dominant color data</li>
+                                    <li>Established serial communication between Java and Arduino (using RXTX library)</li>
+                                    <li>Tested and debugged the complete workflow from analysis to hardware response</li>
+                                    <li>Documented the process and created UML diagrams for project clarity</li>
                                 </ol>
                             </div>
                         </div>
@@ -948,17 +962,86 @@
                         onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
                         onclick="goToHomeScreen()"></div>
                     </div>
-                    
+                    <!-- Package Tracking Project Screen -->
+                    <div class="app-screen project-screen" id="tracking-project">
+                        <div class="app-header">
+                            <div class="back-button"><i class="fas fa-chevron-left"></i></div>
+                            <div class="app-title">Package Tracking</div>
+                        </div>
+                        <div class="project-content">
+                            <div class="project-header">
+                                <h1 class="project-title">Package Tracking System</h1>
+                                <p class="project-subtitle"></p>
+                                <div class="project-image-carousel">
+                                    <button class="carousel-arrow carousel-arrow-left" onclick="prevImage(this)">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <img src="images/Package.jpeg" alt="Package Tracking" class="project-image">
+                                    <button class="carousel-arrow carousel-arrow-right" onclick="nextImage(this)">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Overview</h2>
+                                <p class="project-description">
+                                    Develop an AI email response generator to provide information about package locations, status updates, and delivery estimates, enhancing the customer experience and operational efficiency
+                                </p>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Technologies</h2>
+                                <div class="technologies-list">
+                                    <span class="technology-tag">Python</span>
+                                    <span class="technology-tag">LLM</span>
+                                    <span class="technology-tag">Pylint</span>
+                                    <span class="technology-tag">Postman</span>
+                                    <span class="technology-tag">OpenAI API/Embeddings</span>
+                                    <span class="technology-tag">Prompt Engineering</span>
+                                    <span class="technology-tag">GPT4</span>
+                                </div>
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Features</h2>
+                                <ul class="project-description" style="padding-left: 20px; margin-top: 10px;">
+                                    <li>Email response generation</li>
+                                    <li>General information</li>
+                                    <li>Shipping statues</li>
+                                    <li>Transit statues</li>
+                                    <li>Delivery status</li>
+                                    <li>Package delays (ex: investigations)</li>
+                                </ul> 
+                            </div>
+                            
+                            <div class="project-section">
+                                <h2 class="section-title">Development Process</h2>
+                                <ol class="project-description" style="padding-left: 20px; margin-top: 10px;">
+                                    <li>Gathered previous email inquiries</li>
+                                    <li>Labeled inquires on 5 categories (General, Shipping, Transit, Delivery, and Delays)</li>
+                                    <li>Use retrieval-augmented generation (RAG) to fetch relevant content from labeled documents and feed it to an LLM for a fine-tuned response according to our data</li>
+                                    <li>Implemented APIs to track emails according to their category</li>
+                                    <li>Implemented APIs to allow the client to see package info from the frontend by passing the tracking id</li>
+                                    <li>Every week there would be allocation of stories, and I would create tasks for each story and give time estimations on Azure. Closing every story at the end of the week with update hours for each task and comment on the user story before closing.</li>
+                                </ol>
+                            </div>
+                        </div>
+                        <div class="app-home-indicator" style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 110px; height: 5px; background-color: #000000; border-radius: 100px; z-index: 9999999; opacity: 0.5; cursor: pointer; transition: opacity 0.3s ease, transform 0.2s ease;" 
+                        onmouseover="this.style.opacity='0.8'; bounce(this);" 
+                        onmouseout="this.style.opacity='0.5'; this.style.transform='translateX(-50%)'" 
+                        onclick="goToHomeScreen()"></div>
+                    </div>
                     <!-- BigData Project Screen -->
                     <div class="app-screen project-screen" id="bigdata-project">
                         <div class="app-header">
                             <div class="back-button"><i class="fas fa-chevron-left"></i></div>
                             <div class="app-title">BigData</div>
                         </div>
-                        <div class="app-content project-content">
+                        <div class="project-content">
                             <div class="project-header">
-                                <h1 class="project-title">BigData Migration & Analysis</h1>
-                                <p class="project-subtitle">Enterprise data pipeline infrastructure</p>
+                                <h1 class="project-title">Data Migration & Analysis</h1>
+                                <p class="project-subtitle"></p>
                                 <div class="project-image-carousel">
                                     <button class="carousel-arrow carousel-arrow-left" onclick="prevImage(this)">
                                         <i class="fas fa-chevron-left"></i>
@@ -973,41 +1056,42 @@
                             <div class="project-section">
                                 <h2 class="section-title">Overview</h2>
                                 <p class="project-description">
-                                    This project involved migrating billions of records from Oracle to Google BigQuery, creating efficient data pipelines, and implementing analytics solutions to derive business insights from massive datasets.
+                                    This project involved migrating billions of records from Oracle to Google BigQuery, assiting with multiple GCP tools, and implementing a solutions to compare billions of records for data validation.
                                 </p>
                             </div>
                             
                             <div class="project-section">
                                 <h2 class="section-title">Technologies</h2>
                                 <div class="technologies-list">
-                                    <span class="technology-tag">Google BigQuery</span>
+                                    <span class="technology-tag">GCP</span>
+                                    <span class="technology-tag">Striim</span>
+                                    <span class="technology-tag">SQL</span>
                                     <span class="technology-tag">Python</span>
-                                    <span class="technology-tag">Apache Beam</span>
-                                    <span class="technology-tag">Dataflow</span>
-                                    <span class="technology-tag">Oracle</span>
+                                    <span class="technology-tag">Excel</span>
                                 </div>
                             </div>
                             
                             <div class="project-section">
                                 <h2 class="section-title">Features</h2>
                                 <ul class="project-description" style="padding-left: 20px; margin-top: 10px;">
-                                    <li>Data migration pipeline</li>
-                                    <li>ETL process automation</li>
-                                    <li>Data quality validation</li>
-                                    <li>Analytics dashboard</li>
-                                    <li>Performance optimization</li>
+                                    <li>Python script to validate 1+ billion data</li>
+                                    <li>GCP infrastructure support</li>
+                                    <li>Striim to offer real-time data transfer</li>
+                                    <li>GCP Certified</li>
                                 </ul>
                             </div>
                             
                             <div class="project-section">
                                 <h2 class="section-title">Development Process</h2>
                                 <ol class="project-description" style="padding-left: 20px; margin-top: 10px;">
-                                    <li>Migrated billions of records successfully</li>
-                                    <li>Reduced query time by 60%</li>
+                                    <li>Define where the data is coming from (our case Oracle) and Striim will use adapters to connect and capture changes in data</li>
+                                    <li>Incoming data flows through a real-time pipeline</li>
                                     <li>Implemented efficient data pipelines</li>
-                                    <li>Created automated monitoring systems</li>
-                                    <li>Developed comprehensive documentation</li>
-                                    <li>Established data governance protocols</li>
+                                    <li>Process the data written in TQL (Striims SQL equivalence)</li>
+                                    <li>Processed data is sent over to BigQuery</li>
+                                    <li>Monitoring with Striim to ensure the health of the data transfer</li>
+                                    <li>Using a Python script to validate that all records of Oracle match with BigQuery</li>
+                                    <li>Throughout the project - assisted with GCP infrastructure</li>
                                 </ol>
                             </div>
                         </div>
@@ -1022,22 +1106,33 @@
                             <div class="back-button" id="back-button"><i class="fas fa-chevron-left"></i></div>
                             <div class="app-title">Experience</div>
                         </div>
-                        <div class="app-content">
+                        <div class="">
                             <div class="experience-list">
                                 <div class="experience-item">
                                     <div class="experience-header">
-                                        <span class="date">Sep 2021 – October 2024</span>
+                                        <span class="date">Dec 2023 – Oct 2024</span>
                                     </div>
-                                    <h3>Software Engineer</h3>
+                                    <h3>AI Engineer</h3>
                                     <h4>Tata Consultancy Services, Remote</h4>
-                                    <p>Applied Google Cloud Platform services and worked with OpenAI to automate email inquires about packages</p>
+                                    <p>Developed an AI-driven email responder for package inquiries using OpenAI and historical data</p>
                                     <ul>
-                                        <li>Designed a Python script to generate a spreadsheet comparing 250+ tables from Oracle and BigQuery</li>
-                                        <li>Modified TQL scripts to transfer billions of data from Oracle to BigQuery using Striim</li>
+                                        <li>Automated email inquiries using OpenAI, reducing initial response time from hours to seconds by engineering prompts</li>
+                                        <li>Enforced PEP8 standards across Python codebases using Pylint, improving code quality and reducing time for all developers</li>
+                                        <li>Led development of a package-tracking API, coordinating with 2 developers and QA engineers to ensure reliability through 50+ Postman test cases</li>
+                                    </ul>
+                                </div>
+                                <div class="experience-item">
+                                    <div class="experience-header">
+                                        <span class="date">Sep 2021 – Aug 2023</span>
+                                    </div>
+                                    <h3>Cloud Data Engineer</h3>
+                                    <h4>Tata Consultancy Services</h4>
+                                    <p>Became a certified Google Cloud Data Engineer and handled billions of data for a client</p>
+                                    <ul>
+                                        <li>Designed ETL pipelines on GCP, migrating over 2 billion records daily from Oracle to BigQuery for a major client</li>
+                                        <li>Automated Python validation for 250+ Oracle/BigQuery tables, reducing a 3-month task to a day</li>
+                                        <li>Configured GCP services (Cloud Functions, Pub/Sub, BigQuery, etc.) with cross-functional teams for deployments</li>
                                         <li>Certified as a Google Cloud Associate Engineer</li>
-                                        <li>Implemented an API to track packages based of their tracking number</li>
-                                        <li>Set PEP8 requirements of code structure using Pylint</li>
-                                        <li>Tested backend APIs using Postman</li>
                                     </ul>
                                 </div>
                                 <div class="experience-item">
@@ -1048,8 +1143,8 @@
                                     <h4>Temple University, Philadelphia, PA</h4>
                                     <p>Utilized Machine Learning to classify the presence of eye diseases in images using Python</p>
                                     <ul>
-                                        <li>Achieved 97.9% accuracy in the testing phase across 4 datasets</li>
-                                        <li>Improved model accuracy by 3.8% through hyperparameter tuning</li>
+                                        <li>Trained a TensorFlow CNN on 85,000+ eye images to classify diseases, achieving 97.9% test accuracy across four datasets</li>
+                                        <li>Enhanced the model's predictive accuracy by 3.8% through hyperparameter tuning and data augmentation techniques</li>
                                     </ul>
                                 </div>
                             </div>
@@ -1066,8 +1161,9 @@
                             <div class="back-button" id="back-button"><i class="fas fa-chevron-left"></i></div>
                             <div class="app-title">Education</div>
                         </div>
-                        <div class="app-content">
+                        <div class="">
                             <div class="education-list">
+                                <div class="section-title">Education</div>
                                 <div class="education-item">
                                     <div class="education-header">
                                         <span class="university-name">Temple University</span>
@@ -1084,11 +1180,11 @@
                                 <div class="section-title">Achievements</div>
                                 <div class="education-item achievements-section">
                                     <div class="achievement-item">
-                                        <div class="achievement-title symposium-link" style="cursor: pointer; color: #007AFF; text-decoration: underline;" onclick="openPDFPopup()">Temple University's Symposium</div>
+                                        <div class="achievement-title symposium-link" style="cursor: pointer; color: #000000cb; text-decoration: underline;" onclick="openPDFPopup()">Temple University's Symposium</div>
                                         <p>Selected and presented <i>Chalkboard</i> at the 2021 Temple University Symposium</p>
                                     </div>
                                     <div class="achievement-item">
-                                        <div class="achievement-title" style="cursor: pointer; color: #007AFF; text-decoration: underline;">
+                                        <div class="achievement-title" style="cursor: pointer; color: #000000cb; text-decoration: underline;">
                                             <a href="https://github.com/trushpatel97/Eye-Disease-Detection" target="_blank" style="color: inherit; text-decoration: inherit;">Eye Disease Detection Research</a>
                                         </div>
                                         <p>Built a neural network model with 97.9% accuracy to classify retinal diseases, improving early diagnosis</p>
@@ -1174,9 +1270,9 @@
                         <div class="app-header safari-header">
                             <div class="app-title"></div>
                         </div>
-                        <div class="app-content safari-content">
+                        <div class=" safari-content">
                             <!-- Google Search Home View -->
-                            <div class="google-search-container" id="google-home-view">
+                            <div class="center-google" id="google-home-view">
                                 <div class="google-logo">
                                     <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png" alt="Google">
                                 </div>
@@ -1373,6 +1469,25 @@
                         onclick="goToHomeScreen()"></div>
                     </div>
                     
+                    <!-- Resume Download Popup -->
+                    <div class="resume-popup-overlay" id="resume-popup-overlay">
+                        <div class="resume-popup" id="resume-popup">
+                            <div class="resume-popup-content">
+                                <p>Choose your format</p>
+                                <div class="resume-format-options">
+                                    <button class="resume-format-btn" data-format="pdf">
+                                        <i class="fas fa-file-pdf"></i>
+                                        <span>PDF</span>
+                                    </button>
+                                    <button class="resume-format-btn" data-format="docx">
+                                        <i class="fas fa-file-word"></i>
+                                        <span>Word</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="home-button"></div>
                 </div>
                 <div class="home-indicator"></div>
@@ -1384,7 +1499,19 @@
             <div class="typewriter-bg-text">
                 <span id="typewriter-line1"></span><br>
                 <span id="typewriter-line2"></span><br>
-                <span id="typewriter-line3"></span>
+                <div class="download-container">
+                    <span id="typewriter-line3"></span>
+                    <div class="download-options" id="download-options">
+                        <div class="download-option" data-format="pdf">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>PDF</span>
+                        </div>
+                        <div class="download-option" data-format="word">
+                            <i class="fas fa-file-word"></i>
+                            <span>Word</span>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="typewriter-bg-text-right">
                 <span id="typewriter-line-right1"></span><br>
@@ -1397,6 +1524,28 @@
                     <img src="images/QRCode.png" alt="Book Interview QR Code" id="qr-code-image">
                 </div>
             </div>
+                    <!-- Floating Lofi Music Player Button -->
+        <div id="lofi-player" class="floating-audio-player">
+        <div id="lofi-toggle-wrapper">
+            <div class="lofi-song-row">
+            <button id="lofi-back" title="Previous" class="lofi-song-btn" style="border-radius:8px 0 0 8px;"><i class="fas fa-backward"></i></button>
+            <div id="lofi-song-title"><span class="marquee"><span class="marquee-text"></span><span class="marquee-text"></span></span></div>
+            <button id="lofi-skip" title="Next" class="lofi-song-btn skip" style="border-radius:0 8px 8px 0;"><i class="fas fa-forward"></i></button>
+            </div>
+            <div class="lofi-audio-row">
+            <button id="lofi-toggle" style="background:#111;color:#fff;border:none;padding:8px 10px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.18);cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                <span id="lofi-icon" style="font-size:30px;display:flex;align-items:center;justify-content:center;width:22px;height:22px;">
+                <!-- Modern volume icon (FontAwesome or SVG) -->
+                <svg id="icon-volume" xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="#fff" viewBox="-1 0 20 20"><path d="M3 10v4h4l5 5V5l-5 5H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.74 2.5-2.26 2.5-4.02z"/></svg>
+                </span>
+            </button>
+            <div id="lofi-volume-slider" >
+                <input type="range" id="lofi-slider" class="accent" min="0" max="1" step="0.01" value="0.7" style="width:204px;height:14px;left: 0px; accent-color: #C0C0C0;">
+            </div>
+            </div>
+        </div>
+        <audio id="lofi-audio" src="sounds/playlist.mp3"></audio>
+        </div>
         </div>
     </div>
     
@@ -1646,29 +1795,6 @@
             </button>
             <img class="image-popup-img" src="" alt="Project Image">
         </div>
-    </div>
-
-    <!-- Floating Lofi Music Player Button -->
-    <div id="lofi-player" class="floating-audio-player">
-      <div id="lofi-toggle-wrapper" style="position:relative;display:inline-block;">
-        <div class="lofi-song-row">
-          <button id="lofi-back" title="Previous" class="lofi-song-btn" style="border-radius:8px 0 0 8px;"><i class="fas fa-backward"></i></button>
-          <div id="lofi-song-title"><span class="marquee"><span class="marquee-text"></span><span class="marquee-text"></span></span></div>
-          <button id="lofi-skip" title="Next" class="lofi-song-btn skip" style="border-radius:0 8px 8px 0;"><i class="fas fa-forward"></i></button>
-        </div>
-        <div class="lofi-audio-row">
-          <button id="lofi-toggle" style="background:#111;color:#fff;border:none;padding:8px 10px;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,0.18);cursor:pointer;display:flex;align-items:center;justify-content:center;">
-            <span id="lofi-icon" style="font-size:30px;display:flex;align-items:center;justify-content:center;width:22px;height:22px;">
-              <!-- Modern volume icon (FontAwesome or SVG) -->
-              <svg id="icon-volume" xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="#fff" viewBox="-1 0 20 20"><path d="M3 10v4h4l5 5V5l-5 5H3zm13.5 2c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.74 2.5-2.26 2.5-4.02z"/></svg>
-            </span>
-          </button>
-          <div id="lofi-volume-slider">
-            <input type="range" id="lofi-slider" min="0" max="1" step="0.01" value="0.7" style="width:204px;height:14px;left: 0px;">
-          </div>
-        </div>
-      </div>
-      <audio id="lofi-audio" src="sounds/playlist.mp3"></audio>
     </div>
 </body>
 </html> 
