@@ -277,7 +277,8 @@ const projectImages = {
     'chalkboard': [
         { type: 'image', src: 'images/ChalkboardLogo.png' },
         { type: 'image', src: 'images/Chalkboard2.png' },
-        { type: 'image', src: 'images/Chalkboard3.png' }
+        { type: 'image', src: 'images/Chalkboard3.png' },
+        { type: 'video', src: 'videos/Chalkboard4.png' }
     ],
     'story-spinner': [
         { type: 'image', src: 'images/Story.jpeg' },

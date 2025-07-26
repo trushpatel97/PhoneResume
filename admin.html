@@ -9,6 +9,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
     
+    <!-- Configuration -->
+    <script src="config.js"></script>
+    
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -768,15 +771,7 @@
     
     <script>
         // Initialize Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyDiptAEF_Y6ptGYkiAf1jeEkyy5J72w22g",
-            authDomain: "trushresume.firebaseapp.com",
-            projectId: "trushresume",
-            storageBucket: "trushresume.firebasestorage.app",
-            messagingSenderId: "504357252195",
-            appId: "1:504357252195:web:9519b10c4efc88185cdc56",
-            measurementId: "G-9VL9JPE4KW"
-        };
+        const firebaseConfig = config.firebase;
         
         firebase.initializeApp(firebaseConfig);
         

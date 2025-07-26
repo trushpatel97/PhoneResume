@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iPhone Portfolio</title>
+    <title>Trush Patel</title>
     <!-- Base and Layout Styles -->
     <link rel="stylesheet" href="styles/base.css">
     <link rel="stylesheet" href="styles/iphone.css">
@@ -23,6 +23,8 @@
     <link rel="stylesheet" href="styles/responsive.css">
     <!-- iOS Scrollbar Styles -->
     <link rel="stylesheet" href="styles/scrollbars.css">
+    <!-- PDF Popup Styles -->
+    <link rel="stylesheet" href="styles/pdf-popup.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts - Poppins -->
@@ -36,6 +38,10 @@
     <!-- 2048 Game Script -->
     <script src="scripts/leaderboard.js"></script>
     <script src="scripts/2048.js"></script>
+    
+    <!-- Configuration -->
+    <script src="config.js"></script>
+    
     <script type="text/javascript">
         (function() {
             // To make this work:
@@ -44,7 +50,7 @@
             // 3. Create an email template with parameters: to_email, from_email, subject, message
             // 4. Replace 'YOUR_USER_ID' with your EmailJS user ID
             // 5. Replace 'default_service' and 'template_id' in script.js with your service and template IDs
-            emailjs.init("cGEJxQ5ttlJBEJcte");
+            emailjs.init(config.emailJs.userId);
         })();
     </script>
     
@@ -60,15 +66,7 @@
     
     <script>
         // Your Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDiptAEF_Y6ptGYkiAf1jeEkyy5J72w22g",
-            authDomain: "trushresume.firebaseapp.com",
-            projectId: "trushresume",
-            storageBucket: "trushresume.firebasestorage.app",
-            messagingSenderId: "504357252195",
-            appId: "1:504357252195:web:9519b10c4efc88185cdc56",
-            measurementId: "G-9VL9JPE4KW"
-        };
+        const firebaseConfig = config.firebase;
         
         // Initialize Firebase - make sure this executes correctly
         try {
@@ -1187,7 +1185,7 @@
                                         <div class="achievement-title" style="cursor: pointer; color: #000000cb; text-decoration: underline;">
                                             <a href="https://github.com/trushpatel97/Eye-Disease-Detection" target="_blank" style="color: inherit; text-decoration: inherit;">Eye Disease Detection Research</a>
                                         </div>
-                                        <p>Built a neural network model with 97.9% accuracy to classify retinal diseases, improving early diagnosis</p>
+                                        <p>Built a neural network model with 97.9% accuracy to classify retinal diseases, improving early diagnosis. At the end of the research, it was passed to my professor for publication.</p>
                                     </div>
                                 </div>
 
@@ -1727,10 +1725,24 @@
         }
     }
 
-    // Remove duplicate openPDFPopup function and event listeners
+    // PDF Popup functionality
     function openPDFPopup() {
-        document.getElementById('pdf-popup').style.display = 'flex';
+        const pdfPopup = document.getElementById('pdf-popup');
+        if (pdfPopup) {
+            pdfPopup.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
     }
+
+    function closePDFPopup() {
+        const pdfPopup = document.getElementById('pdf-popup');
+        if (pdfPopup) {
+            pdfPopup.style.display = 'none';
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+    }
+
+
 
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize PDF popup functionality
@@ -1739,17 +1751,13 @@
         const pdfContent = document.querySelector('.pdf-popup-content');
 
         if (closeButton) {
-            closeButton.addEventListener('click', function() {
-                if (pdfPopup) {
-                    pdfPopup.style.display = 'none';
-                }
-            });
+            closeButton.addEventListener('click', closePDFPopup);
         }
 
         if (pdfPopup) {
             pdfPopup.addEventListener('click', function(e) {
                 if (e.target === this) {
-                    this.style.display = 'none';
+                    closePDFPopup();
                 }
             });
         }
@@ -1763,12 +1771,13 @@
         // Add keyboard support for closing with Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && pdfPopup && pdfPopup.style.display === 'flex') {
-                pdfPopup.style.display = 'none';
+                closePDFPopup();
             }
         });
 
-        // Make openPDFPopup available globally
+        // Make functions available globally
         window.openPDFPopup = openPDFPopup;
+        window.closePDFPopup = closePDFPopup;
     });
     </script>
     
@@ -1782,7 +1791,18 @@
                 </button>
             </div>
             <div class="pdf-viewer">
-                <embed src="https://undergradstudies.temple.edu/sites/undergradstudies/files/2021%20Symposium%20Program.pdf" type="application/pdf">
+                <iframe src="https://undergradstudies.temple.edu/sites/undergradstudies/files/2021%20Symposium%20Program.pdf" 
+                        style="width: 100%; height: 100%; border: none;">
+                </iframe>
+                <div class="pdf-controls" style="position: absolute; bottom: 16px; right: 16px; z-index: 1;">
+                    <a href="https://undergradstudies.temple.edu/sites/undergradstudies/files/2021%20Symposium%20Program.pdf" 
+                       target="_blank" 
+                       style="background: rgba(0,0,0,0.7); color: white; padding: 8px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; backdrop-filter: blur(10px);"
+                       title="Open PDF in new tab">
+                        <i class="fas fa-external-link-alt"></i>
+                        Open in New Tab
+                    </a>
+                </div>
             </div>
         </div>
     </div>

@@ -511,8 +511,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Google Custom Search API configuration
         // You would replace these with your actual API key and Custom Search Engine ID
-        const GOOGLE_API_KEY = 'AIzaSyCXTuPWng3CHQyHFpw-pT9n0ZCfW_mJLZw'; 
-        const SEARCH_ENGINE_ID = '950e7df47256b455e';
+        const GOOGLE_API_KEY = config.googleSearch.apiKey;
+        const SEARCH_ENGINE_ID = config.googleSearch.searchEngineId;
         
         // Rate limiting configuration
         const RATE_LIMIT = 100; // Maximum number of searches in a time period
@@ -978,7 +978,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const searchInfo = document.createElement('div');
             searchInfo.className = 'search-info';
             
-            if (isRealSearch && GOOGLE_API_KEY !== 'AIzaSyDiptAEF_Y6ptGYkiAf1jeEkyy5J72w22g') {
+            if (isRealSearch && GOOGLE_API_KEY !== config.googleSearch.firebaseApiKey) {
                 searchInfo.innerHTML = `
                     About ${results.length * 10000000} results (0.${Math.floor(Math.random() * 90) + 10} seconds) 
                     <span class="rate-limit-info">
@@ -2347,15 +2347,7 @@ function checkAuthAndInitializeChat(messagesApp) {
     // Initialize Firebase if not already done
     if (!window.firebase) {
         if (typeof firebase !== 'undefined') {
-            const firebaseConfig = {
-                apiKey: "AIzaSyDiptAEF_Y6ptGYkiAf1jeEkyy5J72w22g",
-                authDomain: "trushresume.firebaseapp.com",
-                projectId: "trushresume",
-                storageBucket: "trushresume.firebasestorage.app",
-                messagingSenderId: "504357252195",
-                appId: "1:504357252195:web:9519b10c4efc88185cdc56",
-                measurementId: "G-9VL9JPE4KW"
-            };
+            const firebaseConfig = config.firebase;
             
             if (!firebase.apps.length) {
                 firebase.initializeApp(firebaseConfig);
@@ -2426,15 +2418,7 @@ function initializeChat() {
     if (!window.firebase) {
         // Initialize Firebase if it's available via script tags but not started
         if (typeof firebase !== 'undefined') {
-            const firebaseConfig = {
-                apiKey: "AIzaSyDiptAEF_Y6ptGYkiAf1jeEkyy5J72w22g",
-                authDomain: "trushresume.firebaseapp.com",
-                projectId: "trushresume",
-                storageBucket: "trushresume.firebasestorage.app",
-                messagingSenderId: "504357252195",
-                appId: "1:504357252195:web:9519b10c4efc88185cdc56",
-                measurementId: "G-9VL9JPE4KW"
-            };
+            const firebaseConfig = config.firebase;
             
             if (!firebase.apps.length) {
                 firebase.initializeApp(firebaseConfig);
@@ -4594,15 +4578,7 @@ function showGoogleSignInPrompt(messagesApp, onSuccess) {
     
     // Ensure Firebase is initialised for auth
     if (typeof firebase === 'undefined' || !firebase.apps || !firebase.apps.length) {
-        const firebaseConfig = {
-            apiKey: "AIzaSyDiptAEF_Y6ptGYkiAf1jeEkyy5J72w22g",
-            authDomain: "trushresume.firebaseapp.com",
-            projectId: "trushresume",
-            storageBucket: "trushresume.firebasestorage.app",
-            messagingSenderId: "504357252195",
-            appId: "1:504357252195:web:9519b10c4efc88185cdc56",
-            measurementId: "G-9VL9JPE4KW"
-        };
+        const firebaseConfig = config.firebase;
         firebase.initializeApp(firebaseConfig);
     }
 
