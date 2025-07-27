@@ -54,7 +54,9 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #007AFF, #00C7FF);
+    background: url('../images/profile-picture.jpg') no-repeat center center;
+    background-size: cover;
+    background-position: center;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -62,8 +64,12 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
+.contact-avatar.not-signed-in {
+    filter: blur(4px);
+}
+
 .contact-avatar i {
-    display: none;
+    display: none; /* Keep this to hide the default icon */
 }
 
 .contact-name {

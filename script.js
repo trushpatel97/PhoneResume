@@ -2360,6 +2360,11 @@ function checkAuthAndInitializeChat(messagesApp) {
         }
     }
     
+    // Setup admin status listener for ALL users (signed in or out)
+    const db = firebase.firestore();
+    const adminStatusRef = db.collection('admin').doc('status');
+    setupAdminStatusListener(adminStatusRef);
+    
     // Check current auth state immediately
     const currentUser = firebase.auth().currentUser;
     if (currentUser) {
